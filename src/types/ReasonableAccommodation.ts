@@ -1,0 +1,22 @@
+export type ReasonableAccommodation = {
+  id: string;
+  name: string;
+  difficultyId: string;
+  implementationDifficulty: 'low' | 'medium' | 'high';
+  cost: 'low' | 'medium' | 'high';
+  methodType: string;
+  rippleEffect: 'low' | 'medium' | 'high';
+  tags: string[];
+  domain: string[];
+  situation: string[];
+  effect: string[];
+  operationSetting: string;
+  legalBasis: string;
+  applicationCondition: string;
+  psychologicalCost: string;
+  adjustmentCost: string;
+  expertiseRequired: string;
+  involvedPeople: string;
+  implementationPeriod: string;
+  maintenanceWorkload: string;
+}; 
