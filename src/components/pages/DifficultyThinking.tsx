@@ -750,7 +750,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <p className="text-gray-700 text-lg leading-relaxed">
           <strong>困りごとを考えてみましょう。</strong><br />
 最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。<br />
-右下の選択数表示をタップで整理できます。
+右上の選択数表示をクリックで整理できます。
         </p>
       </div>
       
