@@ -107,7 +107,7 @@ type DifficultySelectionProps = {
   onBack: () => void;
 };
 
-function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging: isGlobalDragging }: any) {
+function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging: isGlobalDragging, openModal }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   
   // ドラッグ中のスタイルを分離して競合を避ける
@@ -153,12 +153,26 @@ function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging
       {openId === item.id && (
         <div className="bg-indigo-50 px-4 py-4 rounded-b-xl border-t">
           <ul className="space-y-2">
-            {getAccommodations(item.title).map((acc: any, i: number) => (
-              <li key={i} className="flex items-start mb-2">
-                <span className="font-bold text-gray-700 mr-1 flex-shrink-0 whitespace-nowrap">配慮案{ACC_LABELS[i % ACC_LABELS.length]}:</span>
-                <span className="text-gray-700">{acc['配慮内容']}</span>
-              </li>
-            ))}
+            {getAccommodations(item.title).map((acc: any, i: number) => {
+              const domain = '企業'; // デフォルトは企業、実際のドメインに応じて変更
+              const content = acc[`${domain}の具体的配慮例`] || acc['企業の具体的配慮例'] || '具体的な配慮例がありません';
+              
+              return (
+                <li key={i} className="flex items-start mb-2">
+                  <span className="font-bold text-gray-700 mr-1 flex-shrink-0 whitespace-nowrap">配慮案{ACC_LABELS[i % ACC_LABELS.length]}:</span>
+                  <div className="flex items-center flex-1">
+                    <span className="text-gray-700">{acc['配慮内容']}</span>
+                    <button
+                      onClick={() => openModal(`${acc['配慮内容']}の具体的な配慮案`, content)}
+                      className="ml-1 text-indigo-600 hover:text-indigo-800 text-lg transition-colors"
+                      title="具体的な配慮案を表示"
+                    >
+                      ▶
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -185,6 +199,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
   const [difficultiesState, setDifficultiesState] = useState<DifficultyItem[]>(difficulties);
   const [openId, setOpenId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
   const isMobile = useIsMobile();
 
   const sensors = useSensors(
@@ -227,6 +242,16 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
     onComplete(topThreeDifficulties);
   };
 
+  // モーダルを開く関数
+  const openModal = (title: string, content: string) => {
+    setModalContent({ title, content });
+  };
+
+  // モーダルを閉じる関数
+  const closeModal = () => {
+    setModalContent(null);
+  };
+
   // モバイル用UI
   if (isMobile) {
     return (
@@ -235,7 +260,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                                        <p className="text-gray-700 text-base leading-relaxed">
           <strong>困りごとに優先順位を付けましょう。</strong><br />
-ドラッグ＆ドロップで<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞ります。クリックで配慮案を確認できます。
+ドラッグ＆ドロップで<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞ります。クリックで配慮案を確認できます。<span className="text-indigo-600">▶</span>で詳細を確認できます。
         </p>
         </div>
         
@@ -250,7 +275,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
               <ul className="space-y-2">
                   {difficultiesState.map((item, idx) => (
                     <React.Fragment key={item.id}>
-                      <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} />
+                      <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} />
                       {idx === 2 && idx !== difficultiesState.length - 1 && (
                         <li>
                           <div className="border-t border-gray-300 my-2" />
@@ -278,6 +303,16 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
             </button>
           </div>
         </div>
+        
+        {/* モーダル */}
+        {modalContent && (
+          <Modal
+            isOpen={!!modalContent}
+            onClose={closeModal}
+            title={modalContent.title}
+            content={modalContent.content}
+          />
+        )}
       </div>
     );
   }
@@ -289,7 +324,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                            <p className="text-gray-700 text-lg leading-relaxed">
           <strong>困りごとに優先順位を付けましょう。</strong><br />
-ドラッグ＆ドロップで<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞ります。クリックで配慮案を確認できます。
+ドラッグ＆ドロップで<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞ります。クリックで配慮案を確認できます。<span className="text-indigo-600">▶</span>で詳細を確認できます。
         </p>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -301,7 +336,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
           <ul className="space-y-2">
               {difficultiesState.map((item, idx) => (
                 <React.Fragment key={item.id}>
-                  <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} />
+                  <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} />
                   {idx === 2 && idx !== difficultiesState.length - 1 && (
                     <li>
                       <div className="border-t border-gray-300 my-2" />
@@ -326,6 +361,51 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
         >
           次へ進む
         </button>
+      </div>
+      
+      {/* モーダル */}
+      {modalContent && (
+        <Modal
+          isOpen={!!modalContent}
+          onClose={closeModal}
+          title={modalContent.title}
+          content={modalContent.content}
+        />
+      )}
+    </div>
+  );
+};
+
+// モーダルコンポーネント
+const Modal = ({ isOpen, onClose, title, content }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  title: string; 
+  content: string; 
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="p-4 overflow-y-auto max-h-[60vh]">
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+        </div>
       </div>
     </div>
   );
