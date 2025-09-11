@@ -51,7 +51,7 @@ interface AccommodationDisplayProps {
   selectedDomain: Domain | null;
   onRestart: () => void;
   onBack: () => void;
-  viewModel?: ViewModel | null;
+  viewModel?: ViewModel | null | undefined;
 }
 
 // アイコン画像パス
