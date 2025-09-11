@@ -86,7 +86,7 @@ const AccommodationGenerator: React.FC = () => {
   const [selection, setSelection] = useState<Selection>(loadSavedData().selection);
   const [selectedDifficulties, setSelectedDifficulties] = useState<any[]>(loadSavedData().selectedDifficulties);
   const [displayDifficulties, setDisplayDifficulties] = useState<any[]>(loadSavedData().displayDifficulties);
-  const [viewModel, setViewModel] = useState<any[] | null>(null);
+  const [viewModel, setViewModel] = useState<any[] | null | undefined>(null);
   const viewModelRef = useRef<any[] | null>(null);
   
   // viewModelの状態を監視
