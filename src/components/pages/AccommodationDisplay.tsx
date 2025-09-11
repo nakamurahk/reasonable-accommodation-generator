@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
 const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain }: { 
   difficulties: Difficulty[], 
   base64Images: { [key: string]: string },
-  viewModel: ViewModel | null,
+  viewModel: ViewModel | null | undefined,
   selectedDomain: Domain | null
 }) => {
   const today = new Date();
@@ -285,7 +285,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
               <Text style={styles.sectionTitle}>{item.title}</Text>
             </View>
             <View style={styles.accommodationList}>
-              {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
+              {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
                 <View key={accIdx} style={styles.accommodationItem}>
                   {base64Images[`acc${accIdx}`] && (
                     <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
@@ -397,7 +397,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       let detailedAccommodations = '';
       if (viewModel && selectedDifficulties && selectedDomain) {
         selectedDifficulties.forEach((difficulty: any, index: number) => {
-          const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain.id as any);
+          const accommodations = getAccommodations(difficulty.title, viewModel || null, selectedDomain.id as any);
           if (accommodations.length > 0) {
             detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
             accommodations.forEach((acc: any, accIndex: number) => {
@@ -597,7 +597,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                       </div>
                     )}
                   <ul className="space-y-4 ml-4 border-l-2 border-gray-200 pl-3">
-                    {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
+                    {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
                       <li key={accIdx} className="relative">
                         <div className="flex items-start gap-2">
                           <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
@@ -721,7 +721,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                     </div>
                   )}
                 <ul className="space-y-4 ml-6 border-l-2 border-gray-200 pl-4">
-                  {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
+                  {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
                     <li key={accIdx} className="relative">
                       <div className="flex items-start gap-2">
                         <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
