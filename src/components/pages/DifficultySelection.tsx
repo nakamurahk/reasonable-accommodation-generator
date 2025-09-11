@@ -199,7 +199,7 @@ const ACC_ICONS = [
 const ACC_LABELS = ['A', 'B', 'C', 'D'];
 
 // 配慮案抽出関数（新データ構造のみ）
-const getAccommodations = (title: string, viewModel: ViewModel | null, domain: string = '企業'): any[] => {
+const getAccommodations = (title: string, viewModel: ViewModel | null | undefined, domain: string = '企業'): any[] => {
   // console.log('getAccommodations called with:', { title, viewModel, domain });
   if (!viewModel) {
     // console.log('viewModel is null - returning empty array');

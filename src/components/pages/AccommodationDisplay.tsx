@@ -575,7 +575,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
             <h3 className="text-lg font-bold text-gray-800 mb-4">配慮依頼案</h3>
             <ul className="space-y-6">
               {selectedDifficulties.map((item, idx) => {
-                const category = getCategoryFromTitle(item.title, viewModel);
+                const category = getCategoryFromTitle(item.title, viewModel || null);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
                 
                 return (
@@ -699,7 +699,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
               </li>
             ) : (
               selectedDifficulties.map((item, idx) => {
-                const category = getCategoryFromTitle(item.title, viewModel);
+                const category = getCategoryFromTitle(item.title, viewModel || null);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
               
               return (

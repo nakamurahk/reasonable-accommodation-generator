@@ -85,7 +85,7 @@ type DifficultyThinkingProps = {
   onComplete: (difficulties: DifficultyItem[]) => void;
   selectedDifficulties: any[];
   onBack: () => void;
-  onViewModelChange?: (viewModel: any[]) => void;
+  onViewModelChange?: (viewModel: ViewModel | null | undefined) => void;
 };
 
 const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
