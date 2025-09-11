@@ -78,7 +78,7 @@ const CATEGORY_STYLES = {
 };
 
 // 困りごとタイトルからカテゴリを特定する関数（新データ構造対応）
-const getCategoryFromTitle = (title: string, viewModel: ViewModel | null) => {
+const getCategoryFromTitle = (title: string, viewModel: ViewModel | null | undefined) => {
   if (!viewModel) return null;
   
   const item = viewModel.find((vm: any) => vm.concern.title === title);
@@ -101,7 +101,7 @@ const points = [
 ];
 
 // 配慮案抽出関数（新データ構造のみ）
-const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null, selectedDomain: Domain | null) => {
+const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null | undefined, selectedDomain: Domain | null) => {
   // console.log('getAccommodations called with:', { difficultyTitle, viewModel, selectedDomain });
   if (!viewModel || !selectedDomain) {
     // console.log('getAccommodations - returning empty array due to missing data');
