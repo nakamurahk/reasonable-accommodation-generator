@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CharacteristicType, Domain, Situation } from '../types';
-import { ViewModel } from '../data/newDataLoader';
+import { ViewModel } from '../types/newDataStructure';
 import InitialSelection from './pages/InitialSelection';
 import DifficultyThinking from './pages/DifficultyThinking';
 import DifficultySelection from './pages/DifficultySelection';

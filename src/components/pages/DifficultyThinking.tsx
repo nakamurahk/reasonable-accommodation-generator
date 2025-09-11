@@ -6,7 +6,8 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { TAG_MAP, getTagName } from '../../constants/tagMap';
 import DifficultyGraphView from '../graph/DifficultyGraphView';
 // @ts-ignore
-import { loadStore, buildViewModel, buildFilteredViewModel, ViewModel } from '../../data/newDataLoader';
+import { loadStore, buildViewModel, buildFilteredViewModel } from '../../data/newDataLoader';
+import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 
 // 8カテゴリ定義
@@ -583,8 +584,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                   <p className="text-gray-700 text-base leading-relaxed">
           <strong>困りごとを考えてみましょう。</strong><br />
-最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。<br />
-右下の選択数表示をタップで整理できます。
+リスト表示で困りごとを最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。右下の選択数表示をクリックで整理できます。<br />
+グラフ表示で選択した困りごとの関連性を可視化しています。
         </p>
         </div>
         
@@ -834,8 +835,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
           <strong>困りごとを考えてみましょう。</strong><br />
-最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。<br />
-右上の選択数表示をクリックで整理できます。
+リスト表示で困りごとを最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。右上の選択数表示をクリックで整理できます。<br />
+グラフ表示で選択した困りごとの関連性を可視化しています。
         </p>
       </div>
       

@@ -8,7 +8,8 @@ import { getBase64Image } from '../../utils/imageUtils';
 import { Domain } from '../../types';
 import { useIsMobile } from '../../hooks/useIsMobile';
 // @ts-ignore
-import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName, ViewModel } from '../../data/newDataLoader';
+import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName } from '../../data/newDataLoader';
+import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 
 // フォント登録
