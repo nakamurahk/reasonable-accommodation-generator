@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CharacteristicType, Domain, Situation } from '../types';
+import { ViewModel } from '../data/newDataLoader';
 import InitialSelection from './pages/InitialSelection';
 import DifficultyThinking from './pages/DifficultyThinking';
 import DifficultySelection from './pages/DifficultySelection';
@@ -86,8 +87,8 @@ const AccommodationGenerator: React.FC = () => {
   const [selection, setSelection] = useState<Selection>(loadSavedData().selection);
   const [selectedDifficulties, setSelectedDifficulties] = useState<any[]>(loadSavedData().selectedDifficulties);
   const [displayDifficulties, setDisplayDifficulties] = useState<any[]>(loadSavedData().displayDifficulties);
-  const [viewModel, setViewModel] = useState<any[] | null | undefined>(null);
-  const viewModelRef = useRef<any[] | null | undefined>(null);
+  const [viewModel, setViewModel] = useState<ViewModel | null | undefined>(null);
+  const viewModelRef = useRef<ViewModel | null | undefined>(null);
   
   // viewModelの状態を監視
   useEffect(() => {

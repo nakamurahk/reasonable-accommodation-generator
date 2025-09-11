@@ -108,7 +108,7 @@ type DifficultySelectionProps = {
   difficulties: DifficultyItem[];
   onComplete: (selectedDifficulties: DifficultyItem[]) => void;
   onBack: () => void;
-  viewModel?: ViewModel | null;
+  viewModel?: ViewModel | null | undefined;
 };
 
 function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging: isGlobalDragging, openModal, viewModel, isViewModelReady }: any) {
