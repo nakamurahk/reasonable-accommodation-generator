@@ -1,0 +1,87 @@
+[
+  {
+    "concern": "concern_001",
+    "cares": [
+      {
+        "care": "care_001",
+        "variants": ["variant_001_enterprise", "variant_001_education", "variant_001_support"]
+      },
+      {
+        "care": "care_002",
+        "variants": ["variant_002_enterprise", "variant_002_education", "variant_002_support"]
+      },
+      {
+        "care": "care_003",
+        "variants": ["variant_003_enterprise", "variant_003_education", "variant_003_support"]
+      }
+    ]
+  },
+  {
+    "concern": "concern_002",
+    "cares": [
+      {
+        "care": "care_004",
+        "variants": ["variant_004_enterprise", "variant_004_education", "variant_004_support"]
+      },
+      {
+        "care": "care_005",
+        "variants": ["variant_005_enterprise", "variant_005_education", "variant_005_support"]
+      },
+      {
+        "care": "care_006",
+        "variants": ["variant_006_enterprise", "variant_006_education", "variant_006_support"]
+      }
+    ]
+  },
+  {
+    "concern": "concern_003",
+    "cares": [
+      {
+        "care": "care_007",
+        "variants": ["variant_007_enterprise", "variant_007_education", "variant_007_support"]
+      },
+      {
+        "care": "care_008",
+        "variants": ["variant_008_enterprise", "variant_008_education", "variant_008_support"]
+      },
+      {
+        "care": "care_009",
+        "variants": ["variant_009_enterprise", "variant_009_education", "variant_009_support"]
+      }
+    ]
+  },
+  {
+    "concern": "concern_004",
+    "cares": [
+      {
+        "care": "care_010",
+        "variants": ["variant_010_enterprise", "variant_010_education", "variant_010_support"]
+      },
+      {
+        "care": "care_011",
+        "variants": ["variant_011_enterprise", "variant_011_education", "variant_011_support"]
+      },
+      {
+        "care": "care_012",
+        "variants": ["variant_012_enterprise", "variant_012_education", "variant_012_support"]
+      }
+    ]
+  },
+  {
+    "concern": "concern_005",
+    "cares": [
+      {
+        "care": "care_013",
+        "variants": ["variant_013_enterprise", "variant_013_education", "variant_013_support"]
+      },
+      {
+        "care": "care_014",
+        "variants": ["variant_014_enterprise", "variant_014_education", "variant_014_support"]
+      },
+      {
+        "care": "care_015",
+        "variants": ["variant_015_enterprise", "variant_015_education", "variant_015_support"]
+      }
+    ]
+  }
+]

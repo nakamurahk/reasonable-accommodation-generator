@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Situation, CharacteristicType, Domain } from '../../types';
-import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
+// import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
 import AccommodationDisplay from './AccommodationDisplay';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { TAG_MAP, getTagName } from '../../constants/tagMap';
+import DifficultyGraphView from '../graph/DifficultyGraphView';
+// @ts-ignore
+import { loadStore, buildViewModel, buildFilteredViewModel, ViewModel } from '../../data/newDataLoader';
+import { Domain as NewDomain } from '../../types/newDataStructure';
 
 // 8カテゴリ定義
 const CATEGORIES = [
@@ -80,6 +85,7 @@ type DifficultyThinkingProps = {
   onComplete: (difficulties: DifficultyItem[]) => void;
   selectedDifficulties: any[];
   onBack: () => void;
+  onViewModelChange?: (viewModel: any[]) => void;
 };
 
 const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
@@ -88,10 +94,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   situations,
   onComplete,
   selectedDifficulties,
-  onBack
+  onBack,
+  onViewModelChange
 }) => {
   const [input, setInput] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [viewModel, setViewModel] = useState<ViewModel | null>(null);
   const [customDifficulties, setCustomDifficulties] = useState<string[]>([]);
   const [showAccommodationDisplay, setShowAccommodationDisplay] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -105,6 +113,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [isDecreasingNumber, setIsDecreasingNumber] = useState<number | null>(null); // 減少時の数字表示用
   const [isDecreasingAnimating, setIsDecreasingAnimating] = useState(false); // 減少時のアニメーション用
   const [showSelectionModal, setShowSelectionModal] = useState(false); // 選択済み困りごとモーダル表示用
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list'); // ビューモード（リスト or グラフ）
   
   // 数値に応じた色を決定する関数
   const getBigNumberColor = (num: number) => {
@@ -153,46 +162,53 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   // 選択場面名リスト
   const selectedSituationNames = situations.map(s => s.name);
 
-  // フィルタ関数
-  const filteredDifficulties = (reasonableAccommodations as any[]).filter(item => {
-    // 特性タイプ: OR条件
-    const itemTraits = (item['特性タイプ'] || '').split(',');
-    const hasTrait = selectedCharacteristicNames.some(name => itemTraits.includes(name));
+  // 新データ構造を読み込む（指定された流れを使用）
+  useEffect(() => {
+    const loadNewData = async () => {
+      try {
+        const query = {
+          traits: selectedCharacteristicNames,
+          domain: selectedDomainName || '企業',
+          situations: selectedSituationNames
+        };
+        
+        const vm = await buildFilteredViewModel(query);
+        setViewModel(vm);
+        onViewModelChange?.(vm);
+        // console.log('新データ構造の読み込み成功（フィルタ済み）:', vm);
+      } catch (error) {
+        console.error('新データ構造の読み込みに失敗:', error);
+        setViewModel(null);
+      }
+    };
+    loadNewData();
+  }, [characteristics, domain, situations]); // 依存配列を修正
 
-    // ドメイン: OR条件
-    const itemDomains = (item['ドメイン'] || '').split(',');
-    const hasDomain = selectedDomainName ? itemDomains.includes(selectedDomainName) : false;
-
-    // 場面: OR条件
-    const hasSituation = (() => {
-      if (!domain) return false;
-
-      // ドメインに応じたシチュエーションフィールドを選択
-      const situationField = {
-        '企業': '企業でのシチュエーション',
-        '教育機関': '教育機関でのシチュエーション',
-        '支援機関': '支援機関でのシチュエーション'
-      }[domain.name];
-
-      if (!situationField) return false;
-
-      // 選択されたシチュエーションとJSONのシチュエーションを比較
-      const itemSituations = (item[situationField] || '').split(',');
-      return selectedSituationNames.some(selectedSituation => 
-        itemSituations.some((itemSituation: string) => 
-          itemSituation.trim() === selectedSituation.trim()
-        )
-      );
-    })();
-
-    // AND条件
-    return hasTrait && hasDomain && hasSituation;
-  });
+  // フィルタ済み困りごと（新データ構造対応）
+  const filteredDifficulties = useMemo(() => {
+    if (!viewModel) return [];
+    
+    // buildFilteredViewModelで既にフィルタリング済みなので、そのまま使用
+    return viewModel.map((vm: any) => ({
+      '困りごと内容': vm.concern.title,
+      'カテゴリ': vm.concern.category,
+      '主要タグ': vm.concern.primary_tags.join(','),
+      '補助タグ': vm.concern.secondary_tags.join(','),
+      '特性タイプ': vm.concern.trait_types.join(','),
+      'ドメイン': Object.keys(vm.concern.contexts).join(','),
+      '企業でのシチュエーション': vm.concern.contexts['企業']?.join(',') || '',
+      '教育機関でのシチュエーション': vm.concern.contexts['教育機関']?.join(',') || '',
+      '支援機関でのシチュエーション': vm.concern.contexts['支援機関']?.join(',') || '',
+      '企業具体例': vm.concern.examples['企業']?.join(',') || '',
+      '教育機関具体例': vm.concern.examples['教育機関']?.join(',') || '',
+      '支援機関具体例': vm.concern.examples['支援機関']?.join(',') || '',
+    }));
+  }, [viewModel]);
 
   // 困りごと内容で重複排除
   const uniqueDifficulties = useMemo(() => {
   const uniqueDifficultiesMap = new Map<string, any>();
-  filteredDifficulties.forEach(item => {
+  filteredDifficulties.forEach((item: any) => {
     if (!uniqueDifficultiesMap.has(item['困りごと内容'])) {
       uniqueDifficultiesMap.set(item['困りごと内容'], item);
     }
@@ -433,18 +449,21 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
   // モバイル用UI
   if (isMobile) {
-    return (
+  return (
       <div className="max-w-none mx-auto p-4 relative">
-        {/* 選択件数固定表示 - 直角三角形 */}
-        <div className="fixed bottom-0 right-0 z-50">
-          <div className="relative w-[100px] h-[100px]">
-            {/* 直角三角形の背景 */}
-            <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[100px] border-l-transparent border-b-[100px] border-b-indigo-600"></div>
+        {/* 選択件数固定表示 - 直角三角形（リスト表示時のみ） */}
+        {viewMode === 'list' && (
+          <div className="fixed bottom-0 right-0 z-50">
+            <div className="relative w-[100px] h-[100px]">
+              {/* 直角三角形の背景 */}
+              <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[100px] border-l-transparent border-b-[100px] border-b-indigo-600"></div>
+            </div>
           </div>
-        </div>
+        )}
         
-        {/* 3/10テキスト表示 - 高いレイヤーで背景に重なる */}
-        <div className="fixed bottom-4 right-3 z-[60]">
+        {/* 3/10テキスト表示 - 高いレイヤーで背景に重なる（リスト表示時のみ） */}
+        {viewMode === 'list' && (
+          <div className="fixed bottom-4 right-3 z-[60]">
           <div 
             className="text-lg font-bold cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setShowSelectionModal(true)}
@@ -483,6 +502,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             }`}>/10</span>
           </div>
         </div>
+        )}
         
 
         {/* 選択済み困りごとモーダル */}
@@ -568,105 +588,170 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         </p>
         </div>
         
+        {/* ビューモード切り替えタブ */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              リスト表示
+            </button>
+            <button
+              onClick={() => setViewMode('graph')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'graph'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              グラフ表示
+            </button>
+          </div>
+        </div>
+        
         <div className="space-y-4">
-          {/* カテゴリタブ */}
-          {renderCategoryTabs()}
+          {viewMode === 'list' ? (
+            <>
+              {/* カテゴリタブ */}
+              {renderCategoryTabs()}
 
-          {/* フィルタされた困りごとカード */}
-          <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                              <h3 className="text-lg font-medium text-gray-700 mb-4">
-          {selectedCategory}でこんな困りごとはありませんか？（{selected.filter(item => currentCategoryDifficulties.some((d: any) => d['困りごと内容'] === item)).length}/{currentCategoryDifficulties.length}）
-        </h3>
-            <div className="text-sm text-gray-500 mb-2 text-right">
-              候補の困りごと: {currentCategoryDifficulties.length}件
-            </div>
-            <div className="grid grid-cols-1 gap-4 min-h-[420px] content-start">
-              {currentCategoryDifficulties.length === 0 && (
-                <div className="text-gray-400">このカテゴリには該当する困りごとは見つかりませんでした。</div>
-              )}
-              {currentCategoryDifficulties.map((item: any) => {
-                const isSelected = selected.includes(item['困りごと内容']);
-                const isDisabled = !isSelected && selected.length >= maxSelectable;
-                
-                // ドメインに応じた具体例を選択
-                let specificExample = '';
-                if (domain?.name === '企業') {
-                  specificExample = item['企業具体例'];
-                } else if (domain?.name === '教育機関') {
-                  specificExample = item['教育機関具体例'];
-                } else if (domain?.name === '支援機関') {
-                  specificExample = item['支援機関具体例'];
-                }
+        {/* フィルタされた困りごとカード */}
+              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  {selectedCategory}でこんな困りごとはありませんか？（{selected.filter(item => currentCategoryDifficulties.some((d: any) => d['困りごと内容'] === item)).length}/{currentCategoryDifficulties.length}）
+                </h3>
+                <div className="text-sm text-gray-500 mb-2 text-right">
+                  候補の困りごと: {currentCategoryDifficulties.length}件
+                </div>
+                <div className="grid grid-cols-1 gap-4 min-h-[420px] content-start">
+                  {currentCategoryDifficulties.length === 0 && (
+                    <div className="text-gray-400">このカテゴリには該当する困りごとは見つかりませんでした。</div>
+                  )}
+                  {currentCategoryDifficulties.map((item: any) => {
+              const isSelected = selected.includes(item['困りごと内容']);
+              const isDisabled = !isSelected && selected.length >= maxSelectable;
+                    
+                    // ドメインに応じた具体例を選択
+                    let specificExample = '';
+                    if (domain?.name === '企業') {
+                      specificExample = item['企業具体例'];
+                    } else if (domain?.name === '教育機関') {
+                      specificExample = item['教育機関具体例'];
+                    } else if (domain?.name === '支援機関') {
+                      specificExample = item['支援機関具体例'];
+                    }
 
-                // 具体例をカンマで分割してリスト化
-                const exampleList = specificExample.split(',').map((example, index) => (
-                  <li key={index} className="text-sm text-gray-500 mb-1">
-                    {example.trim()}
-                  </li>
-                ));
+                    // 具体例をカンマで分割してリスト化
+                    const exampleList = specificExample.split(',').map((example, index) => (
+                      <li key={index} className="text-sm text-gray-500 mb-1">
+                        {example.trim()}
+                      </li>
+                    ));
 
-                return (
-                  <button
-                    key={item['困りごと内容']}
-                    onClick={() => handleSelect(item['困りごと内容'])}
-                    disabled={isDisabled}
-                    className={`p-4 rounded-lg border text-left transition w-full flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-indigo-300'
-                    } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
-                    </div>
-                    <div className="flex-1 flex items-start">
-                      <ul className="list-disc pl-4 text-sm text-gray-500">
-                        {exampleList}
-                      </ul>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    // タグ情報を取得
+                    const mainTags = item['主要タグ'] ? item['主要タグ'].split(',').map((tag: string) => tag.trim()) : [];
+                    const subTags = item['補助タグ'] ? item['補助タグ'].split(',').map((tag: string) => tag.trim()) : [];
 
-          {/* カスタム困りごと入力 */}
-          <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-            <h3 className="text-lg font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="(未実装)"
-                disabled
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
-              />
-              <button
-                onClick={handleAddCustom}
-                disabled
-                className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
-              >
-                送信
-              </button>
-            </div>
-            {customDifficulties.length > 0 && (
-              <div className="space-y-2">
-                {customDifficulties.map((difficulty, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700">{difficulty}</span>
-                    <button
-                      onClick={() => handleRemoveCustom(difficulty)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      ✕
-                    </button>
+              return (
+                <button
+                  key={item['困りごと内容']}
+                  onClick={() => handleSelect(item['困りごと内容'])}
+                  disabled={isDisabled}
+                        className={`p-4 rounded-lg border text-left transition w-full flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 hover:border-indigo-300'
+                  } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                >
+                        <div className="flex items-center gap-2 mb-3">
+                    <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                        <div className="flex-1 flex items-start">
+                          <ul className="list-disc pl-4 text-sm text-gray-500">
+                            {exampleList}
+                          </ul>
+                        </div>
+                        {/* タグ表示 */}
+                        {(mainTags.length > 0 || subTags.length > 0) && (
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <div className="flex flex-wrap gap-1">
+                              {/* 主要タグ */}
+                              {mainTags.map((tag: string, index: number) => (
+                                <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  #{tag} : {getTagName(tag)}
+                                </span>
+                              ))}
+                              {/* 補助タグ */}
+                              {subTags.map((tag: string, index: number) => (
+                                <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                  #{tag} : {getTagName(tag)}
+                  </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                </button>
+              );
+            })}
           </div>
+              </div>
+
+              {/* カスタム困りごと入力 */}
+              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                <h3 className="text-lg font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="(未実装)"
+                    disabled
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  />
+                  <button
+                    onClick={handleAddCustom}
+                    disabled
+                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
+                  >
+                    送信
+                  </button>
+                </div>
+                {customDifficulties.length > 0 && (
+                  <div className="space-y-2">
+                    {customDifficulties.map((difficulty, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">{difficulty}</span>
+                        <button
+                          onClick={() => handleRemoveCustom(difficulty)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* グラフ表示 */
+            <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+              <h3 className="text-lg font-medium text-gray-700 mb-4">
+                選択した困りごとの関連性
+              </h3>
+              <DifficultyGraphView 
+                selectedDifficulties={selected}
+                domain={domain}
+                viewModel={viewModel}
+              />
+            </div>
+          )}
         </div>
 
         {/* ボタン */}
@@ -699,7 +784,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             {/* モーダルヘッダー */}
             <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">選択済み困りごと</h3>
-              <button 
+              <button
                 onClick={() => setShowSelectionModal(false)}
                 className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20"
               >
@@ -716,14 +801,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   {selected.map((item, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-700 flex-1">{item}</span>
-                                              <button
+                <button
                           onClick={() => {
                             handleSelect(item); // 選択解除（モーダルは閉じない）
                           }}
                           className="ml-3 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
                         >
                           削除
-                        </button>
+                </button>
                     </div>
                   ))}
                 </div>
@@ -740,8 +825,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
       
 
       
@@ -754,152 +839,217 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         </p>
       </div>
       
+      {/* ビューモード切り替えタブ */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-md">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white text-indigo-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            リスト表示
+          </button>
+          <button
+            onClick={() => setViewMode('graph')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'graph'
+                ? 'bg-white text-indigo-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            グラフ表示
+          </button>
+        </div>
+      </div>
+      
       <div className="space-y-6">
-        {/* カテゴリタブと選択数表示 */}
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            {renderCategoryTabs()}
-          </div>
-          <div className="ml-4">
-                           <div 
-                 className={`inline-flex items-center justify-center px-6 py-3 rounded-full shadow-lg transition-all duration-300 cursor-pointer hover:opacity-80 ${
-                   isMaxReached
-                     ? 'scale-125 bg-red-500 shadow-2xl animate-pulse'
-                     : isCountAnimating
-                       ? 'scale-110 bg-yellow-500 shadow-xl'
-                       : isCountDecreasing
-                         ? 'scale-90 bg-blue-400 shadow-sm animate-bounce'
-                         : 'bg-indigo-600 scale-100'
-                 }`}
-                 onClick={() => setShowSelectionModal(true)}
-               >
-                 <span className="text-lg font-bold text-white">
-                   {/* 数字部分 */}
-                   <span className={`transition-all duration-800 ease-out ${
-                                          isHidingCurrent && bigNumber
-                       ? `opacity-100 text-6xl ${getBigNumberColor(bigNumber)}`
-                       : isHidingCurrent && isDecreasingNumber
-                         ? 'opacity-100 text-6xl text-blue-300'
-                         : isHidingCurrent && !bigNumber && !isDecreasingNumber
-                           ? 'opacity-0' 
-                           : bigNumber && !isBigNumberAnimating
-                             ? `text-6xl ${getBigNumberColor(bigNumber)}`
-                             : bigNumber && isBigNumberAnimating
-                               ? `text-lg ${getBigNumberColor(bigNumber)}`
-                                                                : isDecreasingNumber && !isDecreasingAnimating
-                                   ? 'text-6xl text-blue-300'
-                                   : isDecreasingNumber && isDecreasingAnimating
-                                     ? 'text-lg text-blue-300'
-                                     : selected.length >= 11
-                                       ? 'text-red-500 opacity-100'
-                                       : 'opacity-100'
-                   }`}>
-                     {isHidingCurrent && bigNumber ? bigNumber : isHidingCurrent && isDecreasingNumber ? isDecreasingNumber : selected.length}
-                   </span>
-                   {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
-                   <span className={`transition-all duration-300 ${
-                     bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
-                   }`}>/10</span>
-                 </span>
-               </div>
-          </div>
-        </div>
-
-        {/* フィルタされた困りごとカード */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h3 className="text-xl font-medium text-gray-700 mb-4">
-            {selectedCategory}でこんな困りごとはありませんか？（{selected.filter(item => currentCategoryDifficulties.some((d: any) => d['困りごと内容'] === item)).length}/{currentCategoryDifficulties.length}）
-          </h3>
-          <div className="text-sm text-gray-500 mb-4 text-right">
-            候補の困りごと: {currentCategoryDifficulties.length}件
-          </div>
-          <div className="grid grid-cols-2 gap-4 content-start">
-            {currentCategoryDifficulties.length === 0 && (
-              <div className="text-gray-400 col-span-2">このカテゴリには該当する困りごとは見つかりませんでした。</div>
-            )}
-            {currentCategoryDifficulties.map((item: any) => {
-              const isSelected = selected.includes(item['困りごと内容']);
-              const isDisabled = !isSelected && selected.length >= maxSelectable;
-              
-              // ドメインに応じた具体例を選択
-              let specificExample = '';
-              if (domain?.name === '企業') {
-                specificExample = item['企業具体例'];
-              } else if (domain?.name === '教育機関') {
-                specificExample = item['教育機関具体例'];
-              } else if (domain?.name === '支援機関') {
-                specificExample = item['支援機関具体例'];
-              }
-
-              // 具体例をカンマで分割してリスト化
-              const exampleList = specificExample.split(',').map((example, index) => (
-                <li key={index} className="text-sm text-gray-500 mb-1">
-                  {example.trim()}
-                </li>
-              ));
-
-              return (
-                <button
-                  key={item['困りごと内容']}
-                  onClick={() => handleSelect(item['困りごと内容'])}
-                  disabled={isDisabled}
-                  className={`p-3 rounded-lg border text-left transition w-full h-[160px] flex flex-col justify-between ${
-                    isSelected
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300'
-                  } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+        {viewMode === 'list' ? (
+          <>
+            {/* カテゴリタブと選択数表示 */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                {renderCategoryTabs()}
+              </div>
+              <div className="ml-4">
+                <div 
+                  className={`inline-flex items-center justify-center px-6 py-3 rounded-full shadow-lg transition-all duration-300 cursor-pointer hover:opacity-80 ${
+                    isMaxReached
+                      ? 'scale-125 bg-red-500 shadow-2xl animate-pulse'
+                      : isCountAnimating
+                        ? 'scale-110 bg-yellow-500 shadow-xl'
+                        : isCountDecreasing
+                          ? 'scale-90 bg-blue-400 shadow-sm animate-bounce'
+                          : 'bg-indigo-600 scale-100'
+                  }`}
+                  onClick={() => setShowSelectionModal(true)}
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
-                  </div>
-                  <div className="flex-1 flex items-start">
-                    <ul className="list-disc pl-4 text-sm text-gray-500">
-                      {exampleList}
-                    </ul>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                  <span className="text-lg font-bold text-white">
+                    {/* 数字部分 */}
+                    <span className={`transition-all duration-800 ease-out ${
+                      isHidingCurrent && bigNumber
+                        ? `opacity-100 text-6xl ${getBigNumberColor(bigNumber)}`
+                        : isHidingCurrent && isDecreasingNumber
+                          ? 'opacity-100 text-6xl text-blue-300'
+                          : isHidingCurrent && !bigNumber && !isDecreasingNumber
+                            ? 'opacity-0' 
+                            : bigNumber && !isBigNumberAnimating
+                              ? `text-6xl ${getBigNumberColor(bigNumber)}`
+                              : bigNumber && isBigNumberAnimating
+                                ? `text-lg ${getBigNumberColor(bigNumber)}`
+                                : isDecreasingNumber && !isDecreasingAnimating
+                                  ? 'text-6xl text-blue-300'
+                                  : isDecreasingNumber && isDecreasingAnimating
+                                    ? 'text-lg text-blue-300'
+                                    : selected.length >= 11
+                                      ? 'text-red-500 opacity-100'
+                                      : 'opacity-100'
+                    }`}>
+                      {isHidingCurrent && bigNumber ? bigNumber : isHidingCurrent && isDecreasingNumber ? isDecreasingNumber : selected.length}
+                    </span>
+                    {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
+                    <span className={`transition-all duration-300 ${
+                      bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
+                    }`}>/10</span>
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        {/* カスタム困りごと入力 */}
+            {/* フィルタされた困りごとカード */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">
+                {selectedCategory}でこんな困りごとはありませんか？（{selected.filter(item => currentCategoryDifficulties.some((d: any) => d['困りごと内容'] === item)).length}/{currentCategoryDifficulties.length}）
+              </h3>
+              <div className="text-sm text-gray-500 mb-4 text-right">
+                候補の困りごと: {currentCategoryDifficulties.length}件
+              </div>
+              <div className="grid grid-cols-2 gap-4 content-start">
+                {currentCategoryDifficulties.length === 0 && (
+                  <div className="text-gray-400 col-span-2">このカテゴリには該当する困りごとは見つかりませんでした。</div>
+                )}
+                {currentCategoryDifficulties.map((item: any) => {
+                  const isSelected = selected.includes(item['困りごと内容']);
+                  const isDisabled = !isSelected && selected.length >= maxSelectable;
+                  
+                  // ドメインに応じた具体例を選択
+                  let specificExample = '';
+                  if (domain?.name === '企業') {
+                    specificExample = item['企業具体例'];
+                  } else if (domain?.name === '教育機関') {
+                    specificExample = item['教育機関具体例'];
+                  } else if (domain?.name === '支援機関') {
+                    specificExample = item['支援機関具体例'];
+                  }
+
+                  // 具体例をカンマで分割してリスト化
+                  const exampleList = specificExample.split(',').map((example, index) => (
+                    <li key={index} className="text-sm text-gray-500 mb-1">
+                      {example.trim()}
+                    </li>
+                  ));
+
+                  // タグ情報を取得
+                  const mainTags = item['主要タグ'] ? item['主要タグ'].split(',').map((tag: string) => tag.trim()) : [];
+                  const subTags = item['補助タグ'] ? item['補助タグ'].split(',').map((tag: string) => tag.trim()) : [];
+
+                  return (
+                    <button
+                      key={item['困りごと内容']}
+                      onClick={() => handleSelect(item['困りごと内容'])}
+                      disabled={isDisabled}
+                      className={`p-3 rounded-lg border text-left transition w-full flex flex-col justify-between min-h-[160px] ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-indigo-300'
+                      } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
+                      </div>
+                      <div className="flex-1 flex items-start">
+                        <ul className="list-disc pl-4 text-sm text-gray-500">
+                          {exampleList}
+                        </ul>
+                      </div>
+                      {/* タグ表示 */}
+                      {(mainTags.length > 0 || subTags.length > 0) && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex flex-wrap gap-1">
+                            {/* 主要タグ */}
+                            {mainTags.map((tag: string, index: number) => (
+                              <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                #{tag} : {getTagName(tag)}
+                              </span>
+                            ))}
+                            {/* 補助タグ */}
+                            {subTags.map((tag: string, index: number) => (
+                              <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                #{tag} : {getTagName(tag)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* カスタム困りごと入力 */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h3 className="text-xl font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
-          <div className="flex gap-4 mb-4">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
+              <div className="flex gap-4 mb-4">
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="(未実装)"
-              disabled
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  placeholder="(未実装)"
+                  disabled
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
             />
             <button
               onClick={handleAddCustom}
-              disabled
-              className="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
+                  disabled
+                  className="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
             >
               送信
             </button>
           </div>
           {customDifficulties.length > 0 && (
-            <div className="space-y-2">
+                <div className="space-y-2">
                 {customDifficulties.map((difficulty, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <span className="text-gray-700">{difficulty}</span>
                     <button
                       onClick={() => handleRemoveCustom(difficulty)}
-                    className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700"
                     >
                       ✕
                     </button>
+                    </div>
+                  ))}
                 </div>
-                ))}
+              )}
+            </div>
+          </>
+        ) : (
+          /* グラフ表示 */
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h3 className="text-xl font-medium text-gray-700 mb-4">
+              選択した困りごとの関連性
+            </h3>
+            <DifficultyGraphView 
+              selectedDifficulties={selected}
+              domain={domain}
+              viewModel={viewModel}
+            />
             </div>
           )}
-        </div>
         </div>
 
       {/* ボタン */}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SideNav from '../layout/SideNav';
 import Header from '../layout/Header';
 import { Difficulty } from '../../types';
-import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
+// import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
 
 // props型定義
 interface DifficultyReviewProps {
@@ -25,8 +25,10 @@ type AccommodationItem = {
 const DifficultyReview: React.FC<DifficultyReviewProps> = ({ difficulties, prioritizedIds, onTogglePriority, onNext }) => {
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
-  // 困りごと名から配慮案リストを抽出
+  // 困りごと名から配慮案リストを抽出（新データ構造対応のため一時的に空配列を返す）
   const getAccommodations = (difficultyName: string): AccommodationItem[] => {
+    return []; // 新データ構造対応のため一時的に空配列を返す
+    /*
     return (reasonableAccommodations as any[])
       .filter(item => item['困りごと内容'] === difficultyName)
       .map(item => ({
@@ -36,6 +38,7 @@ const DifficultyReview: React.FC<DifficultyReviewProps> = ({ difficulties, prior
         '難易度': item['難易度'],
         '効果・影響': item['効果・影響'],
       }));
+    */
   };
 
   return (

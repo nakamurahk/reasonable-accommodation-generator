@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CharacteristicType, Domain, Situation } from '../types';
 import InitialSelection from './pages/InitialSelection';
@@ -86,6 +86,14 @@ const AccommodationGenerator: React.FC = () => {
   const [selection, setSelection] = useState<Selection>(loadSavedData().selection);
   const [selectedDifficulties, setSelectedDifficulties] = useState<any[]>(loadSavedData().selectedDifficulties);
   const [displayDifficulties, setDisplayDifficulties] = useState<any[]>(loadSavedData().displayDifficulties);
+  const [viewModel, setViewModel] = useState<any[] | null>(null);
+  const viewModelRef = useRef<any[] | null>(null);
+  
+  // viewModelの状態を監視
+  useEffect(() => {
+    // console.log('viewModel state changed:', viewModel);
+    viewModelRef.current = viewModel;
+  }, [viewModel]);
 
   // URLの変更を監視してステップを更新
   useEffect(() => {
@@ -95,13 +103,13 @@ const AccommodationGenerator: React.FC = () => {
   }, [location.pathname]);
 
   const updateStep = (newStep: Step) => {
-    console.log('updateStep called with:', newStep);
+    // console.log('updateStep called with:', newStep);
     setCurrentStep(newStep);
     // URLを更新
     const path = newStep === 'initial' ? '/step1' : 
                  newStep === 'thinking' ? '/step2' : 
                  newStep === 'selection' ? '/step3' : '/step4';
-    console.log('Navigating to path:', path);
+    // console.log('Navigating to path:', path);
     navigate(path);
     window.scrollTo(0, 0);
   };
@@ -121,6 +129,7 @@ const AccommodationGenerator: React.FC = () => {
     // ①→②の遷移時は困りごと関連データをクリア
     setSelectedDifficulties([]);
     setDisplayDifficulties([]);
+    setViewModel(null);
     
     // LocalStorageに保存（困りごと関連は空の状態で保存）
     saveToLocalStorage({
@@ -139,13 +148,22 @@ const AccommodationGenerator: React.FC = () => {
     }));
     setSelectedDifficulties(newSelectedDifficulties);
     
-    // LocalStorageに保存
+    // console.log('handleThinkingComplete - viewModel:', viewModel);
+    // console.log('handleThinkingComplete - viewModelRef.current:', viewModelRef.current);
+    
+    // viewModelがnullの場合は、viewModelRefから取得
+    if (!viewModel && viewModelRef.current) {
+      setViewModel(viewModelRef.current);
+    }
+    
+    // LocalStorageに保存（viewModelは保持）
     saveToLocalStorage({
       selection,
       selectedDifficulties: newSelectedDifficulties,
       displayDifficulties,
     });
     
+    // viewModelを保持したままステップ3に遷移
     updateStep('selection');
   };
 
@@ -179,15 +197,15 @@ const AccommodationGenerator: React.FC = () => {
   };
 
   const handleBack = () => {
-    console.log('handleBack called, currentStep:', currentStep);
+    // console.log('handleBack called, currentStep:', currentStep);
     if (currentStep === 'display') {
-      console.log('Moving from display to selection');
+      // console.log('Moving from display to selection');
       updateStep('selection');
     } else if (currentStep === 'selection') {
-      console.log('Moving from selection to thinking');
+      // console.log('Moving from selection to thinking');
       updateStep('thinking');
     } else if (currentStep === 'thinking') {
-      console.log('Moving from thinking to initial');
+      // console.log('Moving from thinking to initial');
       updateStep('initial');
     }
   };
@@ -206,6 +224,7 @@ const AccommodationGenerator: React.FC = () => {
             onComplete={handleThinkingComplete}
             selectedDifficulties={selectedDifficulties}
             onBack={handleBack}
+            onViewModelChange={setViewModel}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -223,11 +242,15 @@ const AccommodationGenerator: React.FC = () => {
       )}
       {currentStep === 'selection' && (
         selectedDifficulties.length > 0 ? (
-          <DifficultySelection
-            difficulties={selectedDifficulties}
-            onComplete={handleSelectionComplete}
-            onBack={handleBack}
-          />
+          <>
+            {/* console.log('Rendering DifficultySelection with viewModel:', viewModel) */}
+            <DifficultySelection
+              difficulties={selectedDifficulties}
+              onComplete={handleSelectionComplete}
+              onBack={handleBack}
+              viewModel={viewModel}
+            />
+          </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -249,6 +272,7 @@ const AccommodationGenerator: React.FC = () => {
             selectedDomain={selection.domain}
             onRestart={handleRestart}
             onBack={handleBack}
+            viewModel={viewModel}
           />
         ) : (
           <div className="flex items-center justify-center h-full">

@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { ReasonableAccommodation } from '../../types';
-import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
+// import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { getBase64Image } from '../../utils/imageUtils';
 import { Domain } from '../../types';
 import { useIsMobile } from '../../hooks/useIsMobile';
+// @ts-ignore
+import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName, ViewModel } from '../../data/newDataLoader';
+import { Domain as NewDomain } from '../../types/newDataStructure';
 
 // フォント登録
 Font.register({
@@ -48,6 +51,7 @@ interface AccommodationDisplayProps {
   selectedDomain: Domain | null;
   onRestart: () => void;
   onBack: () => void;
+  viewModel?: ViewModel | null;
 }
 
 // アイコン画像パス
@@ -73,10 +77,12 @@ const CATEGORY_STYLES = {
   '職場・社会不安': { icon: '🏢', bgColor: '#F5F5F5' }
 };
 
-// 困りごとタイトルからカテゴリを特定する関数
-const getCategoryFromTitle = (title: string) => {
-  const accommodation = reasonableAccommodations.find((acc: any) => acc['困りごと内容'] === title);
-  return accommodation ? accommodation['カテゴリ'] : null;
+// 困りごとタイトルからカテゴリを特定する関数（新データ構造対応）
+const getCategoryFromTitle = (title: string, viewModel: ViewModel | null) => {
+  if (!viewModel) return null;
+  
+  const item = viewModel.find((vm: any) => vm.concern.title === title);
+  return item ? item.concern.category : null;
 };
 
 // PDF用アイコン画像パス
@@ -94,20 +100,18 @@ const points = [
   'その場で決めず「一度持ち帰って検討いただく」とも伝えると安心です',
 ];
 
-// 配慮案抽出関数
-const getAccommodations = (difficultyTitle: string) => {
-  return reasonableAccommodations
-    .filter((acc: any) => acc['困りごと内容'] === difficultyTitle)
-    .slice(0, 3) // 最大3件
-    .map((acc: any, index: number) => ({
-      name: `配慮案${['A', 'B', 'C'][index]}`,
-      description: acc['配慮内容'],
-      examples: {
-        workplace: acc['企業の具体的配慮例'],
-        education: acc['教育機関の具体的配慮例'],
-        support: acc['支援機関の具体的配慮例']
-      }
-    }));
+// 配慮案抽出関数（新データ構造のみ）
+const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null, selectedDomain: Domain | null) => {
+  // console.log('getAccommodations called with:', { difficultyTitle, viewModel, selectedDomain });
+  if (!viewModel || !selectedDomain) {
+    // console.log('getAccommodations - returning empty array due to missing data');
+    return []; // データが読み込まれていない場合は空配列を返す
+  }
+  
+  const domain = getDomainFromName(selectedDomain.name);
+  const accommodations = getAccommodationsFromViewModel(viewModel, difficultyTitle, domain);
+  // console.log('getAccommodations - found accommodations:', accommodations);
+  return accommodations;
 };
 
 // PDFのスタイル定義
@@ -251,7 +255,12 @@ const styles = StyleSheet.create({
 });
 
 // PDFドキュメントコンポーネント
-const AccommodationPDFDocument = ({ difficulties, base64Images }: { difficulties: Difficulty[], base64Images: { [key: string]: string } }) => {
+const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain }: { 
+  difficulties: Difficulty[], 
+  base64Images: { [key: string]: string },
+  viewModel: ViewModel | null,
+  selectedDomain: Domain | null
+}) => {
   const today = new Date();
   const dateStr = today.getFullYear() +
     String(today.getMonth() + 1).padStart(2, '0') +
@@ -276,7 +285,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images }: { difficulties
               <Text style={styles.sectionTitle}>{item.title}</Text>
             </View>
             <View style={styles.accommodationList}>
-              {getAccommodations(item.title).map((acc: any, accIdx: number) => (
+              {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
                 <View key={accIdx} style={styles.accommodationItem}>
                   {base64Images[`acc${accIdx}`] && (
                     <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
@@ -284,7 +293,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images }: { difficulties
                   <Text style={styles.accommodationLabel}>
                     配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
                   </Text>
-                  <Text style={styles.accommodationText}>{acc.description}</Text>
+                  <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
                 </View>
               ))}
             </View>
@@ -312,8 +321,12 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   selectedDifficulties,
   selectedDomain,
   onRestart,
-  onBack
+  onBack,
+  viewModel
 }) => {
+  // console.log('AccommodationDisplay - viewModel:', viewModel);
+  // console.log('AccommodationDisplay - selectedDifficulties:', selectedDifficulties);
+  // console.log('AccommodationDisplay - selectedDomain:', selectedDomain);
   const isMobile = useIsMobile();
   
   // ファイル名の生成（YYYYMMDD形式）
@@ -323,7 +336,6 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     String(today.getDate()).padStart(2, '0');
 
   const [base64Images, setBase64Images] = useState<{ [key: string]: string }>({});
-
   const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
 
   useEffect(() => {
@@ -340,36 +352,75 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     loadImages();
   }, []);
 
+
   const handleCopyToClipboard = () => {
     // モバイル版とPC版で異なるセレクターを使用
-    const title = document.querySelector('h2');
-    let accommodationSection, pointsSection;
+    let title, accommodationSection, pointsSection;
+    
+    // console.log('handleCopyToClipboard - isMobile:', isMobile);
     
     if (isMobile) {
       // モバイル版のセレクター
+      title = document.querySelector('h3');
       accommodationSection = document.querySelector('.bg-white.rounded-xl.shadow.p-4.mb-6');
       pointsSection = document.querySelector('.bg-white.rounded-xl.shadow.p-4:last-of-type');
     } else {
       // PC版のセレクター
+      title = document.querySelector('h3');
       accommodationSection = document.querySelector('.bg-white.rounded-xl.shadow.p-6.mb-10');
       pointsSection = document.querySelector('.bg-white.rounded-xl.shadow.p-6:last-of-type');
     }
+    
+    // console.log('Elements found:', { title, accommodationSection, pointsSection });
 
     if (title && accommodationSection && pointsSection) {
       // 配慮依頼案のテキストを整形
       const accText = accommodationSection.textContent?.trim() || '';
+      // console.log('Original accText:', accText);
       const formattedAcc = accText
-        .replace(/(⭐📝)/g, '\n$1')
-        .replace(/(🟦|🟧|🟨)/g, '\n$1')
-        .replace(/具体的な配慮案/g, '\n具体的な配慮案\n')
+        .replace(/配慮依頼案/g, '') // 配慮依頼案の重複を削除
+        .replace(/(⭐📝)/g, '\n\n$1')
+        .replace(/(🟦|🟧|🟨)/g, '\n\n$1')
+        .replace(/配慮案([A-D]):/g, '\n配慮案$1:')
+        .replace(/具体的な配慮案/g, '\n\n具体的な配慮案\n')
+        .replace(/困りごと:/g, '\n困りごと:')
+        .replace(/カテゴリ:/g, '\nカテゴリ:')
+        .replace(/(🔄[^カテゴリ]+)/g, '\n$1')
+        .replace(/(💡[^カテゴリ]+)/g, '\n$1')
         .replace(/^\n+/, '')
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
+      
+      // console.log('Formatted accText:', formattedAcc);
+
+      // 具体的配慮案の詳細を追加
+      let detailedAccommodations = '';
+      if (viewModel && selectedDifficulties && selectedDomain) {
+        selectedDifficulties.forEach((difficulty: any, index: number) => {
+          const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain.id as any);
+          if (accommodations.length > 0) {
+            detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
+            accommodations.forEach((acc: any, accIndex: number) => {
+              const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+              detailedAccommodations += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
+              if (acc['詳細説明']) {
+                const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
+                details.forEach((detail: string) => {
+                  detailedAccommodations += `  • ${detail.trim()}\n`;
+                });
+              }
+              detailedAccommodations += '\n';
+            });
+          }
+        });
+      }
 
       // 合意形成のポイントのテキストを整形
       const pointsText = pointsSection.textContent?.trim() || '';
       const formattedPoints = pointsText
-        .replace(/合意形成のポイント/, '合意形成のポイント\n')
+        .replace(/合意形成のポイント/g, '') // 合意形成のポイントの重複を削除
         .replace(/・/g, '\n・')
+        .replace(/^\n+/, '')
         .trim();
 
       // 日付の生成
@@ -379,12 +430,18 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
         String(today.getDate()).padStart(2, '0');
 
       const text = [
-        title.textContent,
+        '配慮案を確認しましょう。',
+        'これは、支援を進めるための調整マニュアルです。',
+        `${dateStr} 合理的配慮ジェネレータ`,
+        '',
+        '【配慮依頼案】',
         formattedAcc,
+        '',
+        '【合意形成のポイント】',
         formattedPoints,
         '',
-        `${dateStr} 合理的配慮ジェネレータ`
-      ].join('\n\n');
+        detailedAccommodations
+      ].join('\n');
 
       // モバイル版ではフォールバック機能も追加
       if (navigator.clipboard && window.isSecureContext) {
@@ -446,21 +503,23 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
   const handleDownloadPDF = async () => {
     try {
-      console.log('PDF生成開始...');
-      console.log('選択された困りごと:', selectedDifficulties);
-      console.log('画像データ:', base64Images);
+      // console.log('PDF生成開始...');
+      // console.log('選択された困りごと:', selectedDifficulties);
+      // console.log('画像データ:', base64Images);
       
       const pdfDoc = (
         <AccommodationPDFDocument
           difficulties={selectedDifficulties}
           base64Images={base64Images}
+          viewModel={viewModel}
+          selectedDomain={selectedDomain}
         />
       );
       
-      console.log('PDFドキュメント作成完了');
+      // console.log('PDFドキュメント作成完了');
       
       const blob = await pdf(pdfDoc).toBlob();
-      console.log('PDF Blob生成完了:', blob);
+      // console.log('PDF Blob生成完了:', blob);
       
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -471,7 +530,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      console.log('PDFダウンロード完了');
+      // console.log('PDFダウンロード完了');
     } catch (error) {
       console.error('PDFの生成に失敗しました:', error);
       const errorMessage = error instanceof Error ? error.message : '不明なエラー';
@@ -506,7 +565,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                   <p className="text-gray-700 text-base leading-relaxed">
           <strong>配慮案を確認しましょう。</strong><br />
-支援を進めるための調整マニュアルです。<span className="text-indigo-600">▶</span>で詳細を確認できます。
+これは、支援を進めるための調整マニュアルです。<span className="text-indigo-600">▶</span>で詳細を確認できます。
         </p>
         </div>
         
@@ -516,7 +575,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
             <h3 className="text-lg font-bold text-gray-800 mb-4">配慮依頼案</h3>
             <ul className="space-y-6">
               {selectedDifficulties.map((item, idx) => {
-                const category = getCategoryFromTitle(item.title);
+                const category = getCategoryFromTitle(item.title, viewModel);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
                 
                 return (
@@ -538,28 +597,34 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                       </div>
                     )}
                   <ul className="space-y-4 ml-4 border-l-2 border-gray-200 pl-3">
-                    {getAccommodations(item.title).map((acc: any, accIdx: number) => (
+                    {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
                       <li key={accIdx} className="relative">
                         <div className="flex items-start gap-2">
-                                                  <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
-                          配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
-                        </span>
-                          <span className="text-gray-700">{acc.description}</span>
-                          {selectedDomain && acc.examples && (
-                            <button
-                              onClick={() => {
-                                const content = selectedDomain.id === 'workplace' ? acc.examples.workplace :
-                                              selectedDomain.id === 'education' ? acc.examples.education :
-                                              acc.examples.support;
-                                openModal(`${acc.description}の具体的な配慮案`, content);
-                              }}
-                              className="ml-2 text-indigo-600 hover:text-indigo-800 text-lg transition-colors"
-                              title="具体的な配慮案を表示"
-                            >
-                              ▶
-                            </button>
-                          )}
-
+                          <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
+                            配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
+                          </span>
+                          <div className="flex-1">
+                            <div className="flex items-center">
+                              <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
+                              <button
+                                onClick={() => openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '')}
+                                className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
+                                title="具体的な配慮案を表示"
+                              >
+                                ▶
+                              </button>
+                            </div>
+                            {/* 新しいデータ構造のbulletsを箇条書きで表示 */}
+                            {acc.bullets && acc.bullets.length > 0 && (
+                              <ul className="mt-2 ml-4 space-y-1">
+                                {acc.bullets.map((bullet: string, bulletIdx: number) => (
+                                  <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
+                                    {bullet}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
                         </div>
                       </li>
                     ))}
@@ -620,7 +685,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
           <strong>配慮案を確認しましょう。</strong><br />
-支援を進めるための調整マニュアルです。<span className="text-indigo-600">▶</span>で詳細を確認できます。
+これは、支援を進めるための調整マニュアルです。<span className="text-indigo-600">▶</span>で詳細を確認できます。
         </p>
       </div>
       
@@ -628,9 +693,14 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
         <div className="bg-white rounded-xl shadow p-6 mb-10">
           <h3 className="text-lg font-bold text-gray-800 mb-4">配慮依頼案</h3>
           <ul className="space-y-6">
-            {selectedDifficulties.map((item, idx) => {
-              const category = getCategoryFromTitle(item.title);
-              const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
+            {!viewModel ? (
+              <li className="text-center text-gray-500 py-8">
+                データを読み込み中...
+              </li>
+            ) : (
+              selectedDifficulties.map((item, idx) => {
+                const category = getCategoryFromTitle(item.title, viewModel);
+                const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
               
               return (
                 <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
@@ -651,27 +721,34 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                     </div>
                   )}
                 <ul className="space-y-4 ml-6 border-l-2 border-gray-200 pl-4">
-                  {getAccommodations(item.title).map((acc: any, accIdx: number) => (
+                  {getAccommodations(item.title, viewModel, selectedDomain).map((acc: any, accIdx: number) => (
                     <li key={accIdx} className="relative">
                       <div className="flex items-start gap-2">
                         <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
                           配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
                         </span>
-                        <span className="text-gray-700">{acc.description}</span>
-                        {selectedDomain && acc.examples && (
-                          <button
-                            onClick={() => {
-                              const content = selectedDomain.id === 'workplace' ? acc.examples.workplace :
-                                            selectedDomain.id === 'education' ? acc.examples.education :
-                                            acc.examples.support;
-                              openModal(`${acc.description}の具体的な配慮案`, content);
-                            }}
-                            className="ml-2 text-indigo-600 hover:text-indigo-800 text-lg transition-colors"
-                            title="具体的な配慮案を表示"
-                          >
-                            ▶
-                          </button>
-                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center">
+                            <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
+                            <button
+                              onClick={() => openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '')}
+                              className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
+                              title="具体的な配慮案を表示"
+                            >
+                              ▶
+                            </button>
+                          </div>
+                          {/* 新しいデータ構造のbulletsを箇条書きで表示 */}
+                          {acc.bullets && acc.bullets.length > 0 && (
+                            <ul className="mt-2 ml-4 space-y-1">
+                              {acc.bullets.map((bullet: string, bulletIdx: number) => (
+                                <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
+                                  {bullet}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
 
                       </div>
                     </li>
@@ -679,7 +756,8 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                 </ul>
               </li>
             );
-          })}
+          })
+            )}
           </ul>
 
         </div>
@@ -761,7 +839,18 @@ const Modal = ({ isOpen, onClose, title, content }: {
           </button>
         </div>
         <div className="p-4 overflow-y-auto max-h-[60vh]">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          {content.includes('\n') ? (
+            <ul className="text-gray-700 leading-relaxed space-y-2">
+              {content.split('\n').filter(line => line.trim()).map((line, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-indigo-600 mr-2 mt-1">•</span>
+                  <span>{line.trim()}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          )}
         </div>
       </div>
     </div>

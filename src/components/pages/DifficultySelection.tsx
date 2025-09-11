@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -17,8 +17,11 @@ import {
 } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import { ReasonableAccommodation } from '../../types';
-import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
+// import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
 import { useIsMobile } from '../../hooks/useIsMobile';
+// @ts-ignore
+import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName, ViewModel } from '../../data/newDataLoader';
+import { Domain as NewDomain } from '../../types/newDataStructure';
 
 // 仮データ
 const initialDifficulties = [
@@ -105,9 +108,11 @@ type DifficultySelectionProps = {
   difficulties: DifficultyItem[];
   onComplete: (selectedDifficulties: DifficultyItem[]) => void;
   onBack: () => void;
+  viewModel?: ViewModel | null;
 };
 
-function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging: isGlobalDragging, openModal }: any) {
+function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging: isGlobalDragging, openModal, viewModel, isViewModelReady }: any) {
+  // console.log('SortableItem - isMobile:', isMobile, 'isViewModelReady:', isViewModelReady, 'viewModel:', viewModel);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   
   // ドラッグ中のスタイルを分離して競合を避ける
@@ -136,24 +141,29 @@ function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging
       }`}
     >
       <div className={`flex items-center ${isMobile ? 'px-2 py-1' : 'px-4 py-2'}`}>
-        <div className="flex-1 cursor-pointer" onClick={() => !isGlobalDragging && handleAccordion(item.id)}>
+        <div 
+          {...attributes}
+          {...listeners}
+          className="flex-1 cursor-grab active:cursor-grabbing"
+        >
           <span className="font-medium text-gray-800">
             {idx < 3 && <span className="text-yellow-400 text-lg mr-2">★</span>}
             {item.title || item.name || ''}
           </span>
         </div>
         <div 
-          {...attributes}
-          {...listeners}
-          className={`${isMobile ? 'mr-0.5' : 'mr-1'} rounded-lg ${isMobile ? 'min-w-[64px] min-h-[32px]' : 'min-w-[48px] min-h-[32px]'} flex items-center justify-center cursor-grab active:cursor-grabbing ${isMobile ? 'p-2' : 'p-3'}`}
+          onClick={() => !isGlobalDragging && handleAccordion(item.id)}
+          className={`${isMobile ? 'mr-0.5' : 'mr-1'} rounded-lg ${isMobile ? 'min-w-[64px] min-h-[32px]' : 'min-w-[48px] min-h-[32px]'} flex items-center justify-center cursor-pointer ${isMobile ? 'p-2' : 'p-3'}`}
         >
-          <span className={`${isMobile ? 'text-3xl' : 'text-2xl'} text-gray-400`}>☰</span>
+          <span className={`${isMobile ? 'text-2xl' : 'text-xl'} text-gray-600 transition-transform duration-200 ${openId === item.id ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
         </div>
       </div>
       {openId === item.id && (
         <div className="bg-indigo-50 px-4 py-4 rounded-b-xl border-t">
           <ul className="space-y-2">
-            {getAccommodations(item.title).map((acc: any, i: number) => {
+            {isViewModelReady ? getAccommodations(item.title, viewModel, '企業').map((acc: any, i: number) => {
               const domain = '企業'; // デフォルトは企業、実際のドメインに応じて変更
               const content = acc[`${domain}の具体的配慮例`] || acc['企業の具体的配慮例'] || '具体的な配慮例がありません';
               
@@ -161,10 +171,10 @@ function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging
                 <li key={i} className="flex items-start mb-2">
                   <span className="font-bold text-gray-700 mr-1 flex-shrink-0 whitespace-nowrap">配慮案{ACC_LABELS[i % ACC_LABELS.length]}:</span>
                   <div className="flex items-center flex-1">
-                    <span className="text-gray-700">{acc['配慮内容']}</span>
+                    <span className="text-gray-700">{acc['配慮案タイトル']}</span>
                     <button
-                      onClick={() => openModal(`${acc['配慮内容']}の具体的な配慮案`, content)}
-                      className="ml-1 text-indigo-600 hover:text-indigo-800 text-lg transition-colors"
+                      onClick={() => openModal(`${acc['配慮案タイトル']}の具体的な配慮案`, content)}
+                      className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
                       title="具体的な配慮案を表示"
                     >
                       ▶
@@ -172,7 +182,7 @@ function SortableItem({ item, idx, openId, handleAccordion, isMobile, isDragging
                   </div>
                 </li>
               );
-            })}
+            }) : []}
           </ul>
         </div>
       )}
@@ -188,19 +198,47 @@ const ACC_ICONS = [
 ];
 const ACC_LABELS = ['A', 'B', 'C', 'D'];
 
-// 配慮案抽出関数
-const getAccommodations = (title: string): any[] => {
-  return (reasonableAccommodations as any[])
-    .filter(item => item['困りごと内容'] === title)
-    .slice(0, 4); // 最大4件
+// 配慮案抽出関数（新データ構造のみ）
+const getAccommodations = (title: string, viewModel: ViewModel | null, domain: string = '企業'): any[] => {
+  // console.log('getAccommodations called with:', { title, viewModel, domain });
+  if (!viewModel) {
+    // console.log('viewModel is null - returning empty array');
+    return []; // データが読み込まれていない場合は空配列を返す
+  }
+  
+  const newDomain = getDomainFromName(domain);
+  const accommodations = getAccommodationsFromViewModel(viewModel, title, newDomain);
+  // console.log('getAccommodations for title:', title, 'accommodations:', accommodations);
+  
+  return accommodations.map((acc: any) => ({
+    '配慮案タイトル': acc['配慮案タイトル'] || '',
+    '配慮内容': acc['具体的な配慮'] || '',
+    '企業の具体的配慮例': acc['詳細説明'] || '', // detail_paragraphsを使用
+    '教育機関の具体的配慮例': acc['詳細説明'] || '', // detail_paragraphsを使用
+    '支援機関の具体的配慮例': acc['詳細説明'] || '', // detail_paragraphsを使用
+    '具体的な配慮': acc['具体的な配慮'] || '',
+    '職場での合理的配慮の要求のしやすさ': acc['難易度']?.toString() || '3'
+  }));
 };
 
-const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, difficulties, onBack }) => {
+const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, difficulties, onBack, viewModel }) => {
+  // console.log('DifficultySelection - viewModel:', viewModel);
   const [difficultiesState, setDifficultiesState] = useState<DifficultyItem[]>(difficulties);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(difficulties[0]?.id || null);
   const [isDragging, setIsDragging] = useState(false);
   const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
+  const [isViewModelReady, setIsViewModelReady] = useState(false);
   const isMobile = useIsMobile();
+
+  // viewModelが利用可能になった時点で再レンダリングをトリガー
+  useEffect(() => {
+    if (viewModel && viewModel.length > 0) {
+      setIsViewModelReady(true);
+    } else {
+      setIsViewModelReady(false);
+    }
+  }, [viewModel]);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -222,7 +260,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
 
   const handleDragStart = (event: DragStartEvent) => {
     // ドラッグ開始時の処理
-    console.log('Drag started:', event.active.id);
+    // console.log('Drag started:', event.active.id);
     setIsDragging(true);
   };
 
@@ -275,7 +313,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
               <ul className="space-y-2">
                   {difficultiesState.map((item, idx) => (
                     <React.Fragment key={item.id}>
-                      <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} />
+                      <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} viewModel={viewModel} isViewModelReady={isViewModelReady} />
                       {idx === 2 && idx !== difficultiesState.length - 1 && (
                         <li>
                           <div className="border-t border-gray-300 my-2" />
@@ -324,7 +362,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                            <p className="text-gray-700 text-lg leading-relaxed">
           <strong>困りごとに優先順位を付けましょう。</strong><br />
-ドラッグ＆ドロップで<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞ります。クリックで配慮案を確認できます。<span className="text-indigo-600">▶</span>で詳細を確認できます。
+困りごとをドラッグして<strong>上位<span className="text-red-500 font-bold">3</span>つ</strong>に絞り、▼で配慮案を開いて確認できます。<span className="text-indigo-600">▶</span>で具体例の確認ができます。
         </p>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -336,7 +374,7 @@ const DifficultySelection: React.FC<DifficultySelectionProps> = ({ onComplete, d
           <ul className="space-y-2">
               {difficultiesState.map((item, idx) => (
                 <React.Fragment key={item.id}>
-                  <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} />
+                  <SortableItem item={item} idx={idx} openId={openId} handleAccordion={handleAccordion} isMobile={isMobile} isDragging={isDragging} openModal={openModal} viewModel={viewModel} isViewModelReady={isViewModelReady} />
                   {idx === 2 && idx !== difficultiesState.length - 1 && (
                     <li>
                       <div className="border-t border-gray-300 my-2" />
@@ -404,7 +442,18 @@ const Modal = ({ isOpen, onClose, title, content }: {
           </button>
         </div>
         <div className="p-4 overflow-y-auto max-h-[60vh]">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          {content.includes('\n') ? (
+            <ul className="text-gray-700 leading-relaxed space-y-2">
+              {content.split('\n').filter(line => line.trim()).map((line, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-indigo-600 mr-2 mt-1">•</span>
+                  <span>{line.trim()}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+          )}
         </div>
       </div>
     </div>

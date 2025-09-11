@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CharacteristicType, Domain, Situation } from '../../types';
+// @ts-ignore
 import { CHARACTERISTICS, DOMAINS } from '../../data/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -7,7 +8,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 const CHARACTERISTIC_GROUPS = [
   {
     label: '発達障害系',
-    ids: ['adhd', 'asd', 'ld'],
+    ids: ['ADHD', 'ASD', 'LD'],
   },
   {
     label: '精神障害系',
@@ -89,11 +90,13 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
               <div key={group.label} className="bg-white border rounded-md px-3 py-3 space-y-2 shadow-sm mt-3 mb-2">
                 <span className="text-sm font-semibold text-gray-700 tracking-wide mb-1 mt-2">{group.label}</span>
                 <div className="grid grid-cols-1 gap-2 mb-2 w-full">
-                  {CHARACTERISTICS.filter(char => group.ids.includes(char.id)).map(char => (
+                  {CHARACTERISTICS.filter((char: any) => group.ids.includes(char.id)).map((char: any) => (
                     <div key={char.id} className="relative">
                       <button
                         type="button"
                         onClick={() => handleCharacteristicToggle(char)}
+                        onMouseEnter={() => setHoveredCharacteristic(char.id)}
+                        onMouseLeave={() => setHoveredCharacteristic(null)}
                         disabled={char.id === 'epilepsy' || char.id === 'schizophrenia'}
                         className={`w-full px-4 py-3 rounded border font-medium transition text-center shadow-sm
                           ${selectedCharacteristics.some(c => c.id === char.id)
@@ -104,6 +107,17 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       >
                         {char.name}
                       </button>
+                      {/* ポップアップ */}
+                      {hoveredCharacteristic === char.id && (
+                        <div className="absolute z-50 left-full top-0 ml-2 w-64 p-3 bg-white border border-gray-300 rounded shadow-lg text-sm text-gray-700 whitespace-pre-line">
+                          {char.description}
+                          {(char.id === 'epilepsy' || char.id === 'schizophrenia') && (
+                            <div className="mt-2 text-red-500">
+                              ※現在、この特性に関する困りごとのマッピングは準備中です
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -117,7 +131,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
           <h2 className="text-xl font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
           <div className="border-b border-gray-200 my-2"></div>
           <div className="grid grid-cols-1 gap-3">
-            {DOMAINS.map(domain => (
+            {DOMAINS.map((domain: any) => (
               <button
                 key={domain.id}
                 type="button"
@@ -225,7 +239,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
             <div key={group.label} className="bg-white border rounded-md px-4 py-3 space-y-2 shadow-sm mt-4 mb-2">
               <span className="text-sm font-semibold text-gray-700 tracking-wide mb-1 mt-4">{group.label}</span>
               <div className="flex flex-wrap gap-3 mb-2 w-full">
-                {CHARACTERISTICS.filter(char => group.ids.includes(char.id)).map(char => (
+                {CHARACTERISTICS.filter((char: any) => group.ids.includes(char.id)).map((char: any) => (
                   <div key={char.id} className="relative inline-block">
                     <button
                       type="button"
@@ -233,7 +247,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       onClick={() => handleCharacteristicToggle(char)}
                       onMouseEnter={() => setHoveredCharacteristic(char.id)}
                       onMouseLeave={() => setHoveredCharacteristic(null)}
-                      disabled={char.id === 'epilepsy' || char.id === 'schizophrenia'}
+                        disabled={char.id === 'epilepsy' || char.id === 'schizophrenia'}
                       className={`px-4 py-2 h-10 rounded border font-medium transition text-center shadow-sm
                         ${selectedCharacteristics.some(c => c.id === char.id)
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow'
@@ -267,7 +281,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         <h2 className="text-2xl font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
         <div className="border-b border-gray-200 my-2"></div>
         <div className="flex flex-wrap gap-6">
-          {DOMAINS.map(domain => (
+          {DOMAINS.map((domain: any) => (
             <button
               key={domain.id}
               type="button"
