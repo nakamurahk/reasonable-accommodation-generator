@@ -269,7 +269,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   }, [difficultiesByCategory, selectedCategory]);
 
   // --- 選択・追加ロジックは従来通り ---
-  const maxSelectable = 20;
+  const maxSelectable = Infinity; // 制限なし
   const handleSelect = (content: string) => {
     setSelected(prev => {
       if (prev.includes(content)) {
@@ -513,7 +513,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               {/* モーダルヘッダー */}
               <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
-                  選択済み困りごと
+                  選択済みの困りごとリスト
                   <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
                     （{selected.length}件）
                   </span>
@@ -584,14 +584,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                   <p className="text-gray-700 text-base leading-relaxed">
           <strong>困りごとを考えてみましょう。</strong><br />
-リスト表示で困りごとを最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。右下の選択数表示をクリックで整理できます。<br />
+リスト表示で困りごとを選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。選択済み困りごとリストから整理できます。<br />
 グラフ表示で選択した困りごとの関連性を可視化しています。
         </p>
         </div>
         
         {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-3">
             <button
               onClick={() => setViewMode('list')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
@@ -613,6 +613,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               グラフ表示
             </button>
           </div>
+          <button
+            onClick={() => setShowSelectionModal(true)}
+            className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            選択済みの困りごとリスト ({selected.length}個)
+          </button>
         </div>
         
         <div className="space-y-4">
@@ -784,7 +790,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
             {/* モーダルヘッダー */}
             <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">選択済み困りごと</h3>
+              <h3 className="text-lg font-semibold">
+                選択済みの困りごとリスト
+                <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
+                  （{selected.length}件）
+                </span>
+              </h3>
               <button
                 onClick={() => setShowSelectionModal(false)}
                 className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20"
@@ -799,7 +810,24 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 <p className="text-gray-500 text-center">選択された困りごとはありません</p>
               ) : (
                 <div className="space-y-3">
-                  {selected.map((item, index) => (
+                  {/* 全て削除ボタン */}
+                  <div className="mb-4">
+                    <button
+                      onClick={() => {
+                        // 全ての選択を解除
+                        selected.forEach(item => handleSelect(item));
+                        // モーダルを閉じる
+                        setTimeout(() => setShowSelectionModal(false), 100);
+                      }}
+                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    >
+                      全て削除 ({selected.length}件)
+                    </button>
+                  </div>
+                  
+                  {/* 個別削除リスト */}
+                  <div className="space-y-3">
+                    {selected.map((item, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-700 flex-1">{item}</span>
                 <button
@@ -811,7 +839,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           削除
                 </button>
                     </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -820,7 +849,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             <div className="px-6 py-4 border-t bg-gray-50">
               <button
                 onClick={() => setShowSelectionModal(false)}
-                className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                className="w-full px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
               >
                 閉じる
               </button>
@@ -835,33 +864,41 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
           <strong>困りごとを考えてみましょう。</strong><br />
-リスト表示で困りごとを最大20個まで選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。右上の選択数表示をクリックで整理できます。<br />
+リスト表示で困りごとを選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。選択済みの困りごとリストから整理出来ます。<br />
 グラフ表示で選択した困りごとの関連性を可視化しています。
         </p>
       </div>
       
       {/* ビューモード切り替えタブ */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-md">
+        <div className="flex items-center gap-4">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              リスト表示
+            </button>
+            <button
+              onClick={() => setViewMode('graph')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'graph'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              グラフ表示
+            </button>
+          </div>
           <button
-            onClick={() => setViewMode('list')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'list'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            onClick={() => setShowSelectionModal(true)}
+            className="py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
-            リスト表示
-          </button>
-          <button
-            onClick={() => setViewMode('graph')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'graph'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            グラフ表示
+            選択済みの困りごとリスト ({selected.length}個)
           </button>
         </div>
       </div>

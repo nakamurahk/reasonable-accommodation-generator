@@ -12,11 +12,11 @@ const CHARACTERISTIC_GROUPS = [
   },
   {
     label: '精神障害系',
-    ids: ['depression', 'bipolar', 'anxiety', 'schizophrenia', 'ptsd'],
+    ids: ['depression', 'bipolar', 'anxiety', 'ptsd'],
   },
   {
     label: '身体・慢性疾患系',
-    ids: ['epilepsy', 'physical'],
+    ids: ['physical'],
   },
   {
     label: '感覚・感受性特性系',
@@ -32,7 +32,6 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
   const [selectedCharacteristics, setSelectedCharacteristics] = useState<CharacteristicType[]>([]);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const [selectedSituations, setSelectedSituations] = useState<Situation[]>([]);
-  const [hoveredCharacteristic, setHoveredCharacteristic] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   // 特性: 複数選択可
@@ -95,29 +94,13 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       <button
                         type="button"
                         onClick={() => handleCharacteristicToggle(char)}
-                        onMouseEnter={() => setHoveredCharacteristic(char.id)}
-                        onMouseLeave={() => setHoveredCharacteristic(null)}
-                        disabled={char.id === 'epilepsy' || char.id === 'schizophrenia'}
                         className={`w-full px-4 py-3 rounded border font-medium transition text-center shadow-sm
                           ${selectedCharacteristics.some(c => c.id === char.id)
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                            : char.id === 'epilepsy' || char.id === 'schizophrenia'
-                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                              : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
                       >
                         {char.name}
                       </button>
-                      {/* ポップアップ */}
-                      {hoveredCharacteristic === char.id && (
-                        <div className="absolute z-50 left-full top-0 ml-2 w-64 p-3 bg-white border border-gray-300 rounded shadow-lg text-sm text-gray-700 whitespace-pre-line">
-                          {char.description}
-                          {(char.id === 'epilepsy' || char.id === 'schizophrenia') && (
-                            <div className="mt-2 text-red-500">
-                              ※現在、この特性に関する困りごとのマッピングは準備中です
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -245,29 +228,13 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       type="button"
                       style={{ width: '180px' }}
                       onClick={() => handleCharacteristicToggle(char)}
-                      onMouseEnter={() => setHoveredCharacteristic(char.id)}
-                      onMouseLeave={() => setHoveredCharacteristic(null)}
-                        disabled={char.id === 'epilepsy' || char.id === 'schizophrenia'}
                       className={`px-4 py-2 h-10 rounded border font-medium transition text-center shadow-sm
                         ${selectedCharacteristics.some(c => c.id === char.id)
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                          : char.id === 'epilepsy' || char.id === 'schizophrenia'
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
                     >
                       {char.name}
                     </button>
-                    {/* ポップアップ */}
-                    {hoveredCharacteristic === char.id && (
-                      <div className="absolute z-50 left-full top-full mt-2 ml-2 w-64 p-3 bg-white border border-gray-300 rounded shadow-lg text-sm text-gray-700 whitespace-pre-line">
-                        {char.description}
-                        {(char.id === 'epilepsy' || char.id === 'schizophrenia') && (
-                          <div className="mt-2 text-red-500">
-                            ※現在、この特性に関する困りごとのマッピングは準備中です
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
