@@ -10,11 +10,13 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
       case 'initial':
         return 'ステップ①：特性の選択';
       case 'thinking':
-        return 'ステップ②：困りごとを考える';
+        return 'ステップ②：困りごとカードを集める！';
+      case 'deckbuilding':
+        return 'ステップ③：デッキ構築';
       case 'selection':
-        return 'ステップ③：困りごとの整理';
+        return 'ステップ④：配慮案を選択';
       case 'display':
-        return 'ステップ④：配慮案を確認';
+        return 'ステップ⑤：結果を確認';
       default:
         return '';
     }
@@ -29,12 +31,13 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
         
         {/* プログレスインジケーター */}
         <div className="flex items-center justify-center space-x-1">
-          {[1, 2, 3, 4].map((step) => {
-            const stepKey = step === 1 ? 'initial' : step === 2 ? 'thinking' : step === 3 ? 'selection' : 'display';
+          {[1, 2, 3, 4, 5].map((step) => {
+            const stepKey = step === 1 ? 'initial' : step === 2 ? 'thinking' : step === 3 ? 'deckbuilding' : step === 4 ? 'selection' : 'display';
             const isCompleted = 
               (currentStep === 'thinking' && step <= 1) ||
-              (currentStep === 'selection' && step <= 2) ||
-              (currentStep === 'display' && step <= 3);
+              (currentStep === 'deckbuilding' && step <= 2) ||
+              (currentStep === 'selection' && step <= 3) ||
+              (currentStep === 'display' && step <= 4);
             const isCurrent = currentStep === stepKey;
             
             return (
@@ -48,7 +51,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
                 }`}>
                   {step}
                 </div>
-                {step < 4 && (
+                {step < 5 && (
                   <div className={`w-4 h-0.5 ${
                     isCompleted ? 'bg-indigo-500' : 'bg-gray-300'
                   }`} />

@@ -22,6 +22,18 @@ const CATEGORIES = [
   '職場・社会不安'
 ];
 
+// カテゴリアイコン（ステップ⑤と統一）
+const CATEGORY_ICONS = {
+  '身体症状・体調': '🏥',
+  '感覚・環境': '💡',
+  '注意・集中': '🎯',
+  '実行・計画・記憶': '📋',
+  '感情・ストレス反応': '❤️',
+  'コミュニケーション': '💬',
+  '生活・変化対応': '🔄',
+  '職場・社会不安': '🏢'
+};
+
 const SUGGESTS = [
   {
     id: '1',
@@ -115,12 +127,32 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [isDecreasingAnimating, setIsDecreasingAnimating] = useState(false); // 減少時のアニメーション用
   const [showSelectionModal, setShowSelectionModal] = useState(false); // 選択済み困りごとモーダル表示用
   const [viewMode, setViewMode] = useState<'list' | 'graph'>('list'); // ビューモード（リスト or グラフ）
+  const [deselectedCard, setDeselectedCard] = useState<string | null>(null); // 選択解除されたカード
+  const [isDeckAnimating, setIsDeckAnimating] = useState(false); // カードの束のアニメーション
+  const [isDeckAdding, setIsDeckAdding] = useState(false); // カードの束に追加するアニメーション
+  const [addingCard, setAddingCard] = useState<{id: string, title: string, category: string} | null>(null); // 追加されるカード
+  const [removingCard, setRemovingCard] = useState<{id: string, title: string, category: string} | null>(null); // 削除されるカード
   
   // 数値に応じた色を決定する関数
   const getBigNumberColor = (num: number) => {
     if (num >= 11) return 'text-red-500'; // 11以降はビビットな赤（超えてますよ！）
     if (num === 10) return 'text-orange-500'; // 10はオレンジ
     return 'text-yellow-500'; // 1-9はイエロー系
+  };
+
+  // カテゴリのアイコンを取得する関数
+  const getCategoryIcon = (category: string) => {
+    const CATEGORY_ICONS = {
+      '身体症状・体調': '🏥',
+      '感覚・環境': '💡',
+      '注意・集中': '🎯',
+      '実行・計画・記憶': '📋',
+      '感情・ストレス反応': '❤️',
+      'コミュニケーション': '💬',
+      '生活・変化対応': '🔄',
+      '職場・社会不安': '🏢'
+    };
+    return CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '🎯';
   };
   
   const isMobile = useIsMobile();
@@ -270,9 +302,31 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
   // --- 選択・追加ロジックは従来通り ---
   const maxSelectable = Infinity; // 制限なし
-  const handleSelect = (content: string) => {
+  const handleSelect = (content: string, event?: React.MouseEvent) => {
     setSelected(prev => {
       if (prev.includes(content)) {
+        // 選択解除時のカードアニメーション
+        setDeselectedCard(content);
+        setTimeout(() => {
+          setDeselectedCard(null);
+        }, 300);
+        
+        // カードの束のアニメーション
+        if (viewMode === 'list') {
+          const cardId = `${content}-${Date.now()}`;
+          // カテゴリ情報を取得
+          const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
+          const category = difficultyItem ? difficultyItem['カテゴリ'] : 'その他';
+          
+          setRemovingCard({ id: cardId, title: content, category });
+          setIsDeckAnimating(true);
+          
+          setTimeout(() => {
+            setRemovingCard(null);
+            setIsDeckAnimating(false);
+          }, 600);
+        }
+        
         // 選択を解除（減らす）場合、アニメーションをトリガー
         setIsCountDecreasing(true);
         
@@ -295,6 +349,22 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         setTimeout(() => setIsCountDecreasing(false), 600);
         return prev.filter(s => s !== content);
       } else if (prev.length < maxSelectable) {
+        // カードの束に追加するアニメーション
+        if (viewMode === 'list') {
+          const cardId = `${content}-${Date.now()}`;
+          // カテゴリ情報を取得
+          const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
+          const category = difficultyItem ? difficultyItem['カテゴリ'] : 'その他';
+          
+          setAddingCard({ id: cardId, title: content, category });
+          setIsDeckAdding(true);
+          
+          setTimeout(() => {
+            setAddingCard(null);
+            setIsDeckAdding(false);
+          }, 800);
+        }
+        
         // 選択数が増える場合、アニメーションをトリガー
         setIsCountAnimating(true);
         
@@ -415,7 +485,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'
                 }`}
               >
-                {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
+                {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
               </button>
             );
           })}
@@ -440,7 +510,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'
               }`}
             >
-              {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
+              {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
             </button>
           );
         })}
@@ -448,23 +518,199 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     );
   };
 
+
   // モバイル用UI
   if (isMobile) {
-  return (
+    return (
       <div className="max-w-none mx-auto p-4 relative">
-        {/* 選択件数固定表示 - 直角三角形（リスト表示時のみ） */}
+        {/* CSSアニメーション */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes flyToDeck {
+              0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+              }
+              25% {
+                transform: translate(calc(100vw - 300px), calc(100vh - 400px)) scale(0.9) rotate(45deg);
+                opacity: 0.9;
+              }
+              50% {
+                transform: translate(calc(100vw - 200px), calc(100vh - 250px)) scale(0.7) rotate(90deg);
+                opacity: 0.8;
+              }
+              75% {
+                transform: translate(calc(100vw - 100px), calc(100vh - 120px)) scale(0.4) rotate(180deg);
+                opacity: 0.6;
+              }
+              100% {
+                transform: translate(calc(100vw - 60px), calc(100vh - 60px)) scale(0.1) rotate(270deg);
+                opacity: 0;
+              }
+            }
+            @keyframes deselectBounce {
+              0% {
+                transform: scale(1) rotate(0deg);
+                background: linear-gradient(to bottom right, rgb(239 246 255), rgb(219 234 254));
+                border-color: rgb(129 140 248);
+              }
+              25% {
+                transform: scale(0.95) rotate(-2deg);
+                background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+                border-color: rgb(239 68 68);
+              }
+              50% {
+                transform: scale(1.05) rotate(2deg);
+                background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+                border-color: rgb(239 68 68);
+              }
+              75% {
+                transform: scale(0.98) rotate(-1deg);
+                background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+                border-color: rgb(239 68 68);
+              }
+              100% {
+                transform: scale(1) rotate(0deg);
+                background: linear-gradient(to bottom right, rgb(255 255 255), rgb(255 255 255));
+                border-color: rgb(209 213 219);
+              }
+            }
+            @keyframes deckRemove {
+              0% {
+                transform: scale(1) translateY(0px);
+                opacity: 1;
+              }
+              20% {
+                transform: scale(1.1) translateY(-5px);
+                opacity: 0.9;
+              }
+              40% {
+                transform: scale(0.9) translateY(2px);
+                opacity: 0.8;
+              }
+              60% {
+                transform: scale(1.05) translateY(-2px);
+                opacity: 0.9;
+              }
+              80% {
+                transform: scale(0.95) translateY(1px);
+                opacity: 0.95;
+              }
+              100% {
+                transform: scale(1) translateY(0px);
+                opacity: 1;
+              }
+            }
+            @keyframes deckAdd {
+              0% {
+                transform: scale(1) translateY(0px);
+                opacity: 1;
+              }
+              25% {
+                transform: scale(1.2) translateY(-10px);
+                opacity: 0.8;
+              }
+              50% {
+                transform: scale(0.8) translateY(5px);
+                opacity: 0.9;
+              }
+              75% {
+                transform: scale(1.1) translateY(-3px);
+                opacity: 0.95;
+              }
+              100% {
+                transform: scale(1) translateY(0px);
+                opacity: 1;
+              }
+            }
+            @keyframes cardSlideIn {
+              0% {
+                transform: translate(-100px, -50px) rotate(-15deg) scale(0.8);
+                opacity: 0;
+              }
+              50% {
+                transform: translate(-20px, -20px) rotate(-5deg) scale(0.9);
+                opacity: 0.8;
+              }
+              100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 0;
+              }
+            }
+            @keyframes cardSlideOut {
+              0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 0.8;
+              }
+              50% {
+                transform: translate(-30px, -30px) rotate(-10deg) scale(0.9);
+                opacity: 0.6;
+              }
+              100% {
+                transform: translate(-100px, -50px) rotate(-20deg) scale(0.7);
+                opacity: 0;
+              }
+            }
+          `
+        }} />
+        {/* 選択件数固定表示 - カードの束（リスト表示時のみ） */}
         {viewMode === 'list' && (
           <div className="fixed bottom-0 right-0 z-50">
-            <div className="relative w-[100px] h-[100px]">
-              {/* 直角三角形の背景 */}
-              <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[100px] border-l-transparent border-b-[100px] border-b-indigo-600"></div>
+            <div className="relative w-[120px] h-[120px]">
+              {/* カードの束の背景 */}
+              <div 
+                className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg shadow-lg transform rotate-3"
+                style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out' } : {}}
+              ></div>
+              <div 
+                className="absolute bottom-3 right-3 w-16 h-20 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg shadow-md transform rotate-1"
+                style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.05s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.05s' } : {}}
+              ></div>
+              <div 
+                className="absolute bottom-4 right-4 w-16 h-20 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-lg shadow-sm transform -rotate-1"
+                style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.1s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.1s' } : {}}
+              ></div>
+              <div 
+                className="absolute bottom-5 right-5 w-16 h-20 bg-gradient-to-br from-indigo-200 to-indigo-400 rounded-lg transform -rotate-2"
+                style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.15s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.15s' } : {}}
+              ></div>
+              
+              {/* 追加されるカードのアニメーション */}
+              {addingCard && (
+                <div
+                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-lg shadow-lg z-10"
+                  style={{ animation: 'cardSlideIn 0.8s ease-in-out forwards' }}
+                >
+                  <div className="p-2 h-full flex flex-col justify-center items-center">
+                    <div className="text-lg mb-1">{getCategoryIcon(addingCard.category)}</div>
+                    <div className="text-xs text-gray-800 text-center leading-tight">
+                      {addingCard.title.length > 8 ? addingCard.title.substring(0, 8) + '...' : addingCard.title}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* 削除されるカードのアニメーション */}
+              {removingCard && (
+                <div
+                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-red-50 to-pink-100 border-2 border-red-300 rounded-lg shadow-lg z-10"
+                  style={{ animation: 'cardSlideOut 0.6s ease-in-out forwards' }}
+                >
+                  <div className="p-2 h-full flex flex-col justify-center items-center">
+                    <div className="text-lg mb-1">{getCategoryIcon(removingCard.category)}</div>
+                    <div className="text-xs text-gray-800 text-center leading-tight">
+                      {removingCard.title.length > 8 ? removingCard.title.substring(0, 8) + '...' : removingCard.title}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
         
-        {/* 3/10テキスト表示 - 高いレイヤーで背景に重なる（リスト表示時のみ） */}
+        {/* 3/10テキスト表示 - カードの束の上に表示（リスト表示時のみ） */}
         {viewMode === 'list' && (
-          <div className="fixed bottom-4 right-3 z-[60]">
+          <div className="fixed bottom-6 right-6 z-[60]">
           <div 
             className="text-lg font-bold cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setShowSelectionModal(true)}
@@ -500,7 +746,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
             <span className={`transition-all duration-300 ${
               bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
-            }`}>/10</span>
+            }`}>枚</span>
           </div>
         </div>
         )}
@@ -580,13 +826,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           </div>
         )}
         
+        
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <p className="text-gray-700 text-base leading-relaxed">
-          <strong>困りごとを考えてみましょう。</strong><br />
-リスト表示で困りごとを選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。選択済み困りごとリストから整理できます。<br />
-グラフ表示で選択した困りごとの関連性を可視化しています。
-        </p>
+          <p className="text-gray-700 text-base leading-relaxed">
+            <strong>🃏 ステップ②：困りごとカードを集める！</strong><br />
+            当てはまる困りごとカードをタップしてコレクションに追加しよう！この段階では少しでも当てはまるカードをたくさん集めよう！<br />
+            コレクションから整理でき、グラフ表示で関連性を可視化できます。
+          </p>
         </div>
         
         {/* ビューモード切り替えタブ */}
@@ -600,7 +847,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              リスト表示
+              📋 リスト表示
             </button>
             <button
               onClick={() => setViewMode('graph')}
@@ -610,14 +857,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              グラフ表示
+              🔗 グラフ表示
             </button>
           </div>
           <button
             onClick={() => setShowSelectionModal(true)}
             className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            選択済みの困りごとリスト ({selected.length}個)
+            📚 コレクション ({selected.length}枚)
           </button>
         </div>
         
@@ -667,16 +914,24 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               return (
                 <button
                   key={item['困りごと内容']}
-                  onClick={() => handleSelect(item['困りごと内容'])}
+                  onClick={(e) => handleSelect(item['困りごと内容'], e)}
                   disabled={isDisabled}
-                        className={`p-4 rounded-lg border text-left transition w-full flex flex-col justify-between ${
+                        className={`p-4 rounded-xl border-2 text-left transition w-full flex flex-col justify-between shadow-md hover:shadow-lg ${
                     isSelected
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300'
+                      ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
+                      : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
                   } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  style={deselectedCard === item['困りごと内容'] ? { animation: 'deselectBounce 0.3s ease-in-out' } : {}}
                 >
                         <div className="flex items-center gap-2 mb-3">
                     <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
+                    {isSelected && (
+                      <div className="ml-auto">
+                        <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                         <div className="flex-1 flex items-start">
                           <ul className="list-disc pl-4 text-sm text-gray-500">
@@ -765,16 +1020,16 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="flex flex-col gap-3 mt-6">
           <button
             onClick={handleNext}
-            disabled={selected.length === 0 || selected.length > 10}
+            disabled={selected.length === 0}
             className="w-full px-8 py-4 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
           >
-            次へ進む
+            🎮 次のステージへ
           </button>
           <button
             onClick={onBack}
             className="w-full px-8 py-4 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
           >
-            前のページに戻る
+            ⬅️ 前のステージへ
           </button>
         </div>
       </div>
@@ -784,6 +1039,128 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   // PC版UI
   return (
     <div className="max-w-none mx-auto p-6 space-y-8">
+      {/* CSSアニメーション */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes flyToDeck {
+            0% {
+              transform: translate(0, 0) scale(1) rotate(0deg);
+              opacity: 1;
+            }
+            50% {
+              transform: translate(calc(100vw - 300px), calc(100vh - 300px)) scale(0.8) rotate(180deg);
+              opacity: 0.8;
+            }
+            100% {
+              transform: translate(calc(100vw - 200px), calc(100vh - 200px)) scale(0.3) rotate(360deg);
+              opacity: 0;
+            }
+          }
+          @keyframes deselectBounce {
+            0% {
+              transform: scale(1) rotate(0deg);
+              background: linear-gradient(to bottom right, rgb(239 246 255), rgb(219 234 254));
+              border-color: rgb(129 140 248);
+            }
+            25% {
+              transform: scale(0.95) rotate(-2deg);
+              background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+              border-color: rgb(239 68 68);
+            }
+            50% {
+              transform: scale(1.05) rotate(2deg);
+              background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+              border-color: rgb(239 68 68);
+            }
+            75% {
+              transform: scale(0.98) rotate(-1deg);
+              background: linear-gradient(to bottom right, rgb(254 242 242), rgb(252 231 243));
+              border-color: rgb(239 68 68);
+            }
+            100% {
+              transform: scale(1) rotate(0deg);
+              background: linear-gradient(to bottom right, rgb(255 255 255), rgb(255 255 255));
+              border-color: rgb(209 213 219);
+            }
+          }
+          @keyframes deckRemove {
+            0% {
+              transform: scale(1) translateY(0px);
+              opacity: 1;
+            }
+            20% {
+              transform: scale(1.1) translateY(-5px);
+              opacity: 0.9;
+            }
+            40% {
+              transform: scale(0.9) translateY(2px);
+              opacity: 0.8;
+            }
+            60% {
+              transform: scale(1.05) translateY(-2px);
+              opacity: 0.9;
+            }
+            80% {
+              transform: scale(0.95) translateY(1px);
+              opacity: 0.95;
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+              opacity: 1;
+            }
+          }
+          @keyframes deckAdd {
+            0% {
+              transform: scale(1) translateY(0px);
+              opacity: 1;
+            }
+            25% {
+              transform: scale(1.2) translateY(-10px);
+              opacity: 0.8;
+            }
+            50% {
+              transform: scale(0.8) translateY(5px);
+              opacity: 0.9;
+            }
+            75% {
+              transform: scale(1.1) translateY(-3px);
+              opacity: 0.95;
+            }
+            100% {
+              transform: scale(1) translateY(0px);
+              opacity: 1;
+            }
+          }
+          @keyframes cardSlideIn {
+            0% {
+              transform: translate(-80px, -40px) rotate(-15deg) scale(0.8);
+              opacity: 0;
+            }
+            50% {
+              transform: translate(-15px, -15px) rotate(-5deg) scale(0.9);
+              opacity: 0.8;
+            }
+            100% {
+              transform: translate(0, 0) rotate(0deg) scale(1);
+              opacity: 0;
+            }
+          }
+          @keyframes cardSlideOut {
+            0% {
+              transform: translate(0, 0) rotate(0deg) scale(1);
+              opacity: 0.8;
+            }
+            50% {
+              transform: translate(-25px, -25px) rotate(-10deg) scale(0.9);
+              opacity: 0.6;
+            }
+            100% {
+              transform: translate(-80px, -40px) rotate(-20deg) scale(0.7);
+              opacity: 0;
+            }
+          }
+        `
+      }} />
       {/* 選択済み困りごとモーダル */}
       {showSelectionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
@@ -863,9 +1240,9 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       {/* 説明文 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
-          <strong>困りごとを考えてみましょう。</strong><br />
-リスト表示で困りごとを選択できます。<strong><span className="text-red-500 font-bold">10</span>個まで絞り込む</strong>と次のステップに進めます。選択済みの困りごとリストから整理出来ます。<br />
-グラフ表示で選択した困りごとの関連性を可視化しています。
+          <strong>🃏 ステップ②：困りごとカードを集める！</strong><br />
+          当てはまる困りごとカードをタップしてコレクションに追加しよう！この段階では少しでも当てはまるカードをたくさん集めよう！<br />
+          コレクションから整理でき、グラフ表示で関連性を可視化できます。
         </p>
       </div>
       
@@ -881,7 +1258,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              リスト表示
+              📋 リスト表示
             </button>
             <button
               onClick={() => setViewMode('graph')}
@@ -891,14 +1268,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              グラフ表示
+              🔗 グラフ表示
             </button>
           </div>
           <button
             onClick={() => setShowSelectionModal(true)}
             className="py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
-            選択済みの困りごとリスト ({selected.length}個)
+            📚 コレクション ({selected.length}枚)
           </button>
         </div>
       </div>
@@ -950,7 +1327,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
                     <span className={`transition-all duration-300 ${
                       bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
-                    }`}>/10</span>
+                    }`}>枚</span>
                   </span>
                 </div>
               </div>
@@ -996,16 +1373,24 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   return (
                     <button
                       key={item['困りごと内容']}
-                      onClick={() => handleSelect(item['困りごと内容'])}
+                      onClick={(e) => handleSelect(item['困りごと内容'], e)}
                       disabled={isDisabled}
-                      className={`p-3 rounded-lg border text-left transition w-full flex flex-col justify-between min-h-[160px] ${
+                      className={`p-3 rounded-xl border-2 text-left transition w-full flex flex-col justify-between min-h-[160px] shadow-md hover:shadow-lg ${
                         isSelected
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-indigo-300'
+                          ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
+                          : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
                       } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      style={deselectedCard === item['困りごと内容'] ? { animation: 'deselectBounce 0.3s ease-in-out' } : {}}
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
+                        {isSelected && (
+                          <div className="ml-auto">
+                            <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 flex items-start">
                         <ul className="list-disc pl-4 text-sm text-gray-500">
@@ -1096,16 +1481,71 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             onClick={onBack}
             className="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
           >
-            前のページに戻る
+            ⬅️ 前のステージへ
           </button>
           <button
             onClick={handleNext}
-          disabled={selected.length === 0 || selected.length > 10}
+          disabled={selected.length === 0}
             className="px-8 py-3 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
           >
-            次へ進む
+            🎮 次のステージへ
           </button>
       </div>
+      
+      {/* PC版カードの束（リスト表示時のみ） */}
+      {viewMode === 'list' && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="relative w-[100px] h-[100px]">
+            {/* カードの束の背景 */}
+            <div 
+              className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg shadow-lg transform rotate-3"
+              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out' } : {}}
+            ></div>
+            <div 
+              className="absolute bottom-2 right-2 w-14 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg shadow-md transform rotate-1"
+              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.05s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.05s' } : {}}
+            ></div>
+            <div 
+              className="absolute bottom-3 right-3 w-14 h-16 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-lg shadow-sm transform -rotate-1"
+              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.1s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.1s' } : {}}
+            ></div>
+            <div 
+              className="absolute bottom-4 right-4 w-14 h-16 bg-gradient-to-br from-indigo-200 to-indigo-400 rounded-lg transform -rotate-2"
+              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.15s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.15s' } : {}}
+            ></div>
+            
+            {/* 追加されるカードのアニメーション */}
+            {addingCard && (
+              <div
+                className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-lg shadow-lg z-10"
+                style={{ animation: 'cardSlideIn 0.8s ease-in-out forwards' }}
+              >
+                <div className="p-1 h-full flex flex-col justify-center items-center">
+                  <div className="text-sm mb-1">{getCategoryIcon(addingCard.category)}</div>
+                  <div className="text-xs text-gray-800 text-center leading-tight">
+                    {addingCard.title.length > 6 ? addingCard.title.substring(0, 6) + '...' : addingCard.title}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* 削除されるカードのアニメーション */}
+            {removingCard && (
+              <div
+                className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-red-50 to-pink-100 border-2 border-red-300 rounded-lg shadow-lg z-10"
+                style={{ animation: 'cardSlideOut 0.6s ease-in-out forwards' }}
+              >
+                <div className="p-1 h-full flex flex-col justify-center items-center">
+                  <div className="text-sm mb-1">{getCategoryIcon(removingCard.category)}</div>
+                  <div className="text-xs text-gray-800 text-center leading-tight">
+                    {removingCard.title.length > 6 ? removingCard.title.substring(0, 6) + '...' : removingCard.title}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

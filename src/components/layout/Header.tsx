@@ -5,19 +5,42 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
+  const steps = [
+    { id: 'initial', title: '特性選択', short: '①' },
+    { id: 'thinking', title: 'カード集め', short: '②' },
+    { id: 'deckbuilding', title: 'デッキ構築', short: '③' },
+    { id: 'selection', title: '配慮案', short: '④' },
+    { id: 'display', title: '結果', short: '⑤' },
+  ];
+
+  const currentStepIndex = steps.findIndex(step => step.id === currentStep);
+
   return (
-    <header className="w-full bg-white shadow flex items-center justify-between px-8 py-3 relative z-10">
+    <header className="w-full bg-white shadow flex items-center justify-between px-4 py-3 relative z-10">
       <div className="flex items-center space-x-2">
         {/* ロゴ部分（SVGや画像に差し替え可） */}
         <span className="text-indigo-600 text-2xl font-bold">🧩</span>
-        <span className="text-xl font-semibold text-gray-900">合理的配慮ジェネレータ</span>
+        <span className="text-lg font-semibold text-gray-900 hidden sm:block">合理的配慮ジェネレータ</span>
+        <span className="text-lg font-semibold text-gray-900 sm:hidden">配慮ジェネレータ</span>
       </div>
-      <nav className="flex items-center space-x-6">
-        <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">HOME</a>
-        <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">ABOUT</a>
-        <a href="#" className="text-gray-600 hover:text-indigo-600 font-medium">CONTACT</a>
-        <button className="ml-4 px-4 py-1 bg-white border border-indigo-200 text-indigo-600 font-semibold rounded shadow-sm hover:bg-indigo-50 transition">ログイン</button>
-      </nav>
+      
+      {/* モバイル版ステップ表示 */}
+      <div className="flex items-center space-x-1">
+        {steps.map((step, index) => (
+          <div
+            key={step.id}
+            className={`
+              w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold
+              ${index <= currentStepIndex
+                ? 'bg-indigo-500 text-white'
+                : 'bg-gray-200 text-gray-500'}
+            `}
+            title={step.title}
+          >
+            {step.short}
+          </div>
+        ))}
+      </div>
     </header>
   );
 };

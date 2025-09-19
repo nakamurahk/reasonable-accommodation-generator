@@ -33,6 +33,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
             <Route path="/step2" element={<AccommodationGenerator />} />
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
+            <Route path="/step5" element={<AccommodationGenerator />} />
           </Routes>
         </main>
       </div>
@@ -52,6 +53,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
             <Route path="/step2" element={<AccommodationGenerator />} />
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
+            <Route path="/step5" element={<AccommodationGenerator />} />
           </Routes>
         </main>
       </div>
@@ -66,8 +68,9 @@ function MobileHeaderWrapper() {
     const path = location.pathname;
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
-    if (path === '/step3') return 'selection';
-    if (path === '/step4') return 'display';
+    if (path === '/step3') return 'deckbuilding';
+    if (path === '/step4') return 'selection';
+    if (path === '/step5') return 'display';
     return 'initial';
   };
   
@@ -80,8 +83,9 @@ function HeaderWrapper() {
     const path = location.pathname;
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
-    if (path === '/step3') return 'selection';
-    if (path === '/step4') return 'display';
+    if (path === '/step3') return 'deckbuilding';
+    if (path === '/step4') return 'selection';
+    if (path === '/step5') return 'display';
     return 'initial';
   };
   
@@ -94,8 +98,9 @@ function SideNavWrapper() {
     const path = location.pathname;
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
-    if (path === '/step3') return 'selection';
-    if (path === '/step4') return 'display';
+    if (path === '/step3') return 'deckbuilding';
+    if (path === '/step4') return 'selection';
+    if (path === '/step5') return 'display';
     return 'initial';
   };
   

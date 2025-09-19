@@ -4,6 +4,7 @@ import { CharacteristicType, Domain, Situation } from '../types';
 import { ViewModel } from '../types/newDataStructure';
 import InitialSelection from './pages/InitialSelection';
 import DifficultyThinking from './pages/DifficultyThinking';
+import DeckBuilding from './pages/DeckBuilding';
 import DifficultySelection from './pages/DifficultySelection';
 import AccommodationDisplay from './pages/AccommodationDisplay';
 
@@ -42,7 +43,7 @@ type Selection = {
   situations: Situation[];
 };
 
-type Step = 'initial' | 'thinking' | 'selection' | 'display';
+type Step = 'initial' | 'thinking' | 'deckbuilding' | 'selection' | 'display';
 
 const AccommodationGenerator: React.FC = () => {
   const location = useLocation();
@@ -53,8 +54,9 @@ const AccommodationGenerator: React.FC = () => {
     const path = location.pathname;
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
-    if (path === '/step3') return 'selection';
-    if (path === '/step4') return 'display';
+    if (path === '/step3') return 'deckbuilding';
+    if (path === '/step4') return 'selection';
+    if (path === '/step5') return 'display';
     return 'initial';
   };
   
@@ -109,7 +111,8 @@ const AccommodationGenerator: React.FC = () => {
     // URLを更新
     const path = newStep === 'initial' ? '/step1' : 
                  newStep === 'thinking' ? '/step2' : 
-                 newStep === 'selection' ? '/step3' : '/step4';
+                 newStep === 'deckbuilding' ? '/step3' :
+                 newStep === 'selection' ? '/step4' : '/step5';
     // console.log('Navigating to path:', path);
     navigate(path);
     window.scrollTo(0, 0);
@@ -165,6 +168,19 @@ const AccommodationGenerator: React.FC = () => {
     });
     
     // viewModelを保持したままステップ3に遷移
+    updateStep('deckbuilding');
+  };
+
+  const handleDeckBuildingComplete = (difficulties: any[]) => {
+    setSelectedDifficulties(difficulties);
+    
+    // LocalStorageに保存
+    saveToLocalStorage({
+      selection,
+      selectedDifficulties: difficulties,
+      displayDifficulties,
+    });
+    
     updateStep('selection');
   };
 
@@ -203,7 +219,10 @@ const AccommodationGenerator: React.FC = () => {
       // console.log('Moving from display to selection');
       updateStep('selection');
     } else if (currentStep === 'selection') {
-      // console.log('Moving from selection to thinking');
+      // console.log('Moving from selection to deckbuilding');
+      updateStep('deckbuilding');
+    } else if (currentStep === 'deckbuilding') {
+      // console.log('Moving from deckbuilding to thinking');
       updateStep('thinking');
     } else if (currentStep === 'thinking') {
       // console.log('Moving from thinking to initial');
@@ -226,6 +245,28 @@ const AccommodationGenerator: React.FC = () => {
             selectedDifficulties={selectedDifficulties}
             onBack={handleBack}
             onViewModelChange={setViewModel}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">データが見つかりません</p>
+              <button
+                onClick={() => updateStep('initial')}
+                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+              >
+                最初からやり直す
+              </button>
+            </div>
+          </div>
+        )
+      )}
+      {currentStep === 'deckbuilding' && (
+        selectedDifficulties.length > 0 ? (
+          <DeckBuilding
+            selectedDifficulties={selectedDifficulties}
+            onComplete={handleDeckBuildingComplete}
+            onBack={handleBack}
+            viewModel={viewModel}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
