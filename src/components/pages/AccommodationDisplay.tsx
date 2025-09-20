@@ -598,7 +598,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-base md:text-lg">
-          選んだ3枚のカードから、実用的な配慮案を生成しました
+          選んだカードから、実用的な配慮案を生成しました
         </p>
       </div>
 
@@ -778,7 +778,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-lg">
-          選んだ3枚のカードから、実用的な配慮案を生成しました
+          選んだカードから、実用的な配慮案を生成しました
         </p>
       </div>
 
