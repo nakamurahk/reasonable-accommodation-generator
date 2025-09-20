@@ -879,8 +879,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            当てはまる困りごとカードをタップしてコレクションに追加しよう！<br />
-            コレクションから整理でき、グラフ表示から関連性を可視化できます。
+            🔍 ここからは「困りごとの地図」を広げていきます。<br />
+            当てはまるカードをタップして集め、自分のコレクションに追加してください。集めたカードは整理でき、🔗グラフ表示で関連性が可視化されていきます。
           </p>
         </div>
         
@@ -1135,14 +1135,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             onClick={onBack}
             className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
           >
-            ⬅️ 前のステージへ
+            ⬅️ 前のステップへ
           </button>
           <button
             onClick={handleNext}
             disabled={selected.length === 0}
             className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
-            🎮 次のステージへ
+            🎮 次のステップへ
           </button>
         </div>
       </div>
@@ -1353,8 +1353,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       {/* 説明文 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
-          当てはまる困りごとカードをタップしてコレクションに追加しよう！<br />
-          コレクションから整理でき、グラフ表示から関連性を可視化できます。
+          🔍 ここからは「困りごとの地図」を広げていきます。<br />
+          当てはまるカードをタップして集め、自分のコレクションに追加してください。集めたカードは整理でき、🔗グラフ表示で関連性が可視化されていきます。
         </p>
       </div>
       
@@ -1658,14 +1658,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             onClick={onBack}
             className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
           >
-            ⬅️ 前のステージへ
+            ⬅️ 前のステップへ
           </button>
           <button
             onClick={handleNext}
           disabled={selected.length === 0}
             className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
-            🎮 次のステージへ
+            🎮 次のステップへ
           </button>
       </div>
       

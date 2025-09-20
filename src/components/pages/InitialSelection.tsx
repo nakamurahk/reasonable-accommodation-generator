@@ -73,8 +73,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                 {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            <strong>特性と環境を選択しましょう。</strong><br />
-まず<strong>特性</strong>を選択し、次に<strong>環境</strong>を選択してください。<strong>環境</strong>に応じて<strong>シチュエーション</strong>が表示されます。
+            🔍 あなたの困りごとを探る旅の第一歩です。<br />
+まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて、具体的なシチュエーションが現れます。
           </p>
         </div>
         
@@ -193,7 +193,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
             disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
             className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
-            🎮 次のステージへ
+            🎮 次のステップへ
           </button>
         </div>
       </div>
@@ -206,8 +206,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
             {/* 説明文 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                   <p className="text-gray-700 text-lg leading-relaxed">
-            <strong>特性と環境を選択しましょう。</strong><br />
-まず<strong>特性</strong>を選択し、次に<strong>環境</strong>を選択してください。<strong>環境</strong>に応じて<strong>シチュエーション</strong>が表示されます。
+            🔍 あなたの困りごとを探る旅の第一歩です。<br />
+まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて、具体的なシチュエーションが現れます。
           </p>
       </div>
       
@@ -329,7 +329,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
           disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
           className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
         >
-          🎮 次のステージへ
+          🎮 次のステップへ
         </button>
       </div>
     </div>

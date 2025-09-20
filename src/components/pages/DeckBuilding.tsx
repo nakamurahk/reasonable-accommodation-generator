@@ -140,7 +140,8 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
         {/* 説明文 */}
                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                  <p className="text-gray-700 text-lg leading-relaxed">
-                   カードプールから最大10枚を選んで、あなたの困りごとデッキを構築しよう！最も重要で対処したい困りごとを厳選して選んでね。
+                   🔍 "核心を探すステージ"です。<br />
+                   コレクションしたカードから最大10枚を選び、あなたが特に大事だと感じる困りごとを絞り込みましょう。
                  </p>
                </div>
 

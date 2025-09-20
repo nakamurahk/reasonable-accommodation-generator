@@ -54,7 +54,8 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
           <p className="text-gray-700 text-lg leading-relaxed">
-            困りごとデッキから3枚のカードを選んで、最も重要で対処したい困りごとを決定しよう！
+            🎯 "最終選抜ステージ"です。<br />
+            困りごとデッキから3枚のカードを選び、あなたが最も重要だと感じる困りごとにフォーカスしましょう。
           </p>
         </div>
 
@@ -224,7 +225,7 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
                 : 'bg-gray-300 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {finalSelection.length === 3 ? '🎮 次のステージへ' : '🎮 次のステージへ'}
+            {finalSelection.length === 3 ? '🎮 次のステップへ' : '🎮 次のステップへ'}
           </button>
         </div>
       </div>
