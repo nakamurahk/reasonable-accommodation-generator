@@ -370,114 +370,90 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
 
   const handleCopyToClipboard = () => {
-    // モバイル版とPC版で異なるセレクターを使用
-    let title, accommodationSection, pointsSection;
-    
-    // console.log('handleCopyToClipboard - isMobile:', isMobile);
-    
-    if (isMobile) {
-      // モバイル版のセレクター
-      title = document.querySelector('h3');
-      accommodationSection = document.querySelector('.bg-white.rounded-xl.shadow.p-4.mb-6');
-      pointsSection = document.querySelector('.bg-white.rounded-xl.shadow.p-4:last-of-type');
-    } else {
-      // PC版のセレクター
-      title = document.querySelector('h3');
-      accommodationSection = document.querySelector('.bg-white.rounded-xl.shadow.p-6.mb-10');
-      pointsSection = document.querySelector('.bg-white.rounded-xl.shadow.p-6:last-of-type');
+    // 新しいUI構造に対応したコピー機能
+    if (!viewModel || !selectedDifficulties || !selectedDomain) {
+      alert('データが読み込まれていません。ページを再読み込みしてください。');
+      return;
     }
-    
-    // console.log('Elements found:', { title, accommodationSection, pointsSection });
 
-    if (title && accommodationSection && pointsSection) {
-      // 配慮依頼案のテキストを整形
-      const accText = accommodationSection.textContent?.trim() || '';
-      // console.log('Original accText:', accText);
-      const formattedAcc = accText
-        .replace(/配慮依頼案/g, '') // 配慮依頼案の重複を削除
-        .replace(/(⭐📝)/g, '\n\n$1')
-        .replace(/(🟦|🟧|🟨)/g, '\n\n$1')
-        .replace(/配慮案([A-D]):/g, '\n配慮案$1:')
-        .replace(/具体的な配慮案/g, '\n\n具体的な配慮案\n')
-        .replace(/困りごと:/g, '\n困りごと:')
-        .replace(/カテゴリ:/g, '\nカテゴリ:')
-        .replace(/(🔄[^カテゴリ]+)/g, '\n$1')
-        .replace(/(💡[^カテゴリ]+)/g, '\n$1')
-        .replace(/^\n+/, '')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+    // 配慮依頼案のテキストを直接構築
+    let accommodationText = '';
+    selectedDifficulties.forEach((difficulty: any, index: number) => {
+      const category = getCategoryFromTitle(difficulty.title, viewModel);
+      const categoryIcon = getCategoryIcon(category || '');
       
-      // console.log('Formatted accText:', formattedAcc);
+      accommodationText += `${categoryIcon}${difficulty.title}\n`;
+      accommodationText += `カテゴリ: ${category}\n`;
+      
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      accommodations.forEach((acc: any, accIndex: number) => {
+        const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+        accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
+      });
+      accommodationText += '\n';
+    });
 
-      // 具体的配慮案の詳細を追加
-      let detailedAccommodations = '';
-      if (viewModel && selectedDifficulties && selectedDomain) {
-        selectedDifficulties.forEach((difficulty: any, index: number) => {
-          const accommodations = getAccommodations(difficulty.title, viewModel || null, selectedDomain.id as any);
-          if (accommodations.length > 0) {
-            detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
-            accommodations.forEach((acc: any, accIndex: number) => {
-              const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
-              detailedAccommodations += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
-              if (acc['詳細説明']) {
-                const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
-                details.forEach((detail: string) => {
-                  detailedAccommodations += `  • ${detail.trim()}\n`;
-                });
-              }
-              detailedAccommodations += '\n';
+    // 合意形成のポイントのテキストを構築
+    let pointsText = '';
+    points.forEach((point, index) => {
+      pointsText += `・${point}\n`;
+    });
+
+    // 具体的配慮案の詳細を追加
+    let detailedAccommodations = '';
+    selectedDifficulties.forEach((difficulty: any, index: number) => {
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      if (accommodations.length > 0) {
+        detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
+        accommodations.forEach((acc: any, accIndex: number) => {
+          const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+          detailedAccommodations += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
+          if (acc['詳細説明']) {
+            const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
+            details.forEach((detail: string) => {
+              detailedAccommodations += `  • ${detail.trim()}\n`;
             });
           }
+          detailedAccommodations += '\n';
         });
       }
+    });
 
-      // 合意形成のポイントのテキストを整形
-      const pointsText = pointsSection.textContent?.trim() || '';
-      const formattedPoints = pointsText
-        .replace(/合意形成のポイント/g, '') // 合意形成のポイントの重複を削除
-        .replace(/・/g, '\n・')
-        .replace(/^\n+/, '')
-        .trim();
+    // 日付の生成
+    const today = new Date();
+    const dateStr = today.getFullYear() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
 
-      // 日付の生成
-      const today = new Date();
-      const dateStr = today.getFullYear() +
-        String(today.getMonth() + 1).padStart(2, '0') +
-        String(today.getDate()).padStart(2, '0');
+    const text = [
+      '配慮案を確認しましょう。',
+      'これは、支援を進めるための調整マニュアルです。',
+      `${dateStr} 合理的配慮ジェネレータ`,
+      '',
+      '【配慮依頼案】',
+      accommodationText.trim(),
+      '',
+      '【合意形成のポイント】',
+      pointsText.trim(),
+      '',
+      detailedAccommodations.trim()
+    ].join('\n');
 
-      const text = [
-        '配慮案を確認しましょう。',
-        'これは、支援を進めるための調整マニュアルです。',
-        `${dateStr} 合理的配慮ジェネレータ`,
-        '',
-        '【配慮依頼案】',
-        formattedAcc,
-        '',
-        '【合意形成のポイント】',
-        formattedPoints,
-        '',
-        detailedAccommodations
-      ].join('\n');
-
-      // モバイル版ではフォールバック機能も追加
-      if (navigator.clipboard && window.isSecureContext) {
-        // モダンブラウザ（HTTPS環境）
-        navigator.clipboard.writeText(text)
-          .then(() => {
-            alert('メモをコピーしました');
-          })
-          .catch((err) => {
-            console.error('コピーに失敗しました:', err);
-            // フォールバック: 古い方法を試す
-            fallbackCopyTextToClipboard(text);
-          });
-      } else {
-        // 古いブラウザやHTTP環境
-        fallbackCopyTextToClipboard(text);
-      }
+    // クリップボードにコピー
+    if (navigator.clipboard && window.isSecureContext) {
+      // モダンブラウザ（HTTPS環境）
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          alert('メモをコピーしました');
+        })
+        .catch((err) => {
+          console.error('コピーに失敗しました:', err);
+          // フォールバック: 古い方法を試す
+          fallbackCopyTextToClipboard(text);
+        });
     } else {
-      console.error('要素が見つかりません:', { title, accommodationSection, pointsSection });
-      alert('コピーに失敗しました。ページを再読み込みしてください。');
+      // 古いブラウザやHTTP環境
+      fallbackCopyTextToClipboard(text);
     }
   };
 
