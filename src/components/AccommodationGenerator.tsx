@@ -5,6 +5,7 @@ import { ViewModel } from '../types/newDataStructure';
 import InitialSelection from './pages/InitialSelection';
 import DifficultyThinking from './pages/DifficultyThinking';
 import DeckBuilding from './pages/DeckBuilding';
+import FinalCardSelection from './pages/FinalCardSelection';
 import DifficultySelection from './pages/DifficultySelection';
 import AccommodationDisplay from './pages/AccommodationDisplay';
 
@@ -43,7 +44,7 @@ type Selection = {
   situations: Situation[];
 };
 
-type Step = 'initial' | 'thinking' | 'deckbuilding' | 'selection' | 'display';
+type Step = 'initial' | 'thinking' | 'deckbuilding' | 'finalselection' | 'display';
 
 const AccommodationGenerator: React.FC = () => {
   const location = useLocation();
@@ -55,7 +56,7 @@ const AccommodationGenerator: React.FC = () => {
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
-    if (path === '/step4') return 'selection';
+    if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
     return 'initial';
   };
@@ -112,7 +113,7 @@ const AccommodationGenerator: React.FC = () => {
     const path = newStep === 'initial' ? '/step1' : 
                  newStep === 'thinking' ? '/step2' : 
                  newStep === 'deckbuilding' ? '/step3' :
-                 newStep === 'selection' ? '/step4' : '/step5';
+                 newStep === 'finalselection' ? '/step4' : '/step5';
     // console.log('Navigating to path:', path);
     navigate(path);
     window.scrollTo(0, 0);
@@ -181,10 +182,10 @@ const AccommodationGenerator: React.FC = () => {
       displayDifficulties,
     });
     
-    updateStep('selection');
+    updateStep('finalselection');
   };
 
-  const handleSelectionComplete = (difficulties: any[]) => {
+  const handleFinalSelectionComplete = (difficulties: any[]) => {
     setDisplayDifficulties(difficulties);
     
     // LocalStorageに保存
@@ -196,6 +197,7 @@ const AccommodationGenerator: React.FC = () => {
     
     updateStep('display');
   };
+
 
   const handleRestart = () => {
     const emptySelection = {
@@ -216,10 +218,10 @@ const AccommodationGenerator: React.FC = () => {
   const handleBack = () => {
     // console.log('handleBack called, currentStep:', currentStep);
     if (currentStep === 'display') {
-      // console.log('Moving from display to selection');
-      updateStep('selection');
-    } else if (currentStep === 'selection') {
-      // console.log('Moving from selection to deckbuilding');
+      // console.log('Moving from display to finalselection');
+      updateStep('finalselection');
+    } else if (currentStep === 'finalselection') {
+      // console.log('Moving from finalselection to deckbuilding');
       updateStep('deckbuilding');
     } else if (currentStep === 'deckbuilding') {
       // console.log('Moving from deckbuilding to thinking');
@@ -282,17 +284,13 @@ const AccommodationGenerator: React.FC = () => {
           </div>
         )
       )}
-      {currentStep === 'selection' && (
+      {currentStep === 'finalselection' && (
         selectedDifficulties.length > 0 ? (
-          <>
-            {/* console.log('Rendering DifficultySelection with viewModel:', viewModel) */}
-            <DifficultySelection
-              difficulties={selectedDifficulties}
-              onComplete={handleSelectionComplete}
-              onBack={handleBack}
-              viewModel={viewModel}
-            />
-          </>
+          <FinalCardSelection
+            selectedDifficulties={selectedDifficulties}
+            onComplete={handleFinalSelectionComplete}
+            onBack={handleBack}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">

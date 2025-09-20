@@ -5,13 +5,13 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
-  const steps = [
-    { id: 'initial', title: '特性選択', short: '①' },
-    { id: 'thinking', title: 'カード集め', short: '②' },
-    { id: 'deckbuilding', title: 'デッキ構築', short: '③' },
-    { id: 'selection', title: '配慮案', short: '④' },
-    { id: 'display', title: '結果', short: '⑤' },
-  ];
+       const steps = [
+         { id: 'initial', title: '特性選択', short: '①' },
+         { id: 'thinking', title: 'カード集め', short: '②' },
+         { id: 'deckbuilding', title: '困りごとデッキ構築', short: '③' },
+         { id: 'finalselection', title: '最終選択', short: '④' },
+         { id: 'display', title: '結果', short: '⑤' },
+       ];
 
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
 

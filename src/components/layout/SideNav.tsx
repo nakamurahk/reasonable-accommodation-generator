@@ -5,13 +5,13 @@ interface SideNavProps {
 }
 
 const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
-  const steps = [
-    { id: 'initial', title: '特性を選択' },
-    { id: 'thinking', title: '困りごとカードを集める！' },
-    { id: 'deckbuilding', title: 'デッキ構築' },
-    { id: 'selection', title: '配慮案を選択' },
-    { id: 'display', title: '結果を確認' },
-  ];
+       const steps = [
+         { id: 'initial', title: '特性を選択' },
+         { id: 'thinking', title: '困りごとカードを集める！' },
+         { id: 'deckbuilding', title: '困りごとデッキ構築' },
+         { id: 'finalselection', title: '最終選択' },
+         { id: 'display', title: '結果を確認' },
+       ];
 
   return (
     <nav className="w-60 h-full bg-white shadow py-6 px-3 flex flex-col">

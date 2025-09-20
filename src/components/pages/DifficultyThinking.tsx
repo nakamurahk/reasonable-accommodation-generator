@@ -132,6 +132,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [isDeckAdding, setIsDeckAdding] = useState(false); // カードの束に追加するアニメーション
   const [addingCard, setAddingCard] = useState<{id: string, title: string, category: string} | null>(null); // 追加されるカード
   const [removingCard, setRemovingCard] = useState<{id: string, title: string, category: string} | null>(null); // 削除されるカード
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [visibleCounts, setVisibleCounts] = useState<{[key: string]: number}>({});
   
   // 数値に応じた色を決定する関数
   const getBigNumberColor = (num: number) => {
@@ -153,6 +155,39 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       '職場・社会不安': '🏢'
     };
     return CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '🎯';
+  };
+
+  // アコーディオンを開閉する関数
+  const toggleAccordion = (cardTitle: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardTitle)) {
+        newSet.delete(cardTitle);
+      } else {
+        newSet.add(cardTitle);
+      }
+      return newSet;
+    });
+  };
+
+  // さらに表示する関数
+  const showMore = (category: string, totalCount: number) => {
+    console.log('showMore called:', { category, totalCount, currentVisible: visibleCounts[category], expandedCards: Array.from(expandedCards) });
+    setVisibleCounts(prev => {
+      const newCount = Math.min((prev[category] || 4) + 4, totalCount);
+      console.log('Setting visible count:', { category, newCount });
+      return {
+        ...prev,
+        [category]: newCount
+      };
+    });
+  };
+
+  // 表示件数を取得する関数
+  const getVisibleCount = (category: string, totalCount: number) => {
+    const count = visibleCounts[category] || Math.min(4, totalCount);
+    console.log('getVisibleCount:', { category, totalCount, visibleCounts, result: count });
+    return count;
   };
   
   const isMobile = useIsMobile();
@@ -443,12 +478,26 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     const customDifficultiesWithIds = customDifficulties.map((d, index) => ({
       id: `custom-${index + 1}`,
       title: d,
+      category: 'その他',
       icon: '📝',
       cares: [],
       accommodations: []
     }));
 
-    onComplete([...selectedDifficulties, ...customDifficultiesWithIds]);
+    // 選択された困りごとをオブジェクト形式に変換
+    const selectedDifficultiesWithDetails = selectedDifficulties.map(difficulty => {
+      const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === difficulty.title);
+      return {
+        id: difficulty.id,
+        title: difficulty.title,
+        category: difficultyItem ? difficultyItem['カテゴリ'] : 'その他',
+        icon: difficulty.icon,
+        cares: difficulty.cares,
+        accommodations: difficulty.accommodations
+      };
+    });
+    
+    onComplete([...selectedDifficultiesWithDetails, ...customDifficultiesWithIds]);
   };
 
   // SUGGESTSの代わりにselectedDifficultiesを使う
@@ -830,9 +879,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            <strong>🃏 ステップ②：困りごとカードを集める！</strong><br />
-            当てはまる困りごとカードをタップしてコレクションに追加しよう！この段階では少しでも当てはまるカードをたくさん集めよう！<br />
-            コレクションから整理でき、グラフ表示で関連性を可視化できます。
+            当てはまる困りごとカードをタップしてコレクションに追加しよう！<br />
+            コレクションから整理でき、グラフ表示から関連性を可視化できます。
           </p>
         </div>
         
@@ -882,11 +930,11 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 <div className="text-sm text-gray-500 mb-2 text-right">
                   候補の困りごと: {currentCategoryDifficulties.length}件
                 </div>
-                <div className="grid grid-cols-1 gap-4 min-h-[420px] content-start">
+                <div className="grid grid-cols-1 gap-4 content-start">
                   {currentCategoryDifficulties.length === 0 && (
                     <div className="text-gray-400">このカテゴリには該当する困りごとは見つかりませんでした。</div>
                   )}
-                  {currentCategoryDifficulties.map((item: any) => {
+                  {currentCategoryDifficulties.slice(0, getVisibleCount(selectedCategory, currentCategoryDifficulties.length)).map((item: any) => {
               const isSelected = selected.includes(item['困りごと内容']);
               const isDisabled = !isSelected && selected.length >= maxSelectable;
                     
@@ -911,36 +959,77 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     const mainTags = item['主要タグ'] ? item['主要タグ'].split(',').map((tag: string) => tag.trim()) : [];
                     const subTags = item['補助タグ'] ? item['補助タグ'].split(',').map((tag: string) => tag.trim()) : [];
 
+              const isExpanded = expandedCards.has(item['困りごと内容']);
+
               return (
-                <button
+                <div
                   key={item['困りごと内容']}
-                  onClick={(e) => handleSelect(item['困りごと内容'], e)}
-                  disabled={isDisabled}
-                        className={`p-4 rounded-xl border-2 text-left transition w-full flex flex-col justify-between shadow-md hover:shadow-lg ${
+                  className={`rounded-xl border-2 transition-all duration-300 w-full ${
+                    isExpanded 
+                      ? 'shadow-md' 
+                      : 'shadow-sm hover:shadow-md'
+                  } ${
                     isSelected
                       ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
-                      : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
-                  } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  style={deselectedCard === item['困りごと内容'] ? { animation: 'deselectBounce 0.3s ease-in-out' } : {}}
+                      : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'
+                  } ${isDisabled ? 'opacity-40' : ''}`}
+                  style={{
+                    backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
+                    backgroundSize: '20px 20px',
+                    animation: deselectedCard === item['困りごと内容'] ? 'deselectBounce 0.3s ease-in-out' : undefined
+                  }}
                 >
-                        <div className="flex items-center gap-2 mb-3">
-                    <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
-                    {isSelected && (
-                      <div className="ml-auto">
-                        <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
+                  {/* カードのヘッダー部分（選択可能） */}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={(e) => handleSelect(item['困りごと内容'], e)}
+                        disabled={isDisabled}
+                        className={`flex-1 text-left transition ${
+                          isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
+                          {isSelected && (
+                            <div className="ml-auto">
+                              <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs">✓</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      </button>
+                      
+                      {/* 詳細表示ボタン（右端） */}
+                      <button
+                        onClick={() => toggleAccordion(item['困りごと内容'])}
+                        className="ml-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                      >
+                        <span className="transition-all duration-200">
+                          {isExpanded ? '▲' : '▼'}
+                        </span>
+                        <span className="text-xs">{isExpanded ? '閉じる' : '詳細'}</span>
+                      </button>
+                    </div>
                   </div>
-                        <div className="flex-1 flex items-start">
-                          <ul className="list-disc pl-4 text-sm text-gray-500">
+
+                  {/* アコーディオン内容 */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 border-t border-gray-100 pt-3 bg-gradient-to-b from-transparent to-gray-50/30">
+                      <div className="space-y-3">
+                        {/* 具体例 */}
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">具体例</h4>
+                          <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
                             {exampleList}
                           </ul>
                         </div>
+
                         {/* タグ表示 */}
                         {(mainTags.length > 0 || subTags.length > 0) && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">関連タグ</h4>
                             <div className="flex flex-wrap gap-1">
                               {/* 主要タグ */}
                               {mainTags.map((tag: string, index: number) => (
@@ -952,15 +1041,39 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                               {subTags.map((tag: string, index: number) => (
                                 <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                   #{tag} : {getTagName(tag)}
-                  </span>
+                                </span>
                               ))}
                             </div>
                           </div>
                         )}
-                </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
+          
+          {/* さらに表示ボタン */}
+          {currentCategoryDifficulties.length > getVisibleCount(selectedCategory, currentCategoryDifficulties.length) && (
+            <div className="mt-2">
+              {/* 区切り線とサブ見出し */}
+              <div className="flex items-center my-4">
+                <div className="flex-1 h-px bg-gray-300"></div>
+                <div className="px-4 text-sm text-gray-500 font-medium">— 他の困りごと —</div>
+                <div className="flex-1 h-px bg-gray-300"></div>
+              </div>
+              
+              <div className="text-center">
+                <button
+                  onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                >
+                  残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
+                </button>
+              </div>
+            </div>
+          )}
               </div>
 
               {/* カスタム困りごと入力 */}
@@ -1017,19 +1130,19 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         </div>
 
         {/* ボタン */}
-        <div className="flex flex-col gap-3 mt-6">
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={onBack}
+            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
+          >
+            ⬅️ 前のステージへ
+          </button>
           <button
             onClick={handleNext}
             disabled={selected.length === 0}
-            className="w-full px-8 py-4 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステージへ
-          </button>
-          <button
-            onClick={onBack}
-            className="w-full px-8 py-4 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
-          >
-            ⬅️ 前のステージへ
           </button>
         </div>
       </div>
@@ -1240,9 +1353,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       {/* 説明文 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
-          <strong>🃏 ステップ②：困りごとカードを集める！</strong><br />
-          当てはまる困りごとカードをタップしてコレクションに追加しよう！この段階では少しでも当てはまるカードをたくさん集めよう！<br />
-          コレクションから整理でき、グラフ表示で関連性を可視化できます。
+          当てはまる困りごとカードをタップしてコレクションに追加しよう！<br />
+          コレクションから整理でき、グラフ表示から関連性を可視化できます。
         </p>
       </div>
       
@@ -1345,7 +1457,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 {currentCategoryDifficulties.length === 0 && (
                   <div className="text-gray-400 col-span-2">このカテゴリには該当する困りごとは見つかりませんでした。</div>
                 )}
-                {currentCategoryDifficulties.map((item: any) => {
+                {currentCategoryDifficulties.slice(0, getVisibleCount(selectedCategory, currentCategoryDifficulties.length)).map((item: any) => {
                   const isSelected = selected.includes(item['困りごと内容']);
                   const isDisabled = !isSelected && selected.length >= maxSelectable;
                   
@@ -1370,56 +1482,121 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   const mainTags = item['主要タグ'] ? item['主要タグ'].split(',').map((tag: string) => tag.trim()) : [];
                   const subTags = item['補助タグ'] ? item['補助タグ'].split(',').map((tag: string) => tag.trim()) : [];
 
+                  const isExpanded = expandedCards.has(item['困りごと内容']);
+
                   return (
-                    <button
+                    <div
                       key={item['困りごと内容']}
-                      onClick={(e) => handleSelect(item['困りごと内容'], e)}
-                      disabled={isDisabled}
-                      className={`p-3 rounded-xl border-2 text-left transition w-full flex flex-col justify-between min-h-[160px] shadow-md hover:shadow-lg ${
+                      className={`rounded-xl border-2 transition-all duration-300 w-full ${
+                        isExpanded 
+                          ? 'shadow-md' 
+                          : 'shadow-sm hover:shadow-md'
+                      } ${
                         isSelected
                           ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
-                          : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
-                      } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                      style={deselectedCard === item['困りごと内容'] ? { animation: 'deselectBounce 0.3s ease-in-out' } : {}}
+                          : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'
+                      } ${isDisabled ? 'opacity-40' : ''}`}
+                      style={{
+                        backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
+                        backgroundSize: '20px 20px',
+                        animation: deselectedCard === item['困りごと内容'] ? 'deselectBounce 0.3s ease-in-out' : undefined
+                      }}
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
-                        {isSelected && (
-                          <div className="ml-auto">
-                            <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
+                      {/* カードのヘッダー部分（選択可能） */}
+                      <div className="p-3">
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={(e) => handleSelect(item['困りごと内容'], e)}
+                            disabled={isDisabled}
+                            className={`flex-1 text-left transition ${
+                              isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
+                              {isSelected && (
+                                <div className="ml-auto">
+                                  <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-xs">✓</span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        )}
+                          </button>
+                          
+                          {/* 詳細表示ボタン（右端） */}
+                          <button
+                            onClick={() => toggleAccordion(item['困りごと内容'])}
+                            className="ml-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                          >
+                            <span className="transition-all duration-200">
+                              {isExpanded ? '▲' : '▼'}
+                            </span>
+                            <span className="text-xs">{isExpanded ? '閉じる' : '詳細'}</span>
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex-1 flex items-start">
-                        <ul className="list-disc pl-4 text-sm text-gray-500">
-                          {exampleList}
-                        </ul>
-                      </div>
-                      {/* タグ表示 */}
-                      {(mainTags.length > 0 || subTags.length > 0) && (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <div className="flex flex-wrap gap-1">
-                            {/* 主要タグ */}
-                            {mainTags.map((tag: string, index: number) => (
-                              <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                #{tag} : {getTagName(tag)}
-                              </span>
-                            ))}
-                            {/* 補助タグ */}
-                            {subTags.map((tag: string, index: number) => (
-                              <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                #{tag} : {getTagName(tag)}
-                              </span>
-                            ))}
+
+                      {/* アコーディオン内容 */}
+                      {isExpanded && (
+                        <div className="px-3 pb-3 border-t border-gray-100 pt-3 bg-gradient-to-b from-transparent to-gray-50/30">
+                          <div className="space-y-3">
+                            {/* 具体例 */}
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-2">具体例</h4>
+                              <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
+                                {exampleList}
+                              </ul>
+                            </div>
+
+                            {/* タグ表示 */}
+                            {(mainTags.length > 0 || subTags.length > 0) && (
+                              <div>
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">関連タグ</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {/* 主要タグ */}
+                                  {mainTags.map((tag: string, index: number) => (
+                                    <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      #{tag} : {getTagName(tag)}
+                                    </span>
+                                  ))}
+                                  {/* 補助タグ */}
+                                  {subTags.map((tag: string, index: number) => (
+                                    <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                      #{tag} : {getTagName(tag)}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
+              
+              {/* さらに表示ボタン */}
+              {currentCategoryDifficulties.length > getVisibleCount(selectedCategory, currentCategoryDifficulties.length) && (
+                <div className="mt-2">
+                  {/* 区切り線とサブ見出し */}
+                  <div className="flex items-center my-4">
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                    <div className="px-4 text-sm text-gray-500 font-medium">— 他の困りごと —</div>
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <button
+                      onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
+                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                    >
+                      残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* カスタム困りごと入力 */}
@@ -1479,14 +1656,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="flex justify-between mt-8">
           <button
             onClick={onBack}
-            className="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
+            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
           >
             ⬅️ 前のステージへ
           </button>
           <button
             onClick={handleNext}
           disabled={selected.length === 0}
-            className="px-8 py-3 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステージへ
           </button>

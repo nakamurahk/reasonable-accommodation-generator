@@ -368,6 +368,25 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     return CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '🎯';
   };
 
+  const generatePromptText = () => {
+    const dateStr = new Date().toISOString().split('T')[0];
+    return `配慮案を確認しましょう。
+これは、支援を進めるための調整マニュアルです。
+${dateStr} 合理的配慮ジェネレータ
+
+【配慮依頼案】
+${selectedDifficulties.map((item, idx) => {
+  const category = getCategoryFromTitle(item.title, viewModel || null);
+  return `${category ? getCategoryIcon(category) : '🎯'}${item.title}
+カテゴリ: ${category}
+${getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => 
+  `配慮案${ACC_LABELS[accIdx % ACC_LABELS.length]}:${acc['配慮案タイトル'] || acc.description}▶`
+).join('')}`;
+}).join('\n')}
+
+【合意形成のポイント】
+${points.map(point => `・${point}`).join('\n')}`;
+  };
 
   const handleCopyToClipboard = () => {
     // モバイル版とPC版で異なるセレクターを使用
@@ -595,13 +614,58 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-          ✨ あなたのコアカードが決まりました ✨
+          ✨ あなたの切り札が決まりました ✨
         </h1>
         <p className="text-gray-600 text-base md:text-lg">
           選んだ3枚のカードから、実用的な配慮案を生成しました
         </p>
       </div>
 
+      {/* 3枚のカード（中央で光る演出） */}
+      <div className="flex justify-center mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl">
+          {selectedDifficulties.map((item, index) => {
+            const category = getCategoryFromTitle(item.title, viewModel || null);
+            const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
+            
+            return (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-yellow-100 to-orange-200 border-2 border-yellow-400 rounded-xl p-4 relative group shadow-lg transform hover:scale-105 transition-all duration-300"
+                style={{
+                  animation: 'cardGlow 2s ease-in-out infinite',
+                  animationDelay: `${index * 0.3}s`
+                }}
+              >
+                {/* 光る効果 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/30 via-orange-200/30 to-yellow-200/30 animate-pulse rounded-xl pointer-events-none"></div>
+                
+                {/* レア度表示 */}
+                <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full w-8 h-8 text-xs flex items-center justify-center font-bold shadow-lg">
+                  {index + 1}
+                </div>
+                
+                {/* 星の装飾 */}
+                <div className="absolute top-2 right-2 text-yellow-500 text-lg animate-bounce">
+                  ⭐
+                </div>
+                
+                <div className="text-center pt-2 relative z-10">
+                  <div className="text-3xl mb-2">
+                    {categoryStyle ? categoryStyle.icon : '🎯'}
+                  </div>
+                  <h3 className="font-medium text-gray-800 text-sm leading-tight">
+                    {item.title}
+                  </h3>
+                  <div className="text-xs text-orange-600 font-semibold mt-1">
+                    優先度: {index + 1}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
         
         {/* 配慮案の確認エリア（アコーディオン形式） */}
         <div className="space-y-4">
@@ -626,6 +690,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
                 </div>
                 
                 <div className="p-4">
+                  <h4 className="text-md font-medium text-gray-700 mb-3">対応する配慮案（3案セット）</h4>
                   <div className="space-y-3">
                     {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
                       <div key={accIdx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
@@ -666,56 +731,81 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
           })}
         </div>
           
+          <div className="bg-white rounded-xl shadow p-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">合意形成のポイント</h3>
+            <ul className="space-y-2">
+              {points.map((point, i) => (
+                <li key={i} className="text-gray-700">・{point}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
+        {/* 生成AIへ渡すプロンプトカード */}
+        <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl shadow-lg p-6 border-2 border-purple-200">
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+            🤖 生成AIへ渡すプロンプト
+          </h2>
+          
+          <div className="space-y-4">
+            {/* タブ切り替え */}
+            <div className="flex justify-center">
+              <div className="bg-white rounded-lg p-1 shadow-inner">
+                <button className="px-4 py-2 rounded-md bg-indigo-500 text-white text-sm font-medium">
+                  指示文スタイル
+                </button>
+                <button className="px-4 py-2 rounded-md text-gray-600 text-sm font-medium">
+                  JSONスタイル
+                </button>
+              </div>
+            </div>
+            
+            {/* プロンプト表示エリア */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-medium text-gray-700">指示文スタイル</h3>
+                <button 
+                  onClick={handleCopyToClipboard}
+                  className="px-3 py-1 bg-indigo-500 text-white text-xs rounded hover:bg-indigo-600 transition-colors"
+                >
+                  コピー
+                </button>
+              </div>
+              <div className="bg-gray-50 rounded p-3 text-sm text-gray-700 font-mono max-h-32 overflow-y-auto">
+                {generatePromptText()}
+              </div>
+            </div>
+          </div>
+        </div>
+        
         {/* 最終ガイド（シリアスな締め） */}
         <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
-            📖 合意形成・調整のポイント
+            📖 このページは調整マニュアルです
           </h2>
           
           <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">数より質を重視：</span>
-                  <span className="text-gray-700">配慮は3件以内に絞るのが理想</span>
-                </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">実務に活かすためのポイント</h3>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-gray-700">配慮要求は数を絞る（3つまでが理想）</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">配慮と負担のバランスを意識：</span>
-                  <span className="text-gray-700">双方に無理のない形を探る</span>
-                </div>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-gray-700">負担とのバランスを意識する</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">人事や支援担当を必ず通す：</span>
-                  <span className="text-gray-700">共有してリスクを減らす</span>
-                </div>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-gray-700">合意時は人事を通す</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">段階的な導入を検討：</span>
-                  <span className="text-gray-700">一気にではなく、試行→拡張の流れで</span>
-                </div>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-gray-700">段階的な導入を検討する</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">定期的に見直す：</span>
-                  <span className="text-gray-700">状況に応じて調整や更新を行う</span>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">その場で即決しない：</span>
-                  <span className="text-gray-700">「持ち帰って検討します」と伝える安心ワード</span>
-                </div>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-600 mt-1">•</span>
+                <span className="text-gray-700">定期的な見直しと調整を行う</span>
               </li>
             </ul>
           </div>
@@ -774,13 +864,58 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          ✨ あなたのコアカードが決まりました ✨
+          ✨ あなたの切り札が決まりました ✨
         </h1>
         <p className="text-gray-600 text-lg">
           選んだ3枚のカードから、実用的な配慮案を生成しました
         </p>
       </div>
 
+      {/* 3枚のカード（中央で光る演出） */}
+      <div className="flex justify-center mb-8">
+        <div className="grid grid-cols-3 gap-6 max-w-4xl">
+          {selectedDifficulties.map((item, index) => {
+            const category = getCategoryFromTitle(item.title, viewModel || null);
+            const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
+            
+            return (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-yellow-100 to-orange-200 border-2 border-yellow-400 rounded-xl p-6 relative group shadow-lg transform hover:scale-105 transition-all duration-300"
+                style={{
+                  animation: 'cardGlow 2s ease-in-out infinite',
+                  animationDelay: `${index * 0.3}s`
+                }}
+              >
+                {/* 光る効果 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/30 via-orange-200/30 to-yellow-200/30 animate-pulse rounded-xl pointer-events-none"></div>
+                
+                {/* レア度表示 */}
+                <div className="absolute -top-2 -left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full w-8 h-8 text-xs flex items-center justify-center font-bold shadow-lg">
+                  {index + 1}
+                </div>
+                
+                {/* 星の装飾 */}
+                <div className="absolute top-2 right-2 text-yellow-500 text-lg animate-bounce">
+                  ⭐
+                </div>
+                
+                <div className="text-center pt-2 relative z-10">
+                  <div className="text-4xl mb-3">
+                    {categoryStyle ? categoryStyle.icon : '🎯'}
+                  </div>
+                  <h3 className="font-medium text-gray-800 text-base leading-tight">
+                    {item.title}
+                  </h3>
+                  <div className="text-sm text-orange-600 font-semibold mt-2">
+                    優先度: {index + 1}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
       
       <div>
         <div className="bg-white rounded-xl shadow p-6 mb-10">

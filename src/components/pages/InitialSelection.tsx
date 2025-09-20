@@ -191,9 +191,9 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
           <button
             onClick={handleNext}
             disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
-            className="w-full px-8 py-4 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
-            次へ進む
+            🎮 次のステージへ
           </button>
         </div>
       </div>
@@ -327,9 +327,9 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         <button
           onClick={handleNext}
           disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
-          className="px-8 py-3 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
+          className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
         >
-          次へ進む
+          🎮 次のステージへ
         </button>
       </div>
     </div>

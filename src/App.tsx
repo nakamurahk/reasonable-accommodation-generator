@@ -69,7 +69,7 @@ function MobileHeaderWrapper() {
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
-    if (path === '/step4') return 'selection';
+    if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
     return 'initial';
   };
@@ -84,7 +84,7 @@ function HeaderWrapper() {
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
-    if (path === '/step4') return 'selection';
+    if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
     return 'initial';
   };
@@ -99,7 +99,7 @@ function SideNavWrapper() {
     if (path === '/step1') return 'initial';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
-    if (path === '/step4') return 'selection';
+    if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
     return 'initial';
   };
