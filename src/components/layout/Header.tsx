@@ -6,11 +6,11 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
        const steps = [
-         { id: 'initial', title: '特性選択', short: '①' },
-         { id: 'thinking', title: 'カード集め', short: '②' },
-         { id: 'deckbuilding', title: '困りごとデッキ構築', short: '③' },
-         { id: 'finalselection', title: '最終選択', short: '④' },
-         { id: 'display', title: '結果', short: '⑤' },
+         { id: 'initial', title: '特性と環境を選ぶ', short: '①' },
+         { id: 'thinking', title: '困りごとを集める', short: '②' },
+         { id: 'deckbuilding', title: '重要候補を整える', short: '③' },
+         { id: 'finalselection', title: '最優先を決める', short: '④' },
+         { id: 'display', title: '結果を確認する', short: '⑤' },
        ];
 
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
