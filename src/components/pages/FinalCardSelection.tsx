@@ -146,12 +146,12 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
         {/* 最終選択（3枚） */}
         <div className="bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl shadow-lg p-6 mb-8 border-2 border-yellow-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-2 text-center">
-            ⭐ コアカード選択 ({finalSelection.length}/3枚)
+            ⭐ 重要な困りごとカード選択 ({finalSelection.length}/3枚)
           </h2>
           <div className="text-center mb-4">
             {finalSelection.length === 3 ? (
               <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg animate-pulse">
-                <p className="text-sm font-bold">⭐ コアカード選択完了！ ⭐</p>
+                <p className="text-sm font-bold">⭐ 重要な困りごとカード選択完了！ ⭐</p>
               </div>
             ) : (
               <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full">

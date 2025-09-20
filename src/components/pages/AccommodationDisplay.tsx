@@ -594,8 +594,8 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-          ✨ あなたのコアカードが決まりました ✨
+        <h1 className="text-lg md:text-2xl font-bold text-gray-800 mb-4">
+          ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-base md:text-lg">
           選んだ3枚のカードから、実用的な配慮案を生成しました
@@ -734,18 +734,19 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
           ※支援者に渡す前に、自分でもメモに残しておくと安心です
         </div>
         
-        <div className="flex flex-col gap-3 mt-6">
-          <button
-            onClick={onRestart}
-            className="w-full px-8 py-4 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition"
-          >
-            最初からやり直す
-          </button>
+        <div className="flex justify-between items-center mt-6">
           <button
             onClick={onBack}
-            className="w-full px-8 py-4 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
+            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors shadow-lg"
           >
-            前のページに戻る
+            ⬅️ 前のステップへ
+          </button>
+
+          <button
+            onClick={onRestart}
+            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors shadow-lg"
+          >
+            🎮 最初から
           </button>
         </div>
       </div>
@@ -774,7 +775,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          ✨ あなたのコアカードが決まりました ✨
+          ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-lg">
           選んだ3枚のカードから、実用的な配慮案を生成しました
