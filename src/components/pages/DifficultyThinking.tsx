@@ -174,7 +174,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const showMore = (category: string, totalCount: number) => {
     console.log('showMore called:', { category, totalCount, currentVisible: visibleCounts[category], expandedCards: Array.from(expandedCards) });
     setVisibleCounts(prev => {
-      const newCount = Math.min((prev[category] || 4) + 4, totalCount);
+      // 残り全部を表示するように変更
+      const newCount = totalCount;
       console.log('Setting visible count:', { category, newCount });
       return {
         ...prev,

@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import { ElementDefinition, LayoutOptions, Core } from 'cytoscape';
-import { TAG_MAP, getTagName } from '../../constants/tagMap';
+import { getTagName } from '../../constants/tagMap';
 // import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -48,8 +48,8 @@ interface TagHitCount {
 // 定数
 const MAX_SELECTED_TAGS = 4;
 const TOP_HITS = 5;
-const MAX_MAIN_TAGS = 5;
-const DEBOUNCE_MS = 200;
+// const MAX_MAIN_TAGS = 5;
+// const DEBOUNCE_MS = 200;
 const MAX_TAG_CHIPS = 3;
 
 // タグのひとこと定義
@@ -152,7 +152,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
   viewModel = []
 }) => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [highlightedTag, setHighlightedTag] = useState<string | null>(null);
+  const [highlightedTag] = useState<string | null>(null);
   const [showMainTagsOnly, setShowMainTagsOnly] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tooltipContent, setTooltipContent] = useState<string | null>(null);
@@ -160,7 +160,25 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
   const [selectedTagForBottomSheet, setSelectedTagForBottomSheet] = useState<string | null>(null);
   const [showAllDifficulties, setShowAllDifficulties] = useState(false);
   const isProcessingClick = useRef(false);
+  const cyRef = useRef<Core | null>(null);
+  const isInitialized = useRef(false);
   const isMobile = useIsMobile();
+
+  // showMainTagsOnlyの状態変更時は位置調整しない（デフォルト表示を維持）
+  // useEffect(() => {
+  //   if (cyRef.current && isInitialized.current) {
+  //     setTimeout(() => {
+  //       if (isMobile) {
+  //         cyRef.current!.fit(undefined, 10);
+  //         cyRef.current!.pan({ x: 0, y: 0 }); // 上部余白を大幅に調整（iPhone対応）
+  //         cyRef.current!.zoom(1.0);
+  //       } else {
+  //         cyRef.current!.fit(undefined, 20);
+  //         cyRef.current!.center();
+  //       }
+  //     }, 100);
+  //   }
+  // }, [showMainTagsOnly, isMobile]);
 
   // プリ計算：タグ→困りごとIDの逆インデックス
   const tagToDifficultiesIndex = useMemo(() => {
@@ -549,6 +567,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
   }, [selectedDifficulties, isMobile, showMainTagsOnly, selectedTags, getTagHitCounts]);
 
   // レイアウト設定（concentric：中心配置）
+  // 表示領域にグラフ全体が収まるように調整
   const layout: LayoutOptions = {
     name: 'concentric',
     animate: false,
@@ -557,9 +576,11 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
       return 2; // タグ：外側
     },
     levelWidth: () => 1,
-    spacingFactor: 1.5,
-    minNodeSpacing: 30,
-    avoidOverlap: true
+    spacingFactor: 1.5, // PC版と統一
+    minNodeSpacing: 30, // PC版と統一
+    avoidOverlap: true,
+    fit: false, // レイアウト自体ではフィットしない
+    padding: 0 // レイアウトのパディングは0にして、後で手動で中央配置
   };
 
   // タグ選択ハンドラー
@@ -577,6 +598,14 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
       
       return currentTags; // 変更なし
     });
+    
+    // タグフィルタリング後も位置を調整（PC版と統一）
+    setTimeout(() => {
+      if (cyRef.current) {
+        cyRef.current.fit(undefined, 20);
+        cyRef.current.center();
+      }
+    }, 100);
   };
 
   // タグクリック処理（重複防止）
@@ -713,7 +742,16 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
         {/* オーバーレイ */}
         <div 
           className="absolute inset-0 bg-black bg-opacity-50"
-          onClick={() => setSelectedTagForBottomSheet(null)}
+          onClick={() => {
+            setSelectedTagForBottomSheet(null);
+            // モーダルを閉じる時にグラフの位置とズームを元に戻す（PC版と統一）
+            setTimeout(() => {
+              if (cyRef.current) {
+                cyRef.current.fit(undefined, 20);
+                cyRef.current.center();
+              }
+            }, 150); // 遅延を少し長くして確実に実行
+          }}
         />
         
         {/* モーダル */}
@@ -728,7 +766,16 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
               </span>
             </div>
             <button
-              onClick={() => setSelectedTagForBottomSheet(null)}
+              onClick={() => {
+                setSelectedTagForBottomSheet(null);
+                // モーダルを閉じる時にグラフの位置とズームを元に戻す（PC版と統一）
+                setTimeout(() => {
+                  if (cyRef.current) {
+                    cyRef.current.fit(undefined, 20);
+                    cyRef.current.center();
+                  }
+                }, 150); // 遅延を少し長くして確実に実行
+              }}
               className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
             >
               <span className="text-lg font-bold">✕</span>
@@ -765,32 +812,6 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
                             <p className="text-sm font-medium text-gray-800">
                               {difficulty['困りごと内容']}
                             </p>
-                            {allTags.map((tagInfo, index) => {
-                              // より確実な選択判定
-                              const isSelected = Array.isArray(selectedTags) && selectedTags.includes(tagInfo.tag);
-                              const isCore = tagInfo.type === 'core';
-                              
-                              
-                              
-                              return (
-                                <span
-                                  key={index}
-                                  className={`inline-flex items-center px-1 rounded text-xs font-bold ${
-                                    isSelected
-                                      ? isCore
-                                        ? 'bg-indigo-100 text-indigo-800 border-2 border-indigo-400' // 選択中のcore: 薄い青背景 + 青枠
-                                        : 'bg-indigo-50 text-indigo-700 border-2 border-indigo-300' // 選択中のsub: より薄い青背景 + 薄い青枠
-                                      : isCore
-                                      ? 'bg-gray-800 text-white border-2 border-gray-900' // core: 濃いグレー背景 + 白文字
-                                      : 'bg-gray-100 text-gray-600 border border-gray-300' // sub: 薄いグレー背景 + グレー文字
-                                  }`}
-                                >
-                                  {tagInfo.tag}
-                                  {isCore && !isSelected && <span className="ml-1 text-xs">●</span>}
-                                  {isSelected && <span className="ml-1 text-xs">★</span>}
-                                </span>
-                              );
-                            })}
                           </div>
                         </div>
                       </div>
@@ -820,7 +841,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
                       onClick={() => handleTagSelect(tag)}
                       className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200"
                     >
-                      {tag}
+                      {tag}｜{getTagName(tag)}
                     </button>
                   ))}
                 </div>
@@ -908,13 +929,9 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
                   return (
                     <span 
                       key={`main-${index}`} 
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        isSelected
-                          ? 'bg-indigo-100 text-indigo-800 border-2 border-indigo-400' // 選択中のcore: 薄い青背景 + 青枠
-                          : 'bg-gray-800 text-white border-2 border-gray-900' // core: 濃いグレー背景 + 白文字
-                      }`}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-300"
                     >
-                      #{tagName} : {getTagName(tagName)}
+                      主：{tagName}
                       {isSelected && <span className="ml-1 text-xs">★</span>}
                     </span>
                   );
@@ -925,13 +942,9 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
                   return (
                     <span 
                       key={`sub-${index}`} 
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        isSelected
-                          ? 'bg-indigo-50 text-indigo-700 border-2 border-indigo-300' // 選択中のsub: より薄い青背景 + 薄い青枠
-                          : 'bg-gray-100 text-gray-600 border border-gray-300' // sub: 薄いグレー背景 + グレー文字
-                      }`}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-300"
                     >
-                      #{tagName} : {getTagName(tagName)}
+                      副：{tagName}
                       {isSelected && <span className="ml-1 text-xs">★</span>}
                     </span>
                   );
@@ -1006,19 +1019,47 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
         <CytoscapeComponent
           elements={[...graphData.nodes, ...graphData.edges]}
           layout={layout}
-          style={{ width: '100%', height: '100%' }}
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            ...(isMobile ? {
+              display: 'block',
+              position: 'relative'
+            } : {
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center'
+            })
+          }}
           cy={(cy: Core) => {
+            // cyRefに参照を保存
+            cyRef.current = cy;
+            // 初期化フラグをリセット
+            isInitialized.current = false;
+            
             // イベントリスナーを安全に設定（重複を防ぐ）
             try {
               // 既存のイベントリスナーを削除
               cy.off('tap', 'node', handleNodeClick);
               cy.off('mouseover', 'edge', handleEdgeHover);
               cy.off('mouseout', 'edge', handleEdgeLeave);
+              cy.off('layoutstop');
               
               // 新しいイベントリスナーを設定
               cy.on('tap', 'node', handleNodeClick);
               cy.on('mouseover', 'edge', handleEdgeHover);
               cy.on('mouseout', 'edge', handleEdgeLeave);
+              
+              // レイアウト完了後に中央配置を実行
+              cy.on('layoutstop', () => {
+                setTimeout(() => {
+                  // PC版とモバイル版を統一：通常の中央配置
+                  cy.fit(undefined, 20);
+                  cy.center();
+                  // 初期化完了フラグを設定
+                  isInitialized.current = true;
+                }, 100); // 遅延を少し長くして確実に実行
+              });
               
               // ハイライト機能
               if (highlightedTag) {
