@@ -256,11 +256,12 @@ const styles = StyleSheet.create({
 });
 
 // PDFドキュメントコンポーネント
-const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain }: { 
+const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain, selectedItems }: { 
   difficulties: Difficulty[], 
   base64Images: { [key: string]: string },
   viewModel: ViewModel | null | undefined,
-  selectedDomain: Domain | null
+  selectedDomain: Domain | null,
+  selectedItems: { difficulties: string[], accommodations: { [difficultyId: string]: string[] } }
 }) => {
   const today = new Date();
   const dateStr = today.getFullYear() +
@@ -286,17 +287,33 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
               <Text style={styles.sectionTitle}>{item.title}</Text>
             </View>
             <View style={styles.accommodationList}>
-              {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
-                <View key={accIdx} style={styles.accommodationItem}>
-                  {base64Images[`acc${accIdx}`] && (
-                    <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
-                  )}
-                  <Text style={styles.accommodationLabel}>
-                    配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
-                  </Text>
-                  <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
-                </View>
-              ))}
+              {(() => {
+                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
+                const selectedAccommodationIds = selectedItems.accommodations[item.id] || [];
+                const selectedAccommodations = accommodations.filter((_, index) => 
+                  selectedAccommodationIds.includes(String(index))
+                );
+                
+                if (selectedAccommodations.length === 0) {
+                  return (
+                    <View style={styles.accommodationItem}>
+                      <Text style={styles.accommodationText}>（配慮案が選択されていません）</Text>
+                    </View>
+                  );
+                }
+                
+                return selectedAccommodations.map((acc: any, accIdx: number) => (
+                  <View key={accIdx} style={styles.accommodationItem}>
+                    {base64Images[`acc${accIdx}`] && (
+                      <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
+                    )}
+                    <Text style={styles.accommodationLabel}>
+                      配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
+                    </Text>
+                    <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
+                  </View>
+                ));
+              })()}
             </View>
           </View>
         ))}
@@ -330,6 +347,21 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   // console.log('AccommodationDisplay - selectedDomain:', selectedDomain);
   const isMobile = useIsMobile();
   
+  // 選択状態を管理するstate
+  const [selectedItems, setSelectedItems] = useState<{
+    difficulties: string[];
+    accommodations: { [difficultyId: string]: string[] };
+  }>({
+    difficulties: [],
+    accommodations: {}
+  });
+  
+  // プロンプト生成用のstate
+  const [promptMode, setPromptMode] = useState<'colleague' | 'supervisor'>('colleague');
+  const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
+  const [userInput, setUserInput] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
+  
   // ファイル名の生成（YYYYMMDD形式）
   const today = new Date();
   const dateStr = today.getFullYear() +
@@ -338,6 +370,165 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
   const [base64Images, setBase64Images] = useState<{ [key: string]: string }>({});
   const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
+  
+  // 困りごとの選択状態を切り替える関数
+  const toggleDifficultySelection = (difficultyId: string) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      difficulties: prev.difficulties.includes(difficultyId)
+        ? prev.difficulties.filter(id => id !== difficultyId)
+        : [...prev.difficulties, difficultyId]
+    }));
+  };
+  
+  // 配慮案の選択状態を設定する関数（ラジオボタン用）
+  const setAccommodationSelection = (difficultyId: string, accommodationId: string) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      accommodations: {
+        ...prev.accommodations,
+        [difficultyId]: [accommodationId] // 1つの困りごとに対して1つの配慮案のみ
+      }
+    }));
+  };
+  
+  // 選択された困りごとのみをフィルタリングする関数
+  const getSelectedDifficulties = () => {
+    return selectedDifficulties.filter(difficulty => 
+      selectedItems.difficulties.includes(difficulty.id)
+    );
+  };
+  
+  // 選択された配慮案のみをフィルタリングする関数
+  const getSelectedAccommodations = (difficultyId: string, accommodations: any[]) => {
+    const selectedAccommodationIds = selectedItems.accommodations[difficultyId] || [];
+    return accommodations.filter((_, index) => 
+      selectedAccommodationIds.includes(String(index))
+    );
+  };
+  
+  // プロンプト生成関数
+  const generatePrompt = () => {
+    if (!viewModel || !selectedDomain) {
+      alert('データが読み込まれていません。');
+      return;
+    }
+    
+    const selectedDifficultiesToShow = getSelectedDifficulties();
+    if (selectedDifficultiesToShow.length === 0) {
+      alert('困りごとを選択してください。');
+      return;
+    }
+    
+    // 困りごとテキストを生成
+    let difficultyText = '';
+    selectedDifficultiesToShow.forEach((difficulty: any) => {
+      difficultyText += `・${difficulty.title}\n`;
+    });
+    
+    // 配慮案テキストを生成
+    let accommodationText = '';
+    selectedDifficultiesToShow.forEach((difficulty: any) => {
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
+      
+      if (selectedAccommodations.length > 0) {
+        accommodationText += `【${difficulty.title}】\n`;
+        selectedAccommodations.forEach((acc: any, accIndex: number) => {
+          const accLabel = ['A', 'B', 'C'][accIndex] || String(accIndex + 1);
+          accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
+          if (acc['詳細説明']) {
+            const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
+            details.forEach((detail: string) => {
+              accommodationText += `  • ${detail.trim()}\n`;
+            });
+          }
+        });
+        accommodationText += `\n`;
+      }
+    });
+    
+    let prompt = '';
+    
+    if (promptMode === 'colleague') {
+      // 同僚向けAIプロンプト
+      prompt = `あなたは、チーム内の相互理解を促進し、パフォーマンスを最大化させるためのコミュニケーション設計の専門家です。
+次の困りごとと配慮案を、同僚に「チームを円滑にするための工夫」として伝える想定で整理してください。
+
+条件：
+- 「配慮」や「障害」といった言葉は避け、「チームのルール」「作業の効率化」といった前向きな言葉に置き換える
+- 相手に負担を強いる印象を避け、「お互いに協力し合う」という相互協力の姿勢を示す
+- この工夫が、個人のミスやストレスを減らすだけでなく、チーム全体の生産性向上につながることを示唆する
+- 依頼内容は、同僚が「簡単に」「すぐに」実行できる具体的なアクションとして提示する
+- 依頼する文面は、親しみやすく、かつ建設的なトーンとする
+
+# 困りごと
+${difficultyText.trim()}
+
+# 配慮案
+${accommodationText.trim()}
+
+# 自由記述（ユーザー入力）
+${userInput.trim() || '（記述なし）'}
+
+出力形式：
+1. 目的（例：チーム全体の集中力・ミスの削減を目指して）
+2. 依頼したい具体的なアクションと、それがチームにもたらすメリット
+3. 同僚に伝えるための具体的な文面（チャットや口頭での相談を想定した、親しみやすいトーン）`;
+      
+    } else {
+      // 上司・人事向けAIプロンプト
+      prompt = `あなたは、合理的配慮と生産性向上を両立させる調整のスペシャリストです。上司や人事が前向きに検討できる、建設的で論理的な「合理的配慮の調整案」を提示してください。
+
+👔 上司・人事向け
+次の困りごとと配慮案を、上司や人事に相談する想定で整理してください。
+
+条件：
+- 「要望」ではなく「提案」として書く
+- 業務への影響や実現性がイメージしやすいようにする
+- 協働姿勢を示す（会社への貢献意欲と、配慮が叶った際のメリットを明確にする）
+- 「他の社員に示しがつかない」などと言われないように、この調整が業務遂行上なぜ必要かというロジックを構成する
+- 依頼用の文面は、謙虚かつ前向きな姿勢を保ち、感謝の意と成果で貢献する意思を必ず盛り込む
+- 提案が実現した場合の費用対効果（生産性向上、ミス削減など）を間接的に示唆する
+
+# 困りごと
+${difficultyText.trim()}
+
+# 配慮案
+${accommodationText.trim()}
+
+# 自由記述（ユーザー入力）
+${userInput.trim() || '（記述なし）'}
+
+出力形式：
+1. 件名（例：「業務上の調整についてのご相談」）
+2. 本文（300〜400字程度、ビジネスメール調）
+3. 依頼のポイント（具体的な依頼時に留意すべき点）`;
+    }
+    
+    setGeneratedPrompt(prompt);
+  };
+  
+  // プロンプトをコピーする関数
+  const copyPrompt = () => {
+    if (!generatedPrompt) {
+      alert('プロンプトが生成されていません。');
+      return;
+    }
+    
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(generatedPrompt)
+        .then(() => {
+          alert('プロンプトをコピーしました');
+        })
+        .catch((err) => {
+          console.error('コピーに失敗しました:', err);
+          fallbackCopyTextToClipboard(generatedPrompt);
+        });
+    } else {
+      fallbackCopyTextToClipboard(generatedPrompt);
+    }
+  };
 
   useEffect(() => {
     const loadImages = async () => {
@@ -352,6 +543,28 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     };
     loadImages();
   }, []);
+  
+  // 初期化時にすべての困りごとを選択状態にし、各困りごとの最初の配慮案を自動選択する
+  useEffect(() => {
+    if (selectedDifficulties.length > 0 && selectedItems.difficulties.length === 0) {
+      const initialAccommodations: { [difficultyId: string]: string[] } = {};
+      
+      selectedDifficulties.forEach(difficulty => {
+        if (viewModel && selectedDomain) {
+          const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+          if (accommodations.length > 0) {
+            initialAccommodations[difficulty.id] = ['0']; // 最初の配慮案（インデックス0）を選択
+          }
+        }
+      });
+      
+      setSelectedItems(prev => ({
+        ...prev,
+        difficulties: selectedDifficulties.map(d => d.id),
+        accommodations: initialAccommodations
+      }));
+    }
+  }, [selectedDifficulties, selectedItems.difficulties.length, viewModel, selectedDomain]);
 
 
   const getCategoryIcon = (category: string) => {
@@ -376,9 +589,17 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       return;
     }
 
+    // 選択された困りごとのみを対象とする
+    const selectedDifficultiesToShow = getSelectedDifficulties();
+    
+    if (selectedDifficultiesToShow.length === 0) {
+      alert('困りごとを選択してください。');
+      return;
+    }
+
     // 配慮依頼案のテキストを直接構築
     let accommodationText = '';
-    selectedDifficulties.forEach((difficulty: any, index: number) => {
+    selectedDifficultiesToShow.forEach((difficulty: any, index: number) => {
       const category = getCategoryFromTitle(difficulty.title, viewModel);
       const categoryIcon = getCategoryIcon(category || '');
       
@@ -386,10 +607,16 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       accommodationText += `カテゴリ: ${category}\n`;
       
       const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
-      accommodations.forEach((acc: any, accIndex: number) => {
-        const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
-        accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
-      });
+      const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
+      
+      if (selectedAccommodations.length === 0) {
+        accommodationText += `（配慮案が選択されていません）\n`;
+      } else {
+        selectedAccommodations.forEach((acc: any, accIndex: number) => {
+          const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+          accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
+        });
+      }
       accommodationText += '\n';
     });
 
@@ -401,11 +628,13 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
     // 具体的配慮案の詳細を追加
     let detailedAccommodations = '';
-    selectedDifficulties.forEach((difficulty: any, index: number) => {
+    selectedDifficultiesToShow.forEach((difficulty: any, index: number) => {
       const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
-      if (accommodations.length > 0) {
+      const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
+      
+      if (selectedAccommodations.length > 0) {
         detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
-        accommodations.forEach((acc: any, accIndex: number) => {
+        selectedAccommodations.forEach((acc: any, accIndex: number) => {
           const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
           detailedAccommodations += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
           if (acc['詳細説明']) {
@@ -495,16 +724,25 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
   const handleDownloadPDF = async () => {
     try {
+      // 選択された困りごとのみを対象とする
+      const selectedDifficultiesToShow = getSelectedDifficulties();
+      
+      if (selectedDifficultiesToShow.length === 0) {
+        alert('困りごとを選択してください。');
+        return;
+      }
+      
       // console.log('PDF生成開始...');
-      // console.log('選択された困りごと:', selectedDifficulties);
+      // console.log('選択された困りごと:', selectedDifficultiesToShow);
       // console.log('画像データ:', base64Images);
       
       const pdfDoc = (
         <AccommodationPDFDocument
-          difficulties={selectedDifficulties}
+          difficulties={selectedDifficultiesToShow}
           base64Images={base64Images}
           viewModel={viewModel}
           selectedDomain={selectedDomain}
+          selectedItems={selectedItems}
         />
       );
       
@@ -579,69 +817,225 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       </div>
 
         
-        {/* 配慮案の確認エリア（アコーディオン形式） */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-gray-800 text-center mb-6">
+        {/* タブナビゲーション */}
+        <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+          <button
+            onClick={() => setActiveTab('accommodations')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'accommodations'
+                ? 'bg-white text-indigo-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
             📋 配慮案の確認
-          </h2>
+          </button>
+          <button
+            onClick={() => setActiveTab('prompt')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'prompt'
+                ? 'bg-white text-indigo-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            🤖 プロンプト生成
+          </button>
+        </div>
+
+        {/* 配慮案の確認タブ */}
+        {activeTab === 'accommodations' && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-800 text-center mb-6">
+              📋 配慮案の確認
+            </h2>
+            <p className="text-sm text-gray-600 text-center mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           
           {selectedDifficulties.map((item, idx) => {
             const category = getCategoryFromTitle(item.title, viewModel || null);
             const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
+            const isDifficultySelected = selectedItems.difficulties.includes(item.id);
+            const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
             
             return (
               <div key={idx} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                {/* 困りごとの選択チェックボックス */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{categoryStyle ? categoryStyle.icon : '🎯'}</span>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-                      <p className="text-sm text-gray-600">カテゴリ: {category}</p>
-                    </div>
+                    <input
+                      type="checkbox"
+                      id={`mobile-difficulty-${item.id}`}
+                      checked={isDifficultySelected}
+                      onChange={() => toggleDifficultySelection(item.id)}
+                      className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <label htmlFor={`mobile-difficulty-${item.id}`} className="flex-1 cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{categoryStyle ? categoryStyle.icon : '🎯'}</span>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                          <p className="text-sm text-gray-600">カテゴリ: {category}</p>
+                        </div>
+                      </div>
+                    </label>
                   </div>
                 </div>
                 
-                <div className="p-4">
-                  <div className="space-y-3">
-                    {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
-                      <div key={accIdx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-medium">
-                                配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
-                              </span>
-                              <span className="text-gray-800 font-medium">
-                                {acc['配慮案タイトル'] || acc.description}
-                              </span>
+                {/* 配慮案の選択（困りごとが選択されている場合のみ表示） */}
+                {isDifficultySelected && (
+                  <div className="p-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
+                    <div className="space-y-3">
+                      {accommodations.map((acc: any, accIdx: number) => {
+                        const accommodationId = String(accIdx);
+                        const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
+                        
+                        return (
+                          <div key={accIdx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div className="flex items-start gap-3">
+                              <input
+                                type="radio"
+                                name={`mobile-accommodation-${item.id}`}
+                                id={`mobile-accommodation-${item.id}-${accIdx}`}
+                                checked={isAccommodationSelected}
+                                onChange={() => setAccommodationSelection(item.id, accommodationId)}
+                                className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                              />
+                              <label htmlFor={`mobile-accommodation-${item.id}-${accIdx}`} className="flex-1 cursor-pointer">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-medium">
+                                        配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
+                                      </span>
+                                      <span className="text-gray-800 font-medium">
+                                        {acc['配慮案タイトル'] || acc.description}
+                                      </span>
+                                    </div>
+                                    {acc.bullets && acc.bullets.length > 0 && (
+                                      <ul className="ml-4 space-y-1">
+                                        {acc.bullets.map((bullet: string, bulletIdx: number) => (
+                                          <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
+                                            {bullet}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                    }}
+                                    className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
+                                    title="具体的な配慮案を表示"
+                                  >
+                                    ▶
+                                  </button>
+                                </div>
+                              </label>
                             </div>
-                            {acc.bullets && acc.bullets.length > 0 && (
-                              <ul className="ml-4 space-y-1">
-                                {acc.bullets.map((bullet: string, bulletIdx: number) => (
-                                  <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
-                                    {bullet}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
                           </div>
-                          <button
-                            onClick={() => openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '')}
-                            className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
-                            title="具体的な配慮案を表示"
-                          >
-                            ▶
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
+
+        {/* プロンプト生成タブ */}
+        {activeTab === 'prompt' && (
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+              🤖 AIプロンプト生成
+            </h2>
+            <p className="text-sm text-gray-600 text-center mb-6">選択した困りごとと配慮案に基づいて、話す相手に合わせたプロンプトを生成できます</p>
           
+          {/* モード選択 */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">話す相手を選択してください</h3>
+            <div className="space-y-3">
+              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="mobile-promptMode"
+                  value="colleague"
+                  checked={promptMode === 'colleague'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                />
+                <div className="ml-3">
+                  <div className="font-medium text-gray-700">同僚</div>
+                  <div className="text-sm text-gray-500">環境調整モード（協力的な依頼）</div>
+                </div>
+              </label>
+              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="mobile-promptMode"
+                  value="supervisor"
+                  checked={promptMode === 'supervisor'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                />
+                <div className="ml-3">
+                  <div className="font-medium text-gray-700">上長・人事</div>
+                  <div className="text-sm text-gray-500">合理的配慮モード（法的根拠に基づく依頼）</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          
+          {/* 自由記述入力 */}
+          <div className="mb-6">
+            <label htmlFor="mobile-userInput" className="block text-sm font-medium text-gray-700 mb-2">
+              自由記述（任意）
+            </label>
+            <textarea
+              id="mobile-userInput"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="職場の環境や状況、伝えたい追加の情報があれば記入してください"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+              rows={3}
+            />
+            <p className="text-xs text-gray-500 mt-1">この内容はAIプロンプトに含まれ、より具体的な提案が生成されます</p>
+          </div>
+          
+          {/* プロンプト生成ボタン */}
+          <div className="mb-6">
+            <button
+              onClick={generatePrompt}
+              className="w-full px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow"
+            >
+              AIプロンプトを生成
+            </button>
+            <p className="text-xs text-amber-600 mt-2 text-center">
+              ⚠️ このプロンプトによるAIの出力は、誤解を招く表現や不適切な内容が含まれる場合があります。使用前に必ず内容を確認し、ご自身の判断で修正してください。
+            </p>
+          </div>
+          
+          {/* 生成されたプロンプト表示 */}
+          {generatedPrompt && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">生成されたAIプロンプト</h3>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
+                  {generatedPrompt}
+                </pre>
+              </div>
+              <button
+                onClick={copyPrompt}
+                className="mt-3 w-full px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+              >
+                プロンプトをコピー
+              </button>
+            </div>
+          )}
+          </div>
+        )}
 
         {/* 最終ガイド（シリアスな締め） */}
         <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
@@ -762,6 +1156,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       <div>
         <div className="bg-white rounded-xl shadow p-6 mb-10">
           <h3 className="text-lg font-bold text-gray-800 mb-4">配慮依頼案</h3>
+          <p className="text-sm text-gray-600 mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           <ul className="space-y-6">
             {!viewModel ? (
               <li className="text-center text-gray-500 py-8">
@@ -771,62 +1166,96 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
               selectedDifficulties.map((item, idx) => {
                 const category = getCategoryFromTitle(item.title, viewModel || null);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
+                const isDifficultySelected = selectedItems.difficulties.includes(item.id);
+                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
               
               return (
                 <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    {categoryStyle && (
-                      <div 
-                        className="flex items-center gap-3 mb-2 w-full px-3 py-2 rounded-lg text-sm font-medium"
-                        style={{ backgroundColor: categoryStyle.bgColor }}
-                      >
-                        <span className="text-lg">{categoryStyle.icon}</span>
-                        <span className="text-gray-700 text-lg font-medium">{item.title}</span>
-                      </div>
-                    )}
+                  {/* 困りごとの選択チェックボックス */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <input
+                      type="checkbox"
+                      id={`difficulty-${item.id}`}
+                      checked={isDifficultySelected}
+                      onChange={() => toggleDifficultySelection(item.id)}
+                      className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <label htmlFor={`difficulty-${item.id}`} className="flex-1 cursor-pointer">
+                      {categoryStyle && (
+                        <div 
+                          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium"
+                          style={{ backgroundColor: categoryStyle.bgColor }}
+                        >
+                          <span className="text-lg">{categoryStyle.icon}</span>
+                          <span className="text-gray-700 text-lg font-medium">{item.title}</span>
+                        </div>
+                      )}
+                    </label>
                   </div>
                   {categoryStyle && (
-                    <div className="text-sm text-gray-500 mb-3 ml-3">
+                    <div className="text-sm text-gray-500 mb-3 ml-8">
                       カテゴリ: {category}
                     </div>
                   )}
-                <ul className="space-y-4 ml-6 border-l-2 border-gray-200 pl-4">
-                  {getAccommodations(item.title, viewModel || null, selectedDomain).map((acc: any, accIdx: number) => (
-                    <li key={accIdx} className="relative">
-                      <div className="flex items-start gap-2">
-                        <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap">
-                          配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
-                        </span>
-                        <div className="flex-1">
-                          <div className="flex items-center">
-                            <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
-                            <button
-                              onClick={() => openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '')}
-                              className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
-                              title="具体的な配慮案を表示"
-                            >
-                              ▶
-                            </button>
-                          </div>
-                          {/* 新しいデータ構造のbulletsを箇条書きで表示 */}
-                          {acc.bullets && acc.bullets.length > 0 && (
-                            <ul className="mt-2 ml-4 space-y-1">
-                              {acc.bullets.map((bullet: string, bulletIdx: number) => (
-                                <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
-                                  {bullet}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            );
-          })
+                  
+                  {/* 配慮案の選択（困りごとが選択されている場合のみ表示） */}
+                  {isDifficultySelected && (
+                    <div className="ml-8 border-l-2 border-gray-200 pl-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
+                      <ul className="space-y-3">
+                        {accommodations.map((acc: any, accIdx: number) => {
+                          const accommodationId = String(accIdx);
+                          const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
+                          
+                          return (
+                            <li key={accIdx} className="relative">
+                              <div className="flex items-start gap-3">
+                                <input
+                                  type="radio"
+                                  name={`accommodation-${item.id}`}
+                                  id={`accommodation-${item.id}-${accIdx}`}
+                                  checked={isAccommodationSelected}
+                                  onChange={() => setAccommodationSelection(item.id, accommodationId)}
+                                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                                />
+                                <label htmlFor={`accommodation-${item.id}-${accIdx}`} className="flex-1 cursor-pointer">
+                                  <div className="flex items-center">
+                                    <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap mr-2">
+                                      配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
+                                    </span>
+                                    <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                      }}
+                                      className="ml-3 text-indigo-600 hover:text-indigo-800 text-lg transition-colors flex-shrink-0"
+                                      title="具体的な配慮案を表示"
+                                    >
+                                      ▶
+                                    </button>
+                                  </div>
+                                  {/* 新しいデータ構造のbulletsを箇条書きで表示 */}
+                                  {acc.bullets && acc.bullets.length > 0 && (
+                                    <ul className="mt-2 ml-4 space-y-1">
+                                      {acc.bullets.map((bullet: string, bulletIdx: number) => (
+                                        <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
+                                          {bullet}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </label>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              );
+            })
             )}
           </ul>
 
@@ -838,6 +1267,94 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
               <li key={i} className="text-gray-700">・{point}</li>
             ))}
           </ul>
+        </div>
+        
+        {/* プロンプト生成エリア */}
+        <div className="bg-white rounded-xl shadow p-6 mb-10">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">AIプロンプト生成</h3>
+          <p className="text-sm text-gray-600 mb-6">選択した困りごとと配慮案に基づいて、AIに渡すプロンプトを生成できます</p>
+          
+          {/* モード選択 */}
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">話す相手を選択してください</h4>
+            <div className="flex gap-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="promptMode"
+                  value="colleague"
+                  checked={promptMode === 'colleague'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                />
+                <span className="ml-2 text-gray-700">
+                  <span className="font-medium">同僚</span>
+                  <span className="text-sm text-gray-500 block">環境調整モード（協力的な依頼）</span>
+                </span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="promptMode"
+                  value="supervisor"
+                  checked={promptMode === 'supervisor'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                />
+                <span className="ml-2 text-gray-700">
+                  <span className="font-medium">上長・人事</span>
+                  <span className="text-sm text-gray-500 block">合理的配慮モード（法的根拠に基づく依頼）</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          {/* 自由記述入力 */}
+          <div className="mb-6">
+            <label htmlFor="userInput" className="block text-sm font-medium text-gray-700 mb-2">
+              自由記述（任意）
+            </label>
+            <textarea
+              id="userInput"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="職場の環境や状況、伝えたい追加の情報があれば記入してください"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+              rows={3}
+            />
+            <p className="text-xs text-gray-500 mt-1">この内容はAIプロンプトに含まれ、より具体的な提案が生成されます</p>
+          </div>
+          
+          {/* プロンプト生成ボタン */}
+          <div className="mb-6">
+            <button
+              onClick={generatePrompt}
+              className="w-full px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow"
+            >
+              AIプロンプトを生成
+            </button>
+            <p className="text-xs text-amber-600 mt-2 text-center">
+              ⚠️ このプロンプトによるAIの出力は、誤解を招く表現や不適切な内容が含まれる場合があります。使用前に必ず内容を確認し、ご自身の判断で修正してください。
+            </p>
+          </div>
+          
+          {/* 生成されたプロンプト表示 */}
+          {generatedPrompt && (
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">生成されたAIプロンプト</h4>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
+                  {generatedPrompt}
+                </pre>
+              </div>
+              <button
+                onClick={copyPrompt}
+                className="mt-3 px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+              >
+                プロンプトをコピー
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-10 flex flex-wrap gap-4 mb-4 justify-center">
