@@ -357,7 +357,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   });
   
   // プロンプト生成用のstate
-  const [promptMode, setPromptMode] = useState<'colleague' | 'supervisor'>('colleague');
+  const [promptMode, setPromptMode] = useState<'colleague' | 'supervisor'>('supervisor');
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [userInput, setUserInput] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
@@ -457,10 +457,10 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
 条件：
 - 「配慮」や「障害」といった言葉は避け、「チームのルール」「作業の効率化」といった前向きな言葉に置き換える
-- 相手に負担を強いる印象を避け、「お互いに協力し合う」という相互協力の姿勢を示す
+- 相手に負担を強いる印象を避け、「お互いに協力し合う」という姿勢を示す
 - この工夫が、個人のミスやストレスを減らすだけでなく、チーム全体の生産性向上につながることを示唆する
-- 依頼内容は、同僚が「簡単に」「すぐに」実行できる具体的なアクションとして提示する
-- 依頼する文面は、親しみやすく、かつ建設的なトーンとする
+- 同僚に「簡単に」「すぐに」できる具体的アクションを提示する
+- 依頼文は、親しみやすく、かつ建設的なトーンにする
 
 # 困りごと
 ${difficultyText.trim()}
@@ -490,6 +490,7 @@ ${userInput.trim() || '（記述なし）'}
 - 「他の社員に示しがつかない」などと言われないように、この調整が業務遂行上なぜ必要かというロジックを構成する
 - 依頼用の文面は、謙虚かつ前向きな姿勢を保ち、感謝の意と成果で貢献する意思を必ず盛り込む
 - 提案が実現した場合の費用対効果（生産性向上、ミス削減など）を間接的に示唆する
+- 上司や相手方に取ってほしいアクションが明確になるように依頼文を構成する
 
 # 困りごと
 ${difficultyText.trim()}
@@ -812,7 +813,7 @@ ${userInput.trim() || '（記述なし）'}
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-base md:text-lg">
-          選んだカードから、実用的な配慮案を生成しました
+          選んだカードから実用的な配慮案を準備しました。必要な案を選び、AIに依頼文を作成してもらえるようプロンプトを作成しましょう。
         </p>
       </div>
 
@@ -955,22 +956,8 @@ ${userInput.trim() || '（記述なし）'}
           
           {/* モード選択 */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">話す相手を選択してください</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">モードを選択してください</h3>
             <div className="space-y-3">
-              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <input
-                  type="radio"
-                  name="mobile-promptMode"
-                  value="colleague"
-                  checked={promptMode === 'colleague'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
-                />
-                <div className="ml-3">
-                  <div className="font-medium text-gray-700">同僚</div>
-                  <div className="text-sm text-gray-500">環境調整モード（協力的な依頼）</div>
-                </div>
-              </label>
               <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                 <input
                   type="radio"
@@ -981,8 +968,22 @@ ${userInput.trim() || '（記述なし）'}
                   className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
                 />
                 <div className="ml-3">
-                  <div className="font-medium text-gray-700">上長・人事</div>
-                  <div className="text-sm text-gray-500">合理的配慮モード（法的根拠に基づく依頼）</div>
+                  <div className="font-medium text-gray-700">合理的配慮モード</div>
+                  <div className="text-sm text-gray-500">上長・人事に法的根拠に基づく依頼</div>
+                </div>
+              </label>
+              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <input
+                  type="radio"
+                  name="mobile-promptMode"
+                  value="colleague"
+                  checked={promptMode === 'colleague'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                />
+                <div className="ml-3">
+                  <div className="font-medium text-gray-700">環境調整モード</div>
+                  <div className="text-sm text-gray-500">同僚に協力的な依頼</div>
                 </div>
               </label>
             </div>
@@ -1147,7 +1148,7 @@ ${userInput.trim() || '（記述なし）'}
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
         <p className="text-gray-600 text-lg">
-          選んだカードから、実用的な配慮案を生成しました
+          選んだカードから実用的な配慮案を準備しました。必要な案を選び、AIに依頼文を作成してもらえるようプロンプトを作成しましょう。
         </p>
       </div>
 
@@ -1317,22 +1318,8 @@ ${userInput.trim() || '（記述なし）'}
           
           {/* モード選択 */}
           <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">話す相手を選択してください</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-3">モードを選択してください</h4>
             <div className="flex gap-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="promptMode"
-                  value="colleague"
-                  checked={promptMode === 'colleague'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                />
-                <span className="ml-2 text-gray-700">
-                  <span className="font-medium">同僚</span>
-                  <span className="text-sm text-gray-500 block">環境調整モード（協力的な依頼）</span>
-                </span>
-              </label>
               <label className="flex items-center cursor-pointer">
                 <input
                   type="radio"
@@ -1343,8 +1330,22 @@ ${userInput.trim() || '（記述なし）'}
                   className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                 />
                 <span className="ml-2 text-gray-700">
-                  <span className="font-medium">上長・人事</span>
-                  <span className="text-sm text-gray-500 block">合理的配慮モード（法的根拠に基づく依頼）</span>
+                  <span className="font-medium">合理的配慮モード</span>
+                  <span className="text-sm text-gray-500 block">上長・人事に法的根拠に基づく依頼</span>
+                </span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="promptMode"
+                  value="colleague"
+                  checked={promptMode === 'colleague'}
+                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                />
+                <span className="ml-2 text-gray-700">
+                  <span className="font-medium">環境調整モード</span>
+                  <span className="text-sm text-gray-500 block">同僚に協力的な依頼</span>
                 </span>
               </label>
             </div>
