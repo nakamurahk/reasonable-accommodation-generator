@@ -6,11 +6,11 @@ interface SideNavProps {
 
 const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
        const steps = [
-         { id: 'initial', title: '特性と環境を選ぶ' },
-         { id: 'thinking', title: '困りごとを集める' },
-         { id: 'deckbuilding', title: '重要候補を整える' },
-         { id: 'finalselection', title: '最優先を決める（＝3つ選ぶ）' },
-         { id: 'display', title: '結果を確認する' },
+         { id: 'initial', title: '出発ステージ' },
+         { id: 'thinking', title: '探索ステージ' },
+         { id: 'deckbuilding', title: '選抜ステージ' },
+         { id: 'finalselection', title: '決定ステージ' },
+         { id: 'display', title: '確認ステージ' },
        ];
 
   return (

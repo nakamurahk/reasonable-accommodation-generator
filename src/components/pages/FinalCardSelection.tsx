@@ -54,8 +54,8 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
           <p className="text-gray-700 text-lg leading-relaxed">
-            🎯 "最終選抜ステージ"です。<br />
-            困りごとデッキから3枚のカードを選び、あなたが最も重要だと感じる困りごとにフォーカスしましょう。
+            🎯 決定のステージ<br />
+            残ったカードの中から3枚を選び、あなたが最も大事だと感じる困りごとにフォーカスします。
           </p>
         </div>
 

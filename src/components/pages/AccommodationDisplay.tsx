@@ -269,11 +269,11 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
     String(today.getDate()).padStart(2, '0');
 
   return (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>
-          このページは、あなたの支援を一歩前に進めるための"調整マニュアル"です
-        </Text>
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.title}>
+        このページは、あなたの支援を一歩前に進めるための"調整マニュアル"です
+      </Text>
         <Text style={styles.mainTitle}>配慮依頼案</Text>
         {difficulties.map((item, idx) => (
           <View key={idx} style={styles.section}>
@@ -298,7 +298,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
                   return (
                     <View style={styles.accommodationItem}>
                       <Text style={styles.accommodationText}>（配慮案が選択されていません）</Text>
-                    </View>
+              </View>
                   );
                 }
                 
@@ -323,16 +323,16 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
             {points.map((point, idx) => (
               <View key={idx} style={styles.accommodationItem}>
                 <Text style={styles.pointText}>・{point}</Text>
-              </View>
-            ))}
-          </View>
+      </View>
+        ))}
+      </View>
         </View>
         <Text style={styles.footer}>
           {dateStr} 合理的配慮ジェネレータ
         </Text>
-      </Page>
-    </Document>
-  );
+    </Page>
+  </Document>
+);
 };
 
 export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
@@ -788,7 +788,7 @@ ${userInput.trim() || '（記述なし）'}
 
   // モバイル用UI
   if (isMobile) {
-    return (
+  return (
       <div className="max-w-none mx-auto p-4 space-y-6">
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -870,7 +870,7 @@ ${userInput.trim() || '（記述なし）'}
                     <label htmlFor={`mobile-difficulty-${item.id}`} className="flex-1 cursor-pointer">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{categoryStyle ? categoryStyle.icon : '🎯'}</span>
-                        <div>
+      <div>
                           <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
                           <p className="text-sm text-gray-600">カテゴリ: {category}</p>
                         </div>
@@ -950,7 +950,7 @@ ${userInput.trim() || '（記述なし）'}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-6">
             <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
               🤖 AIプロンプト生成
-            </h2>
+        </h2>
             <p className="text-sm text-gray-600 text-center mb-6">選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。</p>
           
           {/* モード選択 */}
@@ -1154,22 +1154,19 @@ ${userInput.trim() || '（記述なし）'}
       
       <div>
         <div className="bg-white rounded-xl shadow p-6 mb-10">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">配慮依頼案</h3>
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+            📋 配慮案の確認
+          </h2>
           <p className="text-sm text-gray-600 mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           <ul className="space-y-6">
-            {!viewModel ? (
-              <li className="text-center text-gray-500 py-8">
-                データを読み込み中...
-              </li>
-            ) : (
-              selectedDifficulties.map((item, idx) => {
+            {selectedDifficulties.map((item, idx) => {
                 const category = getCategoryFromTitle(item.title, viewModel || null);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
                 const isDifficultySelected = selectedItems.difficulties.includes(item.id);
                 const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
               
               return (
-                <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+              <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
                   {/* 困りごとの選択チェックボックス */}
                   <div className="flex items-center gap-3 mb-4">
                     <input
@@ -1187,7 +1184,7 @@ ${userInput.trim() || '（記述なし）'}
                         >
                           <span className="text-lg">{categoryStyle.icon}</span>
                           <span className="text-gray-700 text-lg font-medium">{item.title}</span>
-                        </div>
+                </div>
                       )}
                     </label>
                   </div>
@@ -1221,7 +1218,7 @@ ${userInput.trim() || '（記述なし）'}
                                   <div className="flex items-center">
                                     <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap mr-2">
                                       配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
-                                    </span>
+                      </span>
                                     <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
                                     <button
                                       onClick={(e) => {
@@ -1240,32 +1237,77 @@ ${userInput.trim() || '（記述なし）'}
                                       {acc.bullets.map((bullet: string, bulletIdx: number) => (
                                         <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
                                           {bullet}
-                                        </li>
-                                      ))}
-                                    </ul>
+                    </li>
+                  ))}
+                </ul>
                                   )}
                                 </label>
                               </div>
-                            </li>
+              </li>
                           );
                         })}
-                      </ul>
-                    </div>
+          </ul>
+        </div>
                   )}
                 </li>
               );
-            })
-            )}
+            })}
           </ul>
 
         </div>
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">合意形成のポイント</h3>
-          <ul className="space-y-2">
-            {points.map((point, i) => (
-              <li key={i} className="text-gray-700">・{point}</li>
-            ))}
-          </ul>
+        
+        {/* 合意形成・調整のポイント */}
+        <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200 mb-10">
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+            📖 合意形成・調整のポイント
+          </h2>
+          
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">数より質を重視：</span>
+                  <span className="text-gray-700">配慮は3件以内に絞るのが理想</span>
+      </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">配慮と負担のバランスを意識：</span>
+                  <span className="text-gray-700">双方に無理のない形を探る</span>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">人事や支援担当を必ず通す：</span>
+                  <span className="text-gray-700">共有してリスクを減らす</span>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">段階的な導入を検討：</span>
+                  <span className="text-gray-700">一気にではなく、試行→拡張の流れで</span>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">定期的に見直す：</span>
+                  <span className="text-gray-700">状況に応じて調整や更新を行う</span>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-600 mt-1 font-bold">•</span>
+                <div>
+                  <span className="text-gray-800 font-medium">その場で即決しない：</span>
+                  <span className="text-gray-700">「持ち帰って検討します」と伝える安心ワード</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
         
         {/* プロンプト生成エリア */}
@@ -1380,16 +1422,17 @@ ${userInput.trim() || '（記述なし）'}
       </div>
       <div className="flex justify-between mt-8">
         <button
-          onClick={onRestart}
-          className="px-8 py-3 rounded-full bg-indigo-500 text-white font-semibold text-lg shadow hover:bg-indigo-600 transition disabled:bg-gray-300 disabled:text-gray-400"
-        >
-          最初からやり直す
-        </button>
-        <button
           onClick={onBack}
-          className="px-8 py-3 rounded-full border border-gray-300 bg-white text-gray-700 font-semibold text-lg shadow hover:bg-gray-100 transition"
+          className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors shadow-lg"
         >
-          前のページに戻る
+          ⬅️ 前のステップへ
+        </button>
+
+        <button
+          onClick={onRestart}
+          className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors shadow-lg"
+        >
+          🎮 最初から
         </button>
       </div>
     </div>

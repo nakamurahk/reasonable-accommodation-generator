@@ -880,8 +880,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            🔍 ここからは「困りごとの地図」を広げていきます。<br />
-            当てはまるカードをタップして集め、自分のコレクションに追加してください。集めたカードは整理でき、🔗グラフ表示で関連性が可視化されていきます。
+            🗺️ 探索のステージ<br />
+            「困りごとの地図」を広げ、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
           </p>
         </div>
         

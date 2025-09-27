@@ -144,8 +144,8 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
         {/* 説明文 */}
                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                  <p className="text-gray-700 text-lg leading-relaxed">
-                   🔍 "核心を探すステージ"です。<br />
-                   コレクションしたカードから最大10枚を選び、あなたが特に大事だと感じる困りごとを絞り込みましょう。
+                   💡 選抜のステージ<br />
+                   集めたカードの中から最大10枚を選び、あなたにとって特に重要だと感じる困りごとを絞り込みましょう。
                  </p>
                </div>
 

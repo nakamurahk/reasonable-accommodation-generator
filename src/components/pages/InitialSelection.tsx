@@ -73,8 +73,9 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                 {/* 説明文 */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            🔍 あなたの困りごとを探る旅の第一歩です。<br />
-まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて、具体的なシチュエーションが現れます。
+            🔍 出発のステージ<br />
+ここから「困りごとを探す旅」が始まります。<br />
+まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
           </p>
         </div>
         
@@ -206,8 +207,9 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
             {/* 説明文 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                   <p className="text-gray-700 text-lg leading-relaxed">
-            🔍 あなたの困りごとを探る旅の第一歩です。<br />
-まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて、具体的なシチュエーションが現れます。
+            🔍 出発のステージ<br />
+ここから「困りごとを探す旅」が始まります。<br />
+まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
           </p>
       </div>
       
