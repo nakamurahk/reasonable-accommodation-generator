@@ -1001,7 +1001,7 @@ ${userInput.trim() || '（記述なし）'}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
               rows={3}
             />
-            <p className="text-xs text-gray-500 mt-1">この内容はAIプロンプトに含まれ、より具体的な提案が生成されます</p>
+            <p className="text-xs text-gray-500 mt-1">生成されたプロンプトをChatGPT等のAIに入力する事で、あなたの状況に合わせた配慮依頼文を生成できます。</p>
           </div>
           
           {/* プロンプト生成ボタン */}
@@ -1322,7 +1322,7 @@ ${userInput.trim() || '（記述なし）'}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
               rows={3}
             />
-            <p className="text-xs text-gray-500 mt-1">この内容はAIプロンプトに含まれ、より具体的な提案が生成されます</p>
+            <p className="text-xs text-gray-500 mt-1">生成されたプロンプトをChatGPT等のAIに入力する事で、あなたの状況に合わせた配慮依頼文を生成できます。</p>
           </div>
           
           {/* プロンプト生成ボタン */}
