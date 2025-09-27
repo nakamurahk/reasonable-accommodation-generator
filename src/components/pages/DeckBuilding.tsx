@@ -3,7 +3,7 @@ import { ViewModel } from '../../types/newDataStructure';
 
 type DeckBuildingProps = {
   selectedDifficulties: any[];
-  onComplete: (selectedDifficulties: any[]) => void;
+  onComplete: (data: { selectedCards: any[]; originalCards: any[] }) => void;
   onBack: () => void;
   viewModel: ViewModel | null | undefined;
 };
@@ -76,7 +76,11 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
   };
 
   const handleNext = () => {
-    onComplete(deck);
+    // 選択されたカードと元のカードプール全体を渡す
+    onComplete({
+      selectedCards: deck,
+      originalCards: selectedDifficulties // 元の全カードプール
+    });
   };
 
   return (

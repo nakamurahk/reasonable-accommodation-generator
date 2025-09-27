@@ -951,7 +951,7 @@ ${userInput.trim() || '（記述なし）'}
             <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
               🤖 AIプロンプト生成
             </h2>
-            <p className="text-sm text-gray-600 text-center mb-6">選択した困りごとと配慮案に基づいて、話す相手に合わせたプロンプトを生成できます</p>
+            <p className="text-sm text-gray-600 text-center mb-6">選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。</p>
           
           {/* モード選択 */}
           <div className="mb-6">
@@ -997,11 +997,10 @@ ${userInput.trim() || '（記述なし）'}
               id="mobile-userInput"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="職場の環境や状況、伝えたい追加の情報があれば記入してください"
+              placeholder="ご自分の環境や状況において、伝えたい追加の情報があれば記入してください"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
               rows={3}
             />
-            <p className="text-xs text-gray-500 mt-1">生成されたプロンプトをChatGPT等のAIに入力する事で、あなたの状況に合わせた配慮依頼文を生成できます。</p>
           </div>
           
           {/* プロンプト生成ボタン */}
@@ -1013,7 +1012,7 @@ ${userInput.trim() || '（記述なし）'}
               AIプロンプトを生成
             </button>
             <p className="text-xs text-amber-600 mt-2 text-center">
-              ⚠️ このプロンプトによるAIの出力は、誤解を招く表現や不適切な内容が含まれる場合があります。使用前に必ず内容を確認し、ご自身の判断で修正してください。
+              ⚠️ AIの出力は参考用です。必ず内容を確認し、必要に応じて修正してください。
             </p>
           </div>
           
@@ -1272,7 +1271,7 @@ ${userInput.trim() || '（記述なし）'}
         {/* プロンプト生成エリア */}
         <div className="bg-white rounded-xl shadow p-6 mb-10">
           <h3 className="text-lg font-bold text-gray-800 mb-4">AIプロンプト生成</h3>
-          <p className="text-sm text-gray-600 mb-6">選択した困りごとと配慮案に基づいて、AIに渡すプロンプトを生成できます</p>
+          <p className="text-sm text-gray-600 mb-6">選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。</p>
           
           {/* モード選択 */}
           <div className="mb-6">
@@ -1318,11 +1317,10 @@ ${userInput.trim() || '（記述なし）'}
               id="userInput"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="職場の環境や状況、伝えたい追加の情報があれば記入してください"
+              placeholder="ご自分の環境や状況において、伝えたい追加の情報があれば記入してください"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
               rows={3}
             />
-            <p className="text-xs text-gray-500 mt-1">生成されたプロンプトをChatGPT等のAIに入力する事で、あなたの状況に合わせた配慮依頼文を生成できます。</p>
           </div>
           
           {/* プロンプト生成ボタン */}
@@ -1334,7 +1332,7 @@ ${userInput.trim() || '（記述なし）'}
               AIプロンプトを生成
             </button>
             <p className="text-xs text-amber-600 mt-2 text-center">
-              ⚠️ このプロンプトによるAIの出力は、誤解を招く表現や不適切な内容が含まれる場合があります。使用前に必ず内容を確認し、ご自身の判断で修正してください。
+              ⚠️ AIの出力は参考用です。必ず内容を確認し、必要に応じて修正してください。
             </p>
           </div>
           

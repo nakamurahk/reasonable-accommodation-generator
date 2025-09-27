@@ -518,7 +518,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   // カテゴリタブのレンダリング
   const renderCategoryTabs = () => {
     if (isMobile) {
-      return (
+  return (
         <div className="grid grid-cols-2 gap-2 mb-6">
           {CATEGORIES.map(category => {
             const count = difficultiesByCategory[category]?.length || 0;
@@ -991,12 +991,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
+                    <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
                           {isSelected && (
                             <div className="ml-auto">
                               <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
-                              </div>
+                  </div>
                             </div>
                           )}
                         </div>
@@ -1009,9 +1009,9 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       >
                         <span className="transition-all duration-200">
                           {isExpanded ? '▲' : '▼'}
-                        </span>
+                  </span>
                         <span className="text-xs">{isExpanded ? '閉じる' : '詳細'}</span>
-                      </button>
+                </button>
                     </div>
                   </div>
 
@@ -1066,12 +1066,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               </div>
               
               <div className="text-center">
-                <button
+              <button
                   onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
                   className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
-                >
+              >
                   残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
-                </button>
+              </button>
               </div>
             </div>
           )}
@@ -1090,13 +1090,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     disabled
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
                   />
-                  <button
+                <button
                     onClick={handleAddCustom}
                     disabled
                     className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
                   >
                     送信
-                  </button>
+                </button>
                 </div>
                 {customDifficulties.length > 0 && (
                   <div className="space-y-2">
@@ -1132,7 +1132,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
         {/* ボタン */}
         <div className="flex justify-between mt-6">
-          <button
+              <button
             onClick={onBack}
             className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
           >
@@ -1144,7 +1144,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステップへ
-          </button>
+              </button>
         </div>
       </div>
     );
@@ -1332,10 +1332,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     </div>
                     ))}
                   </div>
-                </div>
-              )}
             </div>
-            
+          )}
+        </div>
+
             {/* モーダルフッター */}
             <div className="px-6 py-4 border-t bg-gray-50">
               <button
@@ -1360,8 +1360,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       </div>
       
       {/* ビューモード切り替えタブ */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex items-center gap-4">
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex items-center gap-4">
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button
               onClick={() => setViewMode('list')}
@@ -1668,7 +1668,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           >
             🎮 次のステップへ
           </button>
-      </div>
+        </div>
       
       {/* PC版カードの束（リスト表示時のみ） */}
       {viewMode === 'list' && (
@@ -1702,7 +1702,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   <div className="text-sm mb-1">{getCategoryIcon(addingCard.category)}</div>
                   <div className="text-xs text-gray-800 text-center leading-tight">
                     {addingCard.title.length > 6 ? addingCard.title.substring(0, 6) + '...' : addingCard.title}
-                  </div>
+      </div>
                 </div>
               </div>
             )}

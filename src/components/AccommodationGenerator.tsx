@@ -73,6 +73,7 @@ const AccommodationGenerator: React.FC = () => {
         },
         selectedDifficulties: savedData.selectedDifficulties || [],
         displayDifficulties: savedData.displayDifficulties || [],
+        originalDifficulties: savedData.originalDifficulties || [],
       };
     }
     return {
@@ -83,6 +84,7 @@ const AccommodationGenerator: React.FC = () => {
       },
       selectedDifficulties: [],
       displayDifficulties: [],
+      originalDifficulties: [],
     };
   };
 
@@ -90,6 +92,7 @@ const AccommodationGenerator: React.FC = () => {
   const [selection, setSelection] = useState<Selection>(loadSavedData().selection);
   const [selectedDifficulties, setSelectedDifficulties] = useState<any[]>(loadSavedData().selectedDifficulties);
   const [displayDifficulties, setDisplayDifficulties] = useState<any[]>(loadSavedData().displayDifficulties);
+  const [originalDifficulties, setOriginalDifficulties] = useState<any[]>(loadSavedData().originalDifficulties || []);
   const [viewModel, setViewModel] = useState<ViewModel | null | undefined>(null);
   const viewModelRef = useRef<ViewModel | null | undefined>(null);
   
@@ -103,6 +106,17 @@ const AccommodationGenerator: React.FC = () => {
   useEffect(() => {
     const newStep = getCurrentStep();
     setCurrentStep(newStep);
+    
+    // ステップ③（deckbuilding）に直接アクセスした時は、元の全選択肢を復元
+    if (newStep === 'deckbuilding') {
+      const savedData = loadFromLocalStorage();
+      if (savedData && savedData.originalDifficulties && savedData.originalDifficulties.length > 0) {
+        setSelectedDifficulties(savedData.originalDifficulties);
+      } else if (savedData && savedData.selectedDifficulties) {
+        setSelectedDifficulties(savedData.selectedDifficulties);
+      }
+    }
+    
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
@@ -172,14 +186,20 @@ const AccommodationGenerator: React.FC = () => {
     updateStep('deckbuilding');
   };
 
-  const handleDeckBuildingComplete = (difficulties: any[]) => {
-    setSelectedDifficulties(difficulties);
+  const handleDeckBuildingComplete = (data: any) => {
+    // 新しいデータ構造に対応
+    const selectedCards = data.selectedCards || data; // 後方互換性のため
+    const originalCards = data.originalCards || data; // 後方互換性のため
+    
+    setSelectedDifficulties(selectedCards);
+    setOriginalDifficulties(originalCards); // 元の全選択肢を保存
     
     // LocalStorageに保存
     saveToLocalStorage({
       selection,
-      selectedDifficulties: difficulties,
+      selectedDifficulties: selectedCards,
       displayDifficulties,
+      originalDifficulties: originalCards, // 元の全選択肢を保存
     });
     
     updateStep('finalselection');
@@ -188,11 +208,12 @@ const AccommodationGenerator: React.FC = () => {
   const handleFinalSelectionComplete = (difficulties: any[]) => {
     setDisplayDifficulties(difficulties);
     
-    // LocalStorageに保存
+    // LocalStorageに保存（originalDifficultiesは保持）
     saveToLocalStorage({
       selection,
       selectedDifficulties,
       displayDifficulties: difficulties,
+      originalDifficulties, // 元の全選択肢を保持
     });
     
     updateStep('display');
@@ -208,6 +229,7 @@ const AccommodationGenerator: React.FC = () => {
     setSelection(emptySelection);
     setSelectedDifficulties([]);
     setDisplayDifficulties([]);
+    setOriginalDifficulties([]);
     
     // LocalStorageをクリア
     clearLocalStorage();
@@ -222,6 +244,13 @@ const AccommodationGenerator: React.FC = () => {
       updateStep('finalselection');
     } else if (currentStep === 'finalselection') {
       // console.log('Moving from finalselection to deckbuilding');
+      // ステップ③に戻る時は、元の全選択肢を復元
+      const savedData = loadFromLocalStorage();
+      if (savedData && savedData.originalDifficulties && savedData.originalDifficulties.length > 0) {
+        setSelectedDifficulties(savedData.originalDifficulties);
+      } else if (savedData && savedData.selectedDifficulties) {
+        setSelectedDifficulties(savedData.selectedDifficulties);
+      }
       updateStep('deckbuilding');
     } else if (currentStep === 'deckbuilding') {
       // console.log('Moving from deckbuilding to thinking');
