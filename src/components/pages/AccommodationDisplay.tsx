@@ -361,6 +361,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [userInput, setUserInput] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
+  const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
   
   // ファイル名の生成（YYYYMMDD形式）
   const today = new Date();
@@ -787,6 +788,125 @@ ${userInput.trim() || '（記述なし）'}
     />
   );
 
+  // プロンプト生成モーダルをレンダリング
+  const renderPromptModal = () => {
+    if (!showPromptModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto mx-auto">
+          <div className="relative p-4 border-b">
+            <h3 className="text-lg font-semibold text-gray-800 text-center">🤖 AIプロンプト生成</h3>
+            <div className="border-t border-gray-200 my-3"></div>
+            <p className="text-sm text-gray-600 text-center">
+              選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。
+            </p>
+            <button
+              onClick={() => setShowPromptModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+          <div className="p-4">
+            {/* プロンプト生成タブの内容をここに配置 */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-md font-medium text-gray-700 mb-3">モードを選択してください</h4>
+                <div className="space-y-3">
+                  <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="promptMode"
+                      value="supervisor"
+                      checked={promptMode === 'supervisor'}
+                      onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                    />
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-700">合理的配慮モード</div>
+                      <div className="text-sm text-gray-500">上長・人事に法的根拠に基づく依頼</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="promptMode"
+                      value="colleague"
+                      checked={promptMode === 'colleague'}
+                      onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
+                    />
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-700">環境調整モード</div>
+                      <div className="text-sm text-gray-500">同僚に協力的な依頼</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  追加の情報や要望があれば記入してください（任意）
+                </label>
+                <textarea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="例：特に伝えたいこと、状況の詳細など"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={generatePrompt}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                  プロンプトを生成
+                </button>
+                <button
+                  onClick={() => setShowPromptModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  キャンセル
+                </button>
+              </div>
+
+              {generatedPrompt && (
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      生成されたプロンプト
+                    </label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(generatedPrompt);
+                          alert('クリップボードにコピーしました！');
+                        } catch (err) {
+                          alert('コピーに失敗しました。手動でコピーしてください。');
+                        }
+                      }}
+                      className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition"
+                    >
+                      クリップボードにコピー
+                    </button>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
+                      {generatedPrompt}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // モバイル用UI
   if (isMobile) {
   return (
@@ -806,6 +926,7 @@ ${userInput.trim() || '（記述なし）'}
           `
         }} />
         {renderModal()}
+        {renderPromptModal()}
       
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg">
@@ -818,33 +939,8 @@ ${userInput.trim() || '（記述なし）'}
       </div>
 
         
-        {/* タブナビゲーション */}
-        <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
-          <button
-            onClick={() => setActiveTab('accommodations')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'accommodations'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            📋 配慮案の確認
-          </button>
-          <button
-            onClick={() => setActiveTab('prompt')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'prompt'
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            🤖 プロンプト生成
-          </button>
-        </div>
-
-        {/* 配慮案の確認タブ */}
-        {activeTab === 'accommodations' && (
-          <div className="space-y-4">
+        {/* 配慮案の確認 */}
+        <div className="space-y-4">
             <h2 className="text-xl font-bold text-gray-800 text-center mb-6">
               📋 配慮案の確認
             </h2>
@@ -944,98 +1040,7 @@ ${userInput.trim() || '（記述なし）'}
             );
           })}
           </div>
-        )}
 
-        {/* プロンプト生成タブ */}
-        {activeTab === 'prompt' && (
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-6">
-            <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
-              🤖 AIプロンプト生成
-        </h2>
-            <p className="text-sm text-gray-600 text-center mb-6">選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。</p>
-          
-          {/* モード選択 */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">モードを選択してください</h3>
-            <div className="space-y-3">
-              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <input
-                  type="radio"
-                  name="mobile-promptMode"
-                  value="supervisor"
-                  checked={promptMode === 'supervisor'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
-                />
-                <div className="ml-3">
-                  <div className="font-medium text-gray-700">合理的配慮モード</div>
-                  <div className="text-sm text-gray-500">上長・人事に法的根拠に基づく依頼</div>
-                </div>
-              </label>
-              <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <input
-                  type="radio"
-                  name="mobile-promptMode"
-                  value="colleague"
-                  checked={promptMode === 'colleague'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-1"
-                />
-                <div className="ml-3">
-                  <div className="font-medium text-gray-700">環境調整モード</div>
-                  <div className="text-sm text-gray-500">同僚に協力的な依頼</div>
-                </div>
-              </label>
-            </div>
-          </div>
-          
-          {/* 自由記述入力 */}
-          <div className="mb-6">
-            <label htmlFor="mobile-userInput" className="block text-sm font-medium text-gray-700 mb-2">
-              自由記述（任意）
-            </label>
-            <textarea
-              id="mobile-userInput"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="ご自分の環境や状況において、伝えたい追加の情報があれば記入してください"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
-              rows={3}
-            />
-          </div>
-          
-          {/* プロンプト生成ボタン */}
-          <div className="mb-6">
-            <button
-              onClick={generatePrompt}
-              className="w-full px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow"
-            >
-              AIプロンプトを生成
-            </button>
-            <p className="text-xs text-amber-600 mt-2 text-center">
-              ⚠️ AIの出力は参考用です。必ず内容を確認し、必要に応じて修正してください。
-            </p>
-          </div>
-          
-          {/* 生成されたプロンプト表示 */}
-          {generatedPrompt && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">生成されたAIプロンプト</h3>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                  {generatedPrompt}
-                </pre>
-              </div>
-              <button
-                onClick={copyPrompt}
-                className="mt-3 w-full px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
-              >
-                プロンプトをコピー
-              </button>
-            </div>
-          )}
-          </div>
-        )}
 
         {/* 最終ガイド（シリアスな締め） */}
         <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
@@ -1093,6 +1098,12 @@ ${userInput.trim() || '（記述なし）'}
 
         <div className="flex flex-col gap-3 mt-6">
           <button
+            onClick={() => setShowPromptModal(true)}
+            className="w-full px-4 py-3 rounded-lg border border-indigo-300 bg-indigo-50 text-indigo-700 font-medium shadow hover:bg-indigo-100 transition"
+          >
+            🤖 AIプロンプト生成
+          </button>
+          <button
             onClick={handleCopyToClipboard}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium shadow hover:bg-gray-100 transition"
           >
@@ -1141,6 +1152,7 @@ ${userInput.trim() || '（記述なし）'}
         `
       }} />
       {renderModal()}
+      {renderPromptModal()}
       
       {/* ヒーローヘッダー */}
       <div className="text-center py-8 bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl border-2 border-yellow-200 shadow-lg mb-8">
@@ -1311,92 +1323,6 @@ ${userInput.trim() || '（記述なし）'}
           </div>
         </div>
         
-        {/* プロンプト生成エリア */}
-        <div className="bg-white rounded-xl shadow p-6 mb-10">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">AIプロンプト生成</h3>
-          <p className="text-sm text-gray-600 mb-6">選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。</p>
-          
-          {/* モード選択 */}
-          <div className="mb-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">モードを選択してください</h4>
-            <div className="flex gap-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="promptMode"
-                  value="supervisor"
-                  checked={promptMode === 'supervisor'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                />
-                <span className="ml-2 text-gray-700">
-                  <span className="font-medium">合理的配慮モード</span>
-                  <span className="text-sm text-gray-500 block">上長・人事に法的根拠に基づく依頼</span>
-                </span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="promptMode"
-                  value="colleague"
-                  checked={promptMode === 'colleague'}
-                  onChange={(e) => setPromptMode(e.target.value as 'colleague' | 'supervisor')}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                />
-                <span className="ml-2 text-gray-700">
-                  <span className="font-medium">環境調整モード</span>
-                  <span className="text-sm text-gray-500 block">同僚に協力的な依頼</span>
-                </span>
-              </label>
-            </div>
-          </div>
-          
-          {/* 自由記述入力 */}
-          <div className="mb-6">
-            <label htmlFor="userInput" className="block text-sm font-medium text-gray-700 mb-2">
-              自由記述（任意）
-            </label>
-            <textarea
-              id="userInput"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="ご自分の環境や状況において、伝えたい追加の情報があれば記入してください"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
-              rows={3}
-            />
-          </div>
-          
-          {/* プロンプト生成ボタン */}
-          <div className="mb-6">
-            <button
-              onClick={generatePrompt}
-              className="w-full px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow"
-            >
-              AIプロンプトを生成
-            </button>
-            <p className="text-xs text-amber-600 mt-2 text-center">
-              ⚠️ AIの出力は参考用です。必ず内容を確認し、必要に応じて修正してください。
-            </p>
-          </div>
-          
-          {/* 生成されたプロンプト表示 */}
-          {generatedPrompt && (
-            <div className="mb-6">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">生成されたAIプロンプト</h4>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono leading-relaxed">
-                  {generatedPrompt}
-                </pre>
-              </div>
-              <button
-                onClick={copyPrompt}
-                className="mt-3 px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
-              >
-                プロンプトをコピー
-              </button>
-            </div>
-          )}
-        </div>
       </div>
       <div className="mt-10 flex flex-wrap gap-4 mb-4 justify-center">
         <button
@@ -1406,10 +1332,10 @@ ${userInput.trim() || '（記述なし）'}
           PDFをダウンロード
         </button>
         <button
-          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-200 text-gray-400 font-medium shadow cursor-not-allowed transition"
-          disabled
+          onClick={() => setShowPromptModal(true)}
+          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-indigo-300 bg-indigo-50 text-indigo-700 font-medium shadow hover:bg-indigo-100 transition"
         >
-          メールで共有（未実装）
+          🤖 AIプロンプト生成
         </button>
         <button
           onClick={handleCopyToClipboard}
