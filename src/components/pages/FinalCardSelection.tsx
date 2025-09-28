@@ -189,13 +189,14 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
                 
                 <button
                   onClick={() => removeFromFinalSelection(card)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 shadow-lg"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 shadow-lg z-10 font-bold"
+                  style={{ backgroundColor: '#EF4444' }}
                 >
                   ×
                 </button>
                 
                 {/* 光る効果 */}
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/30 via-orange-200/30 to-yellow-200/30 animate-pulse rounded-xl pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/30 via-orange-200/30 to-yellow-200/30 animate-pulse rounded-xl pointer-events-none z-0"></div>
               </div>
             ))}
             {Array.from({ length: 3 - finalSelection.length }).map((_, i) => (
