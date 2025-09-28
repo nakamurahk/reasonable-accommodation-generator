@@ -81,7 +81,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         
         {/* 特性選択 */}
         <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-base font-bold text-gray-700">
             🧠あなたの特性を選んでください（複数選択可 / {selectedCharacteristics.length}件選択中）
           </h2>
           <div className="border-b border-gray-200 my-2"></div>
@@ -112,7 +112,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
 
         {/* ドメイン選択 */}
         <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
+          <h2 className="text-base font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
           <div className="border-b border-gray-200 my-2"></div>
           <div className="grid grid-cols-1 gap-3">
             {DOMAINS.map((domain: any) => (
@@ -133,7 +133,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
 
         {/* シチュエーション選択 */}
         <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-base font-bold text-gray-700">
             📝シチュエーションを選んでください（複数選択可 / {selectedSituations.length}件選択中）
           </h2>
           <div className="border-b border-gray-200 my-2"></div>

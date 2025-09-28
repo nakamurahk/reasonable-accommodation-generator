@@ -1174,7 +1174,7 @@ ${userInput.trim() || '（記述なし）'}
             onClick={handleCopyToClipboard}
             className="w-full px-4 py-3 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
           >
-            自分のメモに追加
+            📝 自分のメモに追加
           </button>
         </div>
         
@@ -1408,7 +1408,7 @@ ${userInput.trim() || '（記述なし）'}
           onClick={handleCopyToClipboard}
           className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
         >
-          自分のメモに追加
+          📝 自分のメモに追加
         </button>
       </div>
       <div className="text-xs text-gray-400 mt-2 flex justify-end">

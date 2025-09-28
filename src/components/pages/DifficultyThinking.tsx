@@ -921,7 +921,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
         {/* フィルタされた困りごとカード */}
               <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                <h3 className="text-base font-medium text-gray-700 mb-4">
                   {selectedCategory}でこんな困りごとはありませんか？（{selected.filter(item => currentCategoryDifficulties.some((d: any) => d['困りごと内容'] === item)).length}/{currentCategoryDifficulties.length}）
                 </h3>
                 <div className="text-sm text-gray-500 mb-2 text-right">
@@ -1075,7 +1075,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
               {/* カスタム困りごと入力 */}
               <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
+                <h3 className="text-base font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
                 <div className="flex gap-2 mb-4">
                   <input
                     type="text"
