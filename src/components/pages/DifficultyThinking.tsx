@@ -833,7 +833,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           // モーダルを閉じる
                           setTimeout(() => setShowSelectionModal(false), 100);
                         }}
-                        className="w-full px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                        className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
                       >
                         全て削除 ({selected.length}件)
                       </button>
@@ -848,7 +848,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                             onClick={() => {
                               handleSelect(item); // 選択解除（モーダルは閉じない）
                             }}
-                            className="ml-3 px-3 py-1 bg-red text-white text-sm rounded hover:bg-red-600 transition-colors"
+                            className="ml-3 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
                           >
                             削除
                           </button>
@@ -1306,7 +1306,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                         // モーダルを閉じる
                         setTimeout(() => setShowSelectionModal(false), 100);
                       }}
-                      className="w-full px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                      className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
                     >
                       全て削除 ({selected.length}件)
                     </button>
@@ -1321,7 +1321,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           onClick={() => {
                             handleSelect(item); // 選択解除（モーダルは閉じない）
                           }}
-                          className="ml-3 px-3 py-1 bg-red text-white text-sm rounded hover:bg-red-600 transition-colors"
+                          className="ml-3 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
                         >
                           削除
                 </button>
