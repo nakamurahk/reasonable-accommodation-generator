@@ -14,7 +14,7 @@ const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
        ];
 
   return (
-    <nav className="w-60 h-full bg-white shadow py-6 px-3 flex flex-col">
+    <nav className="w-60 h-full bg-sand shadow py-6 px-3 flex flex-col border-r border-gray-200">
       <ul className="space-y-6 pl-3">
         {steps.map((step, idx) => (
           <li
@@ -24,8 +24,8 @@ const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
               px-3 py-2
               border-l-4
               ${currentStep === step.id
-                ? 'border-blue-500 bg-blue-50 text-blue-800 font-semibold'
-                : 'border-transparent bg-white text-gray-700 font-normal'}
+                ? 'border-teal bg-teal-50 text-teal-800 font-semibold'
+                : 'border-transparent bg-sand text-gray-700 font-normal'}
               rounded-r
               transition
             `}
@@ -35,8 +35,8 @@ const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
                 w-6 h-6 flex items-center justify-center rounded-full
                 border
                 ${currentStep === step.id
-                  ? 'border-blue-500 bg-blue-100 text-blue-800 font-bold'
-                  : 'border-gray-300 bg-white text-gray-400 font-normal'}
+                  ? 'border-teal bg-teal-100 text-teal-800 font-bold'
+                  : 'border-gray-300 bg-sand text-gray-400 font-normal'}
                 text-xs
               `}
             >

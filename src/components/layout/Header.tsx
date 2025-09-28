@@ -16,10 +16,10 @@ const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
 
   return (
-    <header className="w-full bg-white shadow flex items-center justify-between px-4 py-3 relative z-10">
+    <header className="w-full bg-sand shadow flex items-center justify-between px-4 py-3 relative z-10">
       <div className="flex items-center space-x-2">
         {/* ロゴ部分（SVGや画像に差し替え可） */}
-        <span className="text-indigo-600 text-2xl font-bold">🧩</span>
+        <span className="text-teal text-2xl font-bold">🧩</span>
         <span className="text-lg font-semibold text-gray-900 hidden sm:block">合理的配慮ジェネレータ</span>
         <span className="text-lg font-semibold text-gray-900 sm:hidden">配慮ジェネレータ</span>
       </div>
@@ -32,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
             className={`
               w-8 h-8 flex items-center justify-center rounded-full text-xs font-bold
               ${index <= currentStepIndex
-                ? 'bg-indigo-500 text-white'
+                ? 'bg-teal text-white'
                 : 'bg-gray-200 text-gray-500'}
             `}
             title={step.title}

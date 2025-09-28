@@ -71,16 +71,16 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
     return (
       <div className="max-w-none mx-auto p-4 space-y-6">
                 {/* 説明文 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            🔍 出発のステージ<br />
+            <span className="font-bold">🔍 出発のステージ</span><br />
 ここから「困りごとを探す旅」が始まります。<br />
 まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
           </p>
         </div>
         
         {/* 特性選択 */}
-        <div className="space-y-4 bg-gray-100 pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
+        <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold text-gray-700">
             🧠あなたの特性を選んでください（複数選択可 / {selectedCharacteristics.length}件選択中）
           </h2>
@@ -95,10 +95,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       <button
                         type="button"
                         onClick={() => handleCharacteristicToggle(char)}
-                        className={`w-full px-4 py-3 rounded border font-medium transition text-center shadow-sm
+                        className={`w-full px-4 py-3 rounded border font-medium transition text-center
                           ${selectedCharacteristics.some(c => c.id === char.id)
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                            ? 'bg-teal-100 text-teal-500 border border-teal-500 shadow-sm'
+                            : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
                       >
                         {char.name}
                       </button>
@@ -111,7 +111,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         </div>
 
         {/* ドメイン選択 */}
-        <div className="space-y-4 bg-gray-100 pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
+        <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
           <div className="border-b border-gray-200 my-2"></div>
           <div className="grid grid-cols-1 gap-3">
@@ -120,10 +120,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                 key={domain.id}
                 type="button"
                 onClick={() => handleDomainSelect(domain)}
-                className={`w-full px-4 py-3 rounded border font-medium transition text-center shadow-sm
+                className={`w-full px-4 py-3 rounded border font-medium transition text-center
                   ${selectedDomain?.id === domain.id
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                    ? 'bg-teal-100 text-teal-500 border border-teal-500 shadow-sm'
+                    : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
               >
                 {domain.name}
               </button>
@@ -132,7 +132,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         </div>
 
         {/* シチュエーション選択 */}
-        <div className="space-y-4 bg-gray-100 pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
+        <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
           <h2 className="text-xl font-bold text-gray-700">
             📝シチュエーションを選んでください（複数選択可 / {selectedSituations.length}件選択中）
           </h2>
@@ -158,8 +158,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       selectedDomain.situations.every(s => 
                         selectedSituations.some(selected => selected.id === s.id)
                       )
-                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
-                        : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                        ? 'bg-teal-100 text-teal-700 border border-teal-200'
+                        : 'bg-sand text-gray-600 border border-gray-200 hover:bg-gray-200'
                     }`}
                   >
                     {selectedDomain.situations.every(s => 
@@ -174,10 +174,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                     key={situation.id}
                     type="button"
                     onClick={() => handleSituationSelect(situation)}
-                    className={`w-full px-4 py-3 rounded border font-medium transition text-center shadow-sm
+                    className={`w-full px-4 py-3 rounded border font-medium transition text-center
                       ${selectedSituations.some(s => s.id === situation.id)
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                        ? 'bg-teal-100 text-teal-500 border border-teal-500 shadow-sm'
+                        : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
                   >
                     {situation.name}
                   </button>
@@ -192,7 +192,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
           <button
             onClick={handleNext}
             disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
-            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステップへ
           </button>
@@ -205,16 +205,16 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
   return (
     <div className="max-w-none mx-auto p-6 space-y-8">
             {/* 説明文 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+      <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
                   <p className="text-gray-700 text-lg leading-relaxed">
-            🔍 出発のステージ<br />
+            <span className="font-bold">🔍 出発のステージ</span><br />
 ここから「困りごとを探す旅」が始まります。<br />
 まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
           </p>
       </div>
       
       {/* 特性選択 */}
-      <div className="space-y-4 bg-gray-100 pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
+      <div className="space-y-4 bg-sand pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
         <h2 className="text-2xl font-bold text-gray-700">
           🧠あなたの特性を選んでください（複数選択可 / {selectedCharacteristics.length}件選択中）
         </h2>
@@ -230,10 +230,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                       type="button"
                       style={{ width: '180px' }}
                       onClick={() => handleCharacteristicToggle(char)}
-                      className={`px-4 py-2 h-10 rounded border font-medium transition text-center shadow-sm
+                      className={`px-4 py-2 h-10 rounded border font-medium transition text-center
                         ${selectedCharacteristics.some(c => c.id === char.id)
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                          ? 'bg-teal-100 text-teal-500 border border-teal-500 shadow-sm'
+                          : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
                     >
                       {char.name}
                     </button>
@@ -246,7 +246,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
       </div>
 
       {/* ドメイン選択 */}
-      <div className="space-y-4 bg-gray-100 pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
+      <div className="space-y-4 bg-sand pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
         <h2 className="text-2xl font-bold text-gray-700">🏢環境を選んでください（1つのみ）</h2>
         <div className="border-b border-gray-200 my-2"></div>
         <div className="flex flex-wrap gap-6">
@@ -256,10 +256,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
               type="button"
               style={{ width: '240px' }}
               onClick={() => handleDomainSelect(domain)}
-              className={`px-4 py-2 rounded border font-medium transition text-center shadow-sm
+              className={`px-4 py-2 rounded border font-medium transition text-center
                 ${selectedDomain?.id === domain.id
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                  ? 'bg-teal-100 text-teal border border-teal shadow-sm'
+                  : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
             >
               {domain.name}
             </button>
@@ -268,7 +268,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
       </div>
 
       {/* シチュエーション選択 */}
-      <div className="space-y-4 bg-gray-100 pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
+      <div className="space-y-4 bg-sand pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
         <h2 className="text-2xl font-bold text-gray-700">
           📝シチュエーションを選んでください（複数選択可 / {selectedSituations.length}件選択中）
         </h2>
@@ -294,8 +294,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                     selectedDomain.situations.every(s => 
                       selectedSituations.some(selected => selected.id === s.id)
                     )
-                      ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
-                      : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                      ? 'bg-teal-100 text-teal-700 border border-teal-200'
+                      : 'bg-sand text-gray-600 border border-gray-200 hover:bg-gray-200'
                   }`}
                 >
                   {selectedDomain.situations.every(s => 
@@ -311,10 +311,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                   type="button"
                   style={{ width: '240px' }}
                   onClick={() => handleSituationSelect(situation)}
-                  className={`px-4 py-2 rounded border font-medium transition text-center shadow-sm
+                  className={`px-4 py-2 rounded border font-medium transition text-center
                     ${selectedSituations.some(s => s.id === situation.id)
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'}`}
+                      ? 'bg-teal-100 text-teal-500 border border-teal-500 shadow-sm'
+                      : 'bg-teal-500 text-white border-teal-500 hover:bg-teal-700 hover:shadow-md'}`}
                 >
                   {situation.name}
                 </button>
@@ -329,7 +329,7 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
         <button
           onClick={handleNext}
           disabled={selectedCharacteristics.length === 0 || !selectedDomain || selectedSituations.length === 0}
-          className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
+          className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
         >
           🎮 次のステップへ
         </button>

@@ -49,12 +49,12 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen bg-sand p-4">
       <div className="max-w-6xl mx-auto">
         {/* 説明文 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <p className="text-gray-700 text-lg leading-relaxed">
-            🎯 決定のステージ<br />
+        <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
+          <p className="text-gray-700 text-base leading-relaxed">
+            <span className="font-semibold">🎯 決定のステージ</span><br />
             残ったカードの中から3枚を選び、あなたが最も大事だと感じる困りごとにフォーカスします。
           </p>
         </div>
@@ -93,7 +93,7 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
                       ? 'from-yellow-100 to-orange-200 border-yellow-400 shadow-2xl' 
                       : isDisabled
                       ? 'from-gray-50 to-gray-100 border-gray-200'
-                      : 'from-blue-50 to-indigo-100 border-blue-300 hover:shadow-xl'
+                      : 'from-teal-50 to-teal-100 border-teal-300 hover:shadow-xl'
                   }`}>
                     
                     {/* 光る効果 */}
@@ -155,7 +155,7 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
                 <p className="text-sm font-bold">⭐ 重要な困りごとカード選択完了！ ⭐</p>
               </div>
             ) : (
-              <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full">
+              <div className="bg-teal-100 text-teal-700 px-4 py-2 rounded-full">
                 <p className="text-sm font-medium">
                   {3 - finalSelection.length}枚選択してください
                 </p>

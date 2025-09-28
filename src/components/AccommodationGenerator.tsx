@@ -262,7 +262,7 @@ const AccommodationGenerator: React.FC = () => {
   };
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-sand">
       {currentStep === 'initial' && (
         <InitialSelection onComplete={handleInitialSelectionComplete} />
       )}
@@ -283,7 +283,7 @@ const AccommodationGenerator: React.FC = () => {
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
                 onClick={() => updateStep('initial')}
-                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
               </button>
@@ -305,7 +305,7 @@ const AccommodationGenerator: React.FC = () => {
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
                 onClick={() => updateStep('initial')}
-                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
               </button>
@@ -326,7 +326,7 @@ const AccommodationGenerator: React.FC = () => {
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
                 onClick={() => updateStep('initial')}
-                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
               </button>
@@ -349,7 +349,7 @@ const AccommodationGenerator: React.FC = () => {
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
                 onClick={() => updateStep('initial')}
-                className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
               </button>

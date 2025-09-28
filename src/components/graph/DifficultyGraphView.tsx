@@ -761,7 +761,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-gray-800">{tagName}</span>
               <span className="text-sm text-gray-500">｜{tagCategory}</span>
-              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+              <span className="px-2 py-1 bg-teal-100 text-teal-800 text-xs rounded-full">
                 {uniqueDifficulties.length}件
               </span>
             </div>
@@ -823,7 +823,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
               {!showAllDifficulties && sortedDifficulties.length > 6 && (
                 <button
                   onClick={() => setShowAllDifficulties(true)}
-                  className="w-full mt-2 py-2 text-sm text-blue-600 hover:text-blue-800"
+                  className="w-full mt-2 py-2 text-sm text-teal-600 hover:text-teal-800"
                 >
                   すべて表示
                 </button>
@@ -849,8 +849,8 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
             )}
 
             {/* つながり理由 */}
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-xs text-blue-700">
+            <div className="bg-teal-50 p-3 rounded-lg">
+              <p className="text-xs text-teal-700">
                 このタグ経由で現在の選択と繋がるノード：{uniqueDifficulties.length}件
               </p>
             </div>
@@ -897,7 +897,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
             </h3>
             <button
               onClick={() => setSelectedNode(null)}
-              className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-indigo-500 hover:bg-indigo-600"
+              className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-teal hover:bg-teal-600"
             >
               ✕
             </button>
@@ -907,7 +907,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
           <div className="p-6 max-h-[60vh] overflow-y-auto">
             <div className="mb-4">
               <h4 className="font-medium text-gray-900 mb-2">カテゴリ</h4>
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
                 {difficultyData['カテゴリ']}
               </span>
             </div>
@@ -957,7 +957,7 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
           <div className="px-6 py-4 border-t bg-gray-50">
             <button
               onClick={() => setSelectedNode(null)}
-              className="w-full px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+              className="w-full px-4 py-2 bg-teal text-white rounded-lg hover:bg-teal-600 transition-colors"
             >
               閉じる
             </button>

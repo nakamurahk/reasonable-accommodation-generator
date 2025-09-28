@@ -84,7 +84,7 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen bg-sand p-4">
       {/* CSS アニメーション */}
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -130,7 +130,7 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
               transform: 'translate(-50%, -50%)',
             }}
           >
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-xl p-3 w-24 h-16 flex flex-col items-center justify-center shadow-lg">
+            <div className="bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-300 rounded-xl p-3 w-24 h-16 flex flex-col items-center justify-center shadow-lg">
               <div className="text-lg mb-1">
                 {getCategoryIcon(flyingCard.card.category || flyingCard.card['カテゴリ'] || 'その他')}
               </div>
@@ -142,9 +142,9 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
         )}
         
         {/* 説明文 */}
-               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-                 <p className="text-gray-700 text-lg leading-relaxed">
-                   💡 選抜のステージ<br />
+               <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
+                 <p className="text-gray-700 text-base leading-relaxed">
+                   <span className="font-semibold">💡 選抜のステージ</span><br />
                    集めたカードの中から最大10枚を選び、あなたにとって特に重要だと感じる困りごとを絞り込みましょう。
                  </p>
                </div>
@@ -170,12 +170,12 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
                 <p className="text-gray-600 text-lg">すべてのカードがデッキに追加されました！</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-96 overflow-y-auto overflow-x-hidden">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-96 overflow-y-auto overflow-x-hidden">
                 {cardPool.map((card, index) => (
                   <div
                     key={card.id}
                     onClick={(e) => addToDeck(card, e)}
-                    className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-xl p-3 cursor-pointer hover:shadow-xl hover:scale-110 transition-all duration-300 hover:border-blue-500 hover:rotate-1 relative group"
+                    className="bg-gradient-to-br from-white to-teal-50 border-2 border-teal-300 rounded-xl p-3 cursor-pointer hover:shadow-xl hover:scale-110 transition-all duration-300 hover:border-teal-500 hover:rotate-1 relative group shadow-sm"
                     style={{
                       transform: `rotate(${(index % 3 - 1) * 1}deg)`,
                       zIndex: cardPool.length - index
@@ -188,13 +188,13 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
                              <div className="text-xl mb-2 group-hover:scale-110 transition-transform">
                                {getCategoryIcon(card.category || card['カテゴリ'] || 'その他')}
                              </div>
-                            <h3 className="font-medium text-gray-800 text-xs leading-tight group-hover:text-blue-700 transition-colors">
+                            <h3 className="font-medium text-gray-800 text-xs leading-tight group-hover:text-teal-700 transition-colors">
                               {card.title || card['困りごと内容']}
                             </h3>
                           </div>
                     
                     {/* ホバー時の追加効果 */}
-                    <div className="absolute inset-0 bg-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-teal-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                   </div>
                 ))}
               </div>
@@ -258,7 +258,7 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
           <button
             onClick={handleNext}
             disabled={deck.length === 0}
-            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステップへ
           </button>

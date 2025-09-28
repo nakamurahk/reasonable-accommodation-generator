@@ -24,7 +24,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
   // モバイル版レイアウト
   if (isMobile) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-sand">
         <MobileHeaderWrapper />
         <main>
           <Routes>
@@ -42,7 +42,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
 
   // PC版レイアウト（既存のまま）
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-sand">
       <HeaderWrapper />
       <div className="flex-1 flex overflow-hidden">
         <SideNavWrapper />

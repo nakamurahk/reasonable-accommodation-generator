@@ -137,9 +137,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   
   // 数値に応じた色を決定する関数
   const getBigNumberColor = (num: number) => {
-    if (num >= 11) return 'text-red-500'; // 11以降はビビットな赤（超えてますよ！）
-    if (num === 10) return 'text-orange-500'; // 10はオレンジ
-    return 'text-yellow-500'; // 1-9はイエロー系
+    return 'text-yellow-500'; // 全て黄色系で統一
   };
 
   // カテゴリのアイコンを取得する関数
@@ -529,10 +527,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 disabled={count === 0}
                 className={`px-3 py-2 text-sm rounded-lg border transition ${
                   selectedCategory === category
-                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    ? 'bg-teal-500 text-white border-teal-500'
                     : count === 0
-                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'
+                      ? 'bg-sand text-gray-400 border-gray-200 cursor-not-allowed'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-teal-50'
                 }`}
               >
                 {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
@@ -554,10 +552,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               disabled={count === 0}
               className={`px-4 py-2 text-sm rounded-lg border transition ${
                 selectedCategory === category
-                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  ? 'bg-teal-500 text-white border-teal-500'
                   : count === 0
-                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50'
+                    ? 'bg-sand text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-teal-50'
               }`}
             >
               {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
@@ -709,26 +707,26 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             <div className="relative w-[120px] h-[120px]">
               {/* カードの束の背景 */}
               <div 
-                className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg shadow-lg transform rotate-3"
+                className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-lg shadow-lg transform rotate-3"
                 style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out' } : {}}
               ></div>
               <div 
-                className="absolute bottom-3 right-3 w-16 h-20 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg shadow-md transform rotate-1"
+                className="absolute bottom-3 right-3 w-16 h-20 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-lg shadow-md transform rotate-1"
                 style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.05s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.05s' } : {}}
               ></div>
               <div 
-                className="absolute bottom-4 right-4 w-16 h-20 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-lg shadow-sm transform -rotate-1"
+                className="absolute bottom-4 right-4 w-16 h-20 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg shadow-sm transform -rotate-1"
                 style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.1s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.1s' } : {}}
               ></div>
               <div 
-                className="absolute bottom-5 right-5 w-16 h-20 bg-gradient-to-br from-indigo-200 to-indigo-400 rounded-lg transform -rotate-2"
+                className="absolute bottom-5 right-5 w-16 h-20 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-lg transform -rotate-2"
                 style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.15s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.15s' } : {}}
               ></div>
               
               {/* 追加されるカードのアニメーション */}
               {addingCard && (
                 <div
-                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-lg shadow-lg z-10"
+                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-cyan-100 to-cyan-200 border-2 border-cyan-400 rounded-lg shadow-lg z-10"
                   style={{ animation: 'cardSlideIn 0.8s ease-in-out forwards' }}
                 >
                   <div className="p-2 h-full flex flex-col justify-center items-center">
@@ -743,12 +741,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               {/* 削除されるカードのアニメーション */}
               {removingCard && (
                 <div
-                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-red-50 to-pink-100 border-2 border-red-300 rounded-lg shadow-lg z-10"
+                  className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-red-200 to-red-400 border-2 border-red-500 rounded-lg shadow-lg z-10"
                   style={{ animation: 'cardSlideOut 0.6s ease-in-out forwards' }}
                 >
                   <div className="p-2 h-full flex flex-col justify-center items-center">
-                    <div className="text-lg mb-1">{getCategoryIcon(removingCard.category)}</div>
-                    <div className="text-xs text-gray-800 text-center leading-tight">
+                    <div className="text-lg mb-1 text-white">{getCategoryIcon(removingCard.category)}</div>
+                    <div className="text-xs text-white text-center leading-tight font-semibold">
                       {removingCard.title.length > 8 ? removingCard.title.substring(0, 8) + '...' : removingCard.title}
                     </div>
                   </div>
@@ -770,7 +768,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               isHidingCurrent && bigNumber
                 ? `opacity-100 text-5xl ${getBigNumberColor(bigNumber)} drop-shadow-2xl`
                 : isHidingCurrent && isDecreasingNumber
-                  ? 'opacity-100 text-5xl text-blue-300 drop-shadow-2xl'
+                  ? 'opacity-100 text-5xl text-teal-300 drop-shadow-2xl'
                 : isHidingCurrent && !bigNumber && !isDecreasingNumber
                   ? 'opacity-0'
                   : isMaxReached
@@ -778,24 +776,22 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     : isCountAnimating 
                       ? 'scale-125 text-yellow-300 drop-shadow-lg' 
                       : isCountDecreasing
-                        ? 'scale-75 text-blue-300 drop-shadow-sm animate-bounce'
+                        ? 'scale-75 text-teal-300 drop-shadow-sm animate-bounce'
                         : bigNumber && !isBigNumberAnimating
                           ? `text-5xl ${getBigNumberColor(bigNumber)} drop-shadow-2xl`
                           : bigNumber && isBigNumberAnimating
                             ? `text-lg ${getBigNumberColor(bigNumber)}`
                                                             : isDecreasingNumber && !isDecreasingAnimating
-                                  ? 'text-5xl text-blue-300 drop-shadow-2xl'
+                                  ? 'text-5xl text-teal-300 drop-shadow-2xl'
                                   : isDecreasingNumber && isDecreasingAnimating
-                                    ? 'text-lg text-blue-300'
-                                    : selected.length >= 11
-                                      ? 'text-red-500 scale-100'
-                                      : 'text-white scale-100'
+                                    ? 'text-lg text-teal-300'
+                                    : 'text-white scale-100'
             }`}>
               {isHidingCurrent && bigNumber ? bigNumber : isHidingCurrent && isDecreasingNumber ? isDecreasingNumber : selected.length}
             </span>
             {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
             <span className={`transition-all duration-300 ${
-              bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
+              bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-teal-300' : 'text-white'
             }`}>枚</span>
           </div>
         </div>
@@ -807,7 +803,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
               {/* モーダルヘッダー */}
-              <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
+              <div className="bg-teal-500 text-white px-6 py-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
                   選択済みの困りごとリスト
                   <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
@@ -816,7 +812,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 </h3>
                 <button 
                   onClick={() => setShowSelectionModal(false)}
-                  className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-indigo-500 hover:bg-indigo-600"
+                  className="text-white bg-teal-600 hover:bg-teal-700 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full"
                 >
                   ✕
                 </button>
@@ -837,7 +833,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           // モーダルを閉じる
                           setTimeout(() => setShowSelectionModal(false), 100);
                         }}
-                        className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                        className="w-full px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
                       >
                         全て削除 ({selected.length}件)
                       </button>
@@ -846,13 +842,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     {/* 個別削除リスト */}
                     <div className="space-y-3">
                       {selected.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
                           <span className="text-gray-700 flex-1">{item}</span>
                           <button
                             onClick={() => {
                               handleSelect(item); // 選択解除（モーダルは閉じない）
                             }}
-                            className="ml-3 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                            className="ml-3 px-3 py-1 bg-red text-white text-sm rounded hover:bg-red-600 transition-colors"
                           >
                             削除
                           </button>
@@ -864,10 +860,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               </div>
               
               {/* モーダルフッター */}
-              <div className="px-6 py-4 border-t bg-gray-50">
+              <div className="px-6 py-4 border-t bg-sand">
                 <button
                   onClick={() => setShowSelectionModal(false)}
-                  className="w-full px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+                  className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
                 >
                   閉じる
                 </button>
@@ -878,21 +874,21 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         
         {/* 説明文 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            🗺️ 探索のステージ<br />
+            <span className="font-semibold">🗺️ 探索のステージ</span><br />
             「困りごとの地図」を広げ、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
           </p>
         </div>
         
         {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-3">
+          <div className="flex space-x-1 bg-sand p-1 rounded-lg mb-3">
             <button
               onClick={() => setViewMode('list')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -902,7 +898,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               onClick={() => setViewMode('graph')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'graph'
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -911,7 +907,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           </div>
           <button
             onClick={() => setShowSelectionModal(true)}
-            className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors"
           >
             📚 コレクション ({selected.length}枚)
           </button>
@@ -971,8 +967,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       : 'shadow-sm hover:shadow-md'
                   } ${
                     isSelected
-                      ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
-                      : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'
+                      ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg transform scale-[1.02]'
+                      : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
                   } ${isDisabled ? 'opacity-40' : ''}`}
                   style={{
                     backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
@@ -994,7 +990,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
                           {isSelected && (
                             <div className="ml-auto">
-                              <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                              <div className="w-6 h-6 bg-teal rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                   </div>
                             </div>
@@ -1005,7 +1001,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       {/* 詳細表示ボタン（右端） */}
                       <button
                         onClick={() => toggleAccordion(item['困りごと内容'])}
-                        className="ml-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                        className="ml-2 flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 transition-colors px-2 py-1 rounded hover:bg-teal-50"
                       >
                         <span className="transition-all duration-200">
                           {isExpanded ? '▲' : '▼'}
@@ -1034,13 +1030,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                             <div className="flex flex-wrap gap-1">
                               {/* 主要タグ */}
                               {mainTags.map((tag: string, index: number) => (
-                                <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
                                   #{tag} : {getTagName(tag)}
                                 </span>
                               ))}
                               {/* 補助タグ */}
                               {subTags.map((tag: string, index: number) => (
-                                <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
                                   #{tag} : {getTagName(tag)}
                                 </span>
                               ))}
@@ -1068,7 +1064,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               <div className="text-center">
               <button
                   onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                  className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
               >
                   残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
               </button>
@@ -1088,7 +1084,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     onKeyPress={handleKeyPress}
                     placeholder="(未実装)"
                     disabled
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
                   />
                 <button
                     onClick={handleAddCustom}
@@ -1101,7 +1097,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 {customDifficulties.length > 0 && (
                   <div className="space-y-2">
                     {customDifficulties.map((difficulty, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
                         <span className="text-gray-700">{difficulty}</span>
                         <button
                           onClick={() => handleRemoveCustom(difficulty)}
@@ -1141,7 +1137,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           <button
             onClick={handleNext}
             disabled={selected.length === 0}
-            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステップへ
               </button>
@@ -1280,7 +1276,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
             {/* モーダルヘッダー */}
-            <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between">
+            <div className="bg-teal-500 text-white px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">
                 選択済みの困りごとリスト
                 <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
@@ -1289,7 +1285,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               </h3>
               <button
                 onClick={() => setShowSelectionModal(false)}
-                className="text-white hover:text-gray-200 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20"
+                className="text-white bg-teal-600 hover:bg-teal-700 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full"
               >
                 ✕
               </button>
@@ -1310,7 +1306,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                         // モーダルを閉じる
                         setTimeout(() => setShowSelectionModal(false), 100);
                       }}
-                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                      className="w-full px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
                     >
                       全て削除 ({selected.length}件)
                     </button>
@@ -1319,13 +1315,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   {/* 個別削除リスト */}
                   <div className="space-y-3">
                     {selected.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
                       <span className="text-gray-700 flex-1">{item}</span>
                 <button
                           onClick={() => {
                             handleSelect(item); // 選択解除（モーダルは閉じない）
                           }}
-                          className="ml-3 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                          className="ml-3 px-3 py-1 bg-red text-white text-sm rounded hover:bg-red-600 transition-colors"
                         >
                           削除
                 </button>
@@ -1337,10 +1333,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         </div>
 
             {/* モーダルフッター */}
-            <div className="px-6 py-4 border-t bg-gray-50">
+            <div className="px-6 py-4 border-t bg-sand">
               <button
                 onClick={() => setShowSelectionModal(false)}
-                className="w-full px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+                className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
               >
                 閉じる
               </button>
@@ -1352,22 +1348,22 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
 
       
       {/* 説明文 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+      <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
-          🔍 ここからは「困りごとの地図」を広げていきます。<br />
-          当てはまるカードをタップして集め、自分のコレクションに追加してください。集めたカードは整理でき、🔗グラフ表示で関連性が可視化されていきます。
+          <span className="font-semibold">🗺️ 探索のステージ</span><br />
+          「困りごとの地図」を広げ、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
         </p>
       </div>
       
       {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <div className="flex items-center gap-4">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex space-x-1 bg-sand p-1 rounded-lg">
             <button
               onClick={() => setViewMode('list')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -1377,7 +1373,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               onClick={() => setViewMode('graph')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'graph'
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -1386,7 +1382,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           </div>
           <button
             onClick={() => setShowSelectionModal(true)}
-            className="py-2.5 px-4 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
+            className="py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
             📚 コレクション ({selected.length}枚)
           </button>
@@ -1410,37 +1406,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                         ? 'scale-110 bg-yellow-500 shadow-xl'
                         : isCountDecreasing
                           ? 'scale-90 bg-blue-400 shadow-sm animate-bounce'
-                          : 'bg-indigo-600 scale-100'
+                          : 'bg-teal-500 scale-100'
                   }`}
                   onClick={() => setShowSelectionModal(true)}
                 >
                   <span className="text-lg font-bold text-white">
-                    {/* 数字部分 */}
-                    <span className={`transition-all duration-800 ease-out ${
-                      isHidingCurrent && bigNumber
-                        ? `opacity-100 text-6xl ${getBigNumberColor(bigNumber)}`
-                        : isHidingCurrent && isDecreasingNumber
-                          ? 'opacity-100 text-6xl text-blue-300'
-                          : isHidingCurrent && !bigNumber && !isDecreasingNumber
-                            ? 'opacity-0' 
-                            : bigNumber && !isBigNumberAnimating
-                              ? `text-6xl ${getBigNumberColor(bigNumber)}`
-                              : bigNumber && isBigNumberAnimating
-                                ? `text-lg ${getBigNumberColor(bigNumber)}`
-                                : isDecreasingNumber && !isDecreasingAnimating
-                                  ? 'text-6xl text-blue-300'
-                                  : isDecreasingNumber && isDecreasingAnimating
-                                    ? 'text-lg text-blue-300'
-                                    : selected.length >= 11
-                                      ? 'text-red-500 opacity-100'
-                                      : 'opacity-100'
-                    }`}>
-                      {isHidingCurrent && bigNumber ? bigNumber : isHidingCurrent && isDecreasingNumber ? isDecreasingNumber : selected.length}
-                    </span>
-                    {/* /10部分 - 常に表示、大きな数字表示中は色を統一 */}
-                    <span className={`transition-all duration-300 ${
-                      bigNumber ? getBigNumberColor(bigNumber).replace('text-red-500', 'text-red-300').replace('text-orange-500', 'text-orange-300').replace('text-yellow-500', 'text-yellow-300') : isDecreasingNumber ? 'text-blue-300' : 'text-white'
-                    }`}>枚</span>
+                    {selected.length}枚
                   </span>
                 </div>
               </div>
@@ -1494,8 +1465,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           : 'shadow-sm hover:shadow-md'
                       } ${
                         isSelected
-                          ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-blue-100 shadow-lg transform scale-[1.02]'
-                          : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'
+                          ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg transform scale-[1.02]'
+                          : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
                       } ${isDisabled ? 'opacity-40' : ''}`}
                       style={{
                         backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
@@ -1517,7 +1488,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                               <span className="font-medium text-gray-900 text-sm">{item['困りごと内容']}</span>
                               {isSelected && (
                                 <div className="ml-auto">
-                                  <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                                  <div className="w-5 h-5 bg-teal rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs">✓</span>
                                   </div>
                                 </div>
@@ -1528,7 +1499,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           {/* 詳細表示ボタン（右端） */}
                           <button
                             onClick={() => toggleAccordion(item['困りごと内容'])}
-                            className="ml-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                            className="ml-2 flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 transition-colors px-2 py-1 rounded hover:bg-teal-50"
                           >
                             <span className="transition-all duration-200">
                               {isExpanded ? '▲' : '▼'}
@@ -1557,13 +1528,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                                 <div className="flex flex-wrap gap-1">
                                   {/* 主要タグ */}
                                   {mainTags.map((tag: string, index: number) => (
-                                    <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
                                       #{tag} : {getTagName(tag)}
                                     </span>
                                   ))}
                                   {/* 補助タグ */}
                                   {subTags.map((tag: string, index: number) => (
-                                    <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
                                       #{tag} : {getTagName(tag)}
                                     </span>
                                   ))}
@@ -1591,7 +1562,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   <div className="text-center">
                     <button
                       onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                      className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
                     >
                       残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
                     </button>
@@ -1611,7 +1582,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               onKeyPress={handleKeyPress}
                   placeholder="(未実装)"
                   disabled
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
             />
             <button
               onClick={handleAddCustom}
@@ -1624,7 +1595,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           {customDifficulties.length > 0 && (
                 <div className="space-y-2">
                 {customDifficulties.map((difficulty, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
                     <span className="text-gray-700">{difficulty}</span>
                     <button
                       onClick={() => handleRemoveCustom(difficulty)}
@@ -1664,66 +1635,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           <button
             onClick={handleNext}
           disabled={selected.length === 0}
-            className="px-6 py-3 rounded-full bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors disabled:bg-gray-300 disabled:text-gray-400"
+            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
           >
             🎮 次のステップへ
           </button>
         </div>
       
-      {/* PC版カードの束（リスト表示時のみ） */}
-      {viewMode === 'list' && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <div className="relative w-[100px] h-[100px]">
-            {/* カードの束の背景 */}
-            <div 
-              className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg shadow-lg transform rotate-3"
-              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out' } : {}}
-            ></div>
-            <div 
-              className="absolute bottom-2 right-2 w-14 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg shadow-md transform rotate-1"
-              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.05s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.05s' } : {}}
-            ></div>
-            <div 
-              className="absolute bottom-3 right-3 w-14 h-16 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-lg shadow-sm transform -rotate-1"
-              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.1s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.1s' } : {}}
-            ></div>
-            <div 
-              className="absolute bottom-4 right-4 w-14 h-16 bg-gradient-to-br from-indigo-200 to-indigo-400 rounded-lg transform -rotate-2"
-              style={isDeckAnimating ? { animation: 'deckRemove 0.4s ease-in-out 0.15s' } : isDeckAdding ? { animation: 'deckAdd 0.5s ease-in-out 0.15s' } : {}}
-            ></div>
-            
-            {/* 追加されるカードのアニメーション */}
-            {addingCard && (
-              <div
-                className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-lg shadow-lg z-10"
-                style={{ animation: 'cardSlideIn 0.8s ease-in-out forwards' }}
-              >
-                <div className="p-1 h-full flex flex-col justify-center items-center">
-                  <div className="text-sm mb-1">{getCategoryIcon(addingCard.category)}</div>
-                  <div className="text-xs text-gray-800 text-center leading-tight">
-                    {addingCard.title.length > 6 ? addingCard.title.substring(0, 6) + '...' : addingCard.title}
-      </div>
-                </div>
-              </div>
-            )}
-            
-            {/* 削除されるカードのアニメーション */}
-            {removingCard && (
-              <div
-                className="absolute bottom-1 right-1 w-14 h-16 bg-gradient-to-br from-red-50 to-pink-100 border-2 border-red-300 rounded-lg shadow-lg z-10"
-                style={{ animation: 'cardSlideOut 0.6s ease-in-out forwards' }}
-              >
-                <div className="p-1 h-full flex flex-col justify-center items-center">
-                  <div className="text-sm mb-1">{getCategoryIcon(removingCard.category)}</div>
-                  <div className="text-xs text-gray-800 text-center leading-tight">
-                    {removingCard.title.length > 6 ? removingCard.title.substring(0, 6) + '...' : removingCard.title}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

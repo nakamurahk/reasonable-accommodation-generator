@@ -23,7 +23,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+    <div className="bg-sand border-b border-gray-200 px-4 py-3 shadow-sm">
       <div className="text-center">
         <p className="text-base font-medium text-gray-700 mb-3">
           {getPageTitle(currentStep)}
@@ -44,16 +44,16 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
               <React.Fragment key={step}>
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-semibold ${
                   isCompleted 
-                    ? 'bg-indigo-500 border-indigo-500 text-white' 
+                    ? 'bg-teal-500 border-teal-500 text-white' 
                     : isCurrent 
-                    ? 'bg-indigo-100 border-indigo-500 text-indigo-700'
+                    ? 'bg-teal-100 border-teal-500 text-teal-700'
                     : 'bg-white border-gray-300 text-gray-400'
                 }`}>
                   {step}
                 </div>
                 {step < 5 && (
                   <div className={`w-4 h-0.5 ${
-                    isCompleted ? 'bg-indigo-500' : 'bg-gray-300'
+                    isCompleted ? 'bg-teal-500' : 'bg-gray-300'
                   }`} />
                 )}
               </React.Fragment>
