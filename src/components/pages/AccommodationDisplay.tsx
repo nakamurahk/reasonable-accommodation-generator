@@ -358,6 +358,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   
   // プロンプト生成用のstate
   const [promptMode, setPromptMode] = useState<'colleague' | 'supervisor'>('supervisor');
+  const [communicationMethod, setCommunicationMethod] = useState<'email' | 'oral' | 'chat' | 'document'>('email');
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [userInput, setUserInput] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
@@ -453,8 +454,12 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     
     if (promptMode === 'colleague') {
       // 同僚向けAIプロンプト
+      const methodText = communicationMethod === 'email' ? 'メール' : 
+                        communicationMethod === 'oral' ? '口頭' : 
+                        communicationMethod === 'chat' ? 'チャット' : '資料';
+      
       prompt = `あなたは、チーム内の相互理解を促進し、パフォーマンスを最大化させるためのコミュニケーション設計の専門家です。
-次の困りごとと配慮案を、同僚に「チームを円滑にするための工夫」として伝える想定で整理してください。
+次の困りごとと配慮案を、同僚に「チームを円滑にするための工夫」として${methodText}で伝える想定で整理してください。
 
 条件：
 - 「配慮」や「障害」といった言葉は避け、「チームのルール」「作業の効率化」といった前向きな言葉に置き換える
@@ -475,14 +480,18 @@ ${userInput.trim() || '（記述なし）'}
 出力形式：
 1. 目的（例：チーム全体の集中力・ミスの削減を目指して）
 2. 依頼したい具体的なアクションと、それがチームにもたらすメリット
-3. 同僚に伝えるための具体的な文面（チャットや口頭での相談を想定した、親しみやすいトーン）`;
+3. 同僚に伝えるための具体的な文面（${methodText}での相談を想定）`;
       
     } else {
       // 上司・人事向けAIプロンプト
+      const methodText = communicationMethod === 'email' ? 'メール' : 
+                        communicationMethod === 'oral' ? '口頭' : 
+                        communicationMethod === 'chat' ? 'チャット' : '資料';
+      
       prompt = `あなたは、合理的配慮と生産性向上を両立させる調整のスペシャリストです。上司や人事が前向きに検討できる、建設的で論理的な「合理的配慮の調整案」を提示してください。
 
 👔 上司・人事向け
-次の困りごとと配慮案を、上司や人事に相談する想定で整理してください。
+次の困りごとと配慮案を、上司や人事に${methodText}で相談する想定で整理してください。
 
 条件：
 - 「要望」ではなく「提案」として書く
@@ -503,9 +512,9 @@ ${accommodationText.trim()}
 ${userInput.trim() || '（記述なし）'}
 
 出力形式：
-1. 件名（例：「業務上の調整についてのご相談」）
-2. 本文（300〜400字程度、ビジネスメール調）
-3. 依頼のポイント（具体的な依頼時に留意すべき点）`;
+1. 目的（例：チーム全体の集中力・ミスの削減を目指して）
+2. 依頼したい具体的なアクションと、それがチームにもたらすメリット
+3. 上長・人事に伝えるための具体的な文面（${methodText}での相談を想定）`;
     }
     
     setGeneratedPrompt(prompt);
@@ -840,6 +849,64 @@ ${userInput.trim() || '（記述なし）'}
                     <div className="ml-3">
                       <div className="font-medium text-gray-700">環境調整モード</div>
                       <div className="text-sm text-gray-500">同僚に協力的な依頼</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-md font-medium text-gray-700 mb-3">伝達手段を選択してください</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="communicationMethod"
+                      value="email"
+                      checked={communicationMethod === 'email'}
+                      onChange={(e) => setCommunicationMethod(e.target.value as 'email')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">メール</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="communicationMethod"
+                      value="oral"
+                      checked={communicationMethod === 'oral'}
+                      onChange={(e) => setCommunicationMethod(e.target.value as 'oral')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">口頭</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="communicationMethod"
+                      value="chat"
+                      checked={communicationMethod === 'chat'}
+                      onChange={(e) => setCommunicationMethod(e.target.value as 'chat')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">チャット</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="communicationMethod"
+                      value="document"
+                      checked={communicationMethod === 'document'}
+                      onChange={(e) => setCommunicationMethod(e.target.value as 'document')}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">資料</div>
                     </div>
                   </label>
                 </div>
