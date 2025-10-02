@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import StepFooter from '../layout/StepFooter';
 
 type FinalCardSelectionProps = {
   selectedDifficulties: any[];
@@ -208,27 +209,15 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
           </div>
         </div>
 
-        {/* ナビゲーションボタン */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors shadow-lg"
-          >
-            ⬅️ 前のステップへ
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={finalSelection.length !== 3}
-            className={`px-6 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg ${
-              finalSelection.length === 3
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105'
-                : 'bg-gray-300 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            {finalSelection.length === 3 ? '🎮 次のステップへ' : '🎮 次のステップへ'}
-          </button>
-        </div>
+        {/* フッター */}
+        <StepFooter
+          showBackButton={true}
+          onBack={onBack}
+          onNext={handleNext}
+          nextButtonText="🎮 次のステップへ"
+          nextButtonDisabled={finalSelection.length !== 3}
+          isMobile={true}
+        />
       </div>
     </div>
   );

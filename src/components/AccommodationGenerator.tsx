@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CharacteristicType, Domain, Situation } from '../types';
 import { ViewModel } from '../types/newDataStructure';
-import InitialSelection from './pages/InitialSelection';
+import Step1_1_Characteristics from './pages/Step1_1_Characteristics';
+import Step1_2_Domain from './pages/Step1_2_Domain';
+import Step1_3_Situations from './pages/Step1_3_Situations';
 import DifficultyThinking from './pages/DifficultyThinking';
 import DeckBuilding from './pages/DeckBuilding';
 import FinalCardSelection from './pages/FinalCardSelection';
@@ -44,7 +46,7 @@ type Selection = {
   situations: Situation[];
 };
 
-type Step = 'initial' | 'thinking' | 'deckbuilding' | 'finalselection' | 'display';
+type Step = 'step1-1' | 'step1-2' | 'step1-3' | 'thinking' | 'deckbuilding' | 'finalselection' | 'display';
 
 const AccommodationGenerator: React.FC = () => {
   const location = useLocation();
@@ -53,12 +55,14 @@ const AccommodationGenerator: React.FC = () => {
   // URLから現在のステップを取得
   const getCurrentStep = (): Step => {
     const path = location.pathname;
-    if (path === '/step1') return 'initial';
+    if (path === '/step1-1') return 'step1-1';
+    if (path === '/step1-2') return 'step1-2';
+    if (path === '/step1-3') return 'step1-3';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
     if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
-    return 'initial';
+    return 'step1-1';
   };
   
   // LocalStorageからデータを読み込む
@@ -124,13 +128,45 @@ const AccommodationGenerator: React.FC = () => {
     // console.log('updateStep called with:', newStep);
     setCurrentStep(newStep);
     // URLを更新
-    const path = newStep === 'initial' ? '/step1' : 
+    const path = newStep === 'step1-1' ? '/step1-1' :
+                 newStep === 'step1-2' ? '/step1-2' :
+                 newStep === 'step1-3' ? '/step1-3' :
                  newStep === 'thinking' ? '/step2' : 
                  newStep === 'deckbuilding' ? '/step3' :
                  newStep === 'finalselection' ? '/step4' : '/step5';
     // console.log('Navigating to path:', path);
     navigate(path);
     window.scrollTo(0, 0);
+  };
+
+  // ステップ1-1完了時のハンドラー
+  const handleStep1_1Complete = () => {
+    updateStep('step1-2');
+  };
+
+  // ステップ1-2完了時のハンドラー
+  const handleStep1_2Complete = () => {
+    updateStep('step1-3');
+  };
+
+  // ステップ1-3完了時のハンドラー
+  const handleStep1_3Complete = () => {
+    updateStep('thinking');
+  };
+
+  // ステップ1-1に戻る
+  const handleStep1_1Back = () => {
+    updateStep('step1-1');
+  };
+
+  // ステップ1-2に戻る
+  const handleStep1_2Back = () => {
+    updateStep('step1-1');
+  };
+
+  // ステップ1-3に戻る
+  const handleStep1_3Back = () => {
+    updateStep('step1-2');
   };
 
   const handleInitialSelectionComplete = (
@@ -264,15 +300,64 @@ const AccommodationGenerator: React.FC = () => {
       // console.log('Moving from deckbuilding to thinking');
       updateStep('thinking');
     } else if (currentStep === 'thinking') {
-      // console.log('Moving from thinking to initial');
-      updateStep('initial');
+      // console.log('Moving from thinking to step1-1');
+      updateStep('step1-1');
     }
   };
 
   return (
-    <div className="h-full bg-sand">
-      {currentStep === 'initial' && (
-        <InitialSelection onComplete={handleInitialSelectionComplete} />
+    <div className="h-full bg-sand pb-20">
+      {currentStep === 'step1-1' && (
+        <Step1_1_Characteristics
+          selectedCharacteristics={selection.characteristics}
+          onCharacteristicsChange={(characteristics) => {
+            const newSelection = { ...selection, characteristics };
+            setSelection(newSelection);
+            saveToLocalStorage({
+              selection: newSelection,
+              selectedDifficulties,
+              displayDifficulties,
+              originalDifficulties,
+            });
+          }}
+          onNext={handleStep1_1Complete}
+          onBack={handleStep1_1Back}
+        />
+      )}
+      {currentStep === 'step1-2' && (
+        <Step1_2_Domain
+          selectedDomain={selection.domain}
+          onDomainChange={(domain) => {
+            const newSelection = { ...selection, domain, situations: [] };
+            setSelection(newSelection);
+            saveToLocalStorage({
+              selection: newSelection,
+              selectedDifficulties,
+              displayDifficulties,
+              originalDifficulties,
+            });
+          }}
+          onNext={handleStep1_2Complete}
+          onBack={handleStep1_2Back}
+        />
+      )}
+      {currentStep === 'step1-3' && (
+        <Step1_3_Situations
+          selectedSituations={selection.situations}
+          onSituationsChange={(situations) => {
+            const newSelection = { ...selection, situations };
+            setSelection(newSelection);
+            saveToLocalStorage({
+              selection: newSelection,
+              selectedDifficulties,
+              displayDifficulties,
+              originalDifficulties,
+            });
+          }}
+          onComplete={handleStep1_3Complete}
+          onBack={handleStep1_3Back}
+          selectedDomain={selection.domain}
+        />
       )}
       {currentStep === 'thinking' && (
         selection.domain && selection.situations.length > 0 ? (
@@ -290,7 +375,7 @@ const AccommodationGenerator: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
-                onClick={() => updateStep('initial')}
+                onClick={() => updateStep('step1-1')}
                 className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
@@ -312,7 +397,7 @@ const AccommodationGenerator: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
-                onClick={() => updateStep('initial')}
+                onClick={() => updateStep('step1-1')}
                 className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
@@ -333,7 +418,7 @@ const AccommodationGenerator: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
-                onClick={() => updateStep('initial')}
+                onClick={() => updateStep('step1-1')}
                 className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す
@@ -358,7 +443,7 @@ const AccommodationGenerator: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-600 mb-4">データが見つかりません</p>
               <button
-                onClick={() => updateStep('initial')}
+                onClick={() => updateStep('step1-1')}
                 className="px-6 py-3 bg-teal text-white rounded-lg hover:bg-teal-600 transition"
               >
                 最初からやり直す

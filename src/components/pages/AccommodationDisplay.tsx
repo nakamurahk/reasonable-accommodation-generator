@@ -11,6 +11,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName, buildFilteredViewModel } from '../../data/newDataLoader';
 import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
+import StepFooter from '../layout/StepFooter';
 
 // フォント登録
 Font.register({
@@ -1274,21 +1275,14 @@ ${userInput.trim() || '（記述なし）'}
           ※支援者に渡す前に、自分でもメモに残しておくと安心です
         </div>
         
-        <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors shadow-lg"
-          >
-            ⬅️ 前のステップへ
-          </button>
-
-          <button
-            onClick={onRestart}
-            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 transition-colors shadow-lg"
-          >
-            🎮 最初から
-          </button>
-        </div>
+        <StepFooter
+          showBackButton={true}
+          onBack={onBack}
+          onNext={onRestart}
+          nextButtonText="🎮 最初から"
+          nextButtonDisabled={false}
+          isMobile={true}
+        />
       </div>
     );
   }
@@ -1506,21 +1500,14 @@ ${userInput.trim() || '（記述なし）'}
       <div className="text-xs text-gray-400 mt-2 flex justify-end">
         ※支援者に渡す前に、自分でもメモに残しておくと安心です
       </div>
-      <div className="flex justify-between mt-8">
-        <button
-          onClick={onBack}
-          className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors shadow-lg"
-        >
-          ⬅️ 前のステップへ
-        </button>
-
-        <button
-          onClick={onRestart}
-          className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 transition-colors shadow-lg"
-        >
-          🎮 最初から
-        </button>
-      </div>
+      <StepFooter
+        showBackButton={true}
+        onBack={onBack}
+        onNext={onRestart}
+        nextButtonText="🎮 最初から"
+        nextButtonDisabled={false}
+        isMobile={false}
+      />
     </div>
   );
 };

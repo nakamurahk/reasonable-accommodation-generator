@@ -9,6 +9,7 @@ import DifficultyGraphView from '../graph/DifficultyGraphView';
 import { loadStore, buildViewModel, buildFilteredViewModel } from '../../data/newDataLoader';
 import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
+import StepFooter from '../layout/StepFooter';
 
 // 8カテゴリ定義
 const CATEGORIES = [
@@ -703,7 +704,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         }} />
         {/* 選択件数固定表示 - カードの束（リスト表示時のみ） */}
         {viewMode === 'list' && (
-          <div className="fixed bottom-0 right-0 z-50">
+          <div className="fixed bottom-20 right-0 z-50">
             <div className="relative w-[120px] h-[120px]">
               {/* カードの束の背景 */}
               <div 
@@ -758,7 +759,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         {/* 3/10テキスト表示 - カードの束の上に表示（リスト表示時のみ） */}
         {viewMode === 'list' && (
-          <div className="fixed bottom-6 right-6 z-[60]">
+          <div className="fixed bottom-28 right-6 z-[60]">
           <div 
             className="text-lg font-bold cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setShowSelectionModal(true)}
@@ -993,16 +994,16 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                               <div className="w-6 h-6 bg-teal rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                   </div>
-                            </div>
+          </div>
                           )}
                         </div>
-                      </button>
+              </button>
                       
                       {/* 詳細表示ボタン（右端） */}
-                      <button
+                <button
                         onClick={() => toggleAccordion(item['困りごと内容'])}
                         className="ml-2 flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 transition-colors px-2 py-1 rounded hover:bg-teal-50"
-                      >
+                >
                         <span className="transition-all duration-200">
                           {isExpanded ? '▲' : '▼'}
                   </span>
@@ -1071,40 +1072,40 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               </div>
             </div>
           )}
-              </div>
+        </div>
 
               {/* カスタム困りごと入力 */}
               <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
                 <h3 className="text-base font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
                 <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    value={input}
+            <input
+              type="text"
+              value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
+              onKeyPress={handleKeyPress}
                     placeholder="(未実装)"
                     disabled
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
-                  />
-                <button
-                    onClick={handleAddCustom}
+            />
+            <button
+              onClick={handleAddCustom}
                     disabled
                     className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
-                  >
-                    送信
-                </button>
-                </div>
-                {customDifficulties.length > 0 && (
+            >
+              送信
+            </button>
+          </div>
+          {customDifficulties.length > 0 && (
                   <div className="space-y-2">
-                    {customDifficulties.map((difficulty, index) => (
+                {customDifficulties.map((difficulty, index) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
-                        <span className="text-gray-700">{difficulty}</span>
-                        <button
-                          onClick={() => handleRemoveCustom(difficulty)}
+                    <span className="text-gray-700">{difficulty}</span>
+                    <button
+                      onClick={() => handleRemoveCustom(difficulty)}
                           className="text-red-500 hover:text-red-700"
-                        >
-                          ✕
-                        </button>
+                    >
+                      ✕
+                    </button>
                       </div>
                     ))}
                   </div>
@@ -1126,22 +1127,15 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           )}
         </div>
 
-        {/* ボタン */}
-        <div className="flex justify-between mt-6">
-              <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
-          >
-            ⬅️ 前のステップへ
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={selected.length === 0}
-            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
-          >
-            🎮 次のステップへ
-              </button>
-        </div>
+        {/* フッター */}
+        <StepFooter
+          showBackButton={true}
+          onBack={onBack}
+          onNext={handleNext}
+          nextButtonText="🎮 次のステップへ"
+          nextButtonDisabled={selected.length === 0}
+          isMobile={true}
+        />
       </div>
     );
   }
@@ -1518,7 +1512,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                               <h4 className="text-sm font-medium text-gray-700 mb-2">具体例</h4>
                               <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
                                 {exampleList}
-                              </ul>
+              </ul>
                             </div>
 
                             {/* タグ表示 */}
@@ -1539,16 +1533,16 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                                     </span>
                                   ))}
                                 </div>
-                              </div>
-                            )}
+            </div>
+          )}
                           </div>
                         </div>
                       )}
                     </div>
                   );
                 })}
-              </div>
-              
+        </div>
+
               {/* さらに表示ボタン */}
               {currentCategoryDifficulties.length > getVisibleCount(selectedCategory, currentCategoryDifficulties.length) && (
                 <div className="mt-2">
@@ -1560,12 +1554,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   </div>
                   
                   <div className="text-center">
-                    <button
+          <button
                       onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
                       className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
-                    >
+          >
                       残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
-                    </button>
+          </button>
                   </div>
                 </div>
               )}
@@ -1584,14 +1578,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   disabled
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
             />
-            <button
+          <button
               onClick={handleAddCustom}
                   disabled
                   className="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
             >
               送信
-            </button>
-          </div>
+          </button>
+        </div>
           {customDifficulties.length > 0 && (
                 <div className="space-y-2">
                 {customDifficulties.map((difficulty, index) => (
@@ -1603,7 +1597,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     >
                       ✕
                     </button>
-                    </div>
+      </div>
                   ))}
                 </div>
               )}
@@ -1624,22 +1618,15 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           )}
         </div>
 
-      {/* ボタン */}
-        <div className="flex justify-between mt-8">
-          <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
-          >
-            ⬅️ 前のステップへ
-          </button>
-          <button
-            onClick={handleNext}
-          disabled={selected.length === 0}
-            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
-          >
-            🎮 次のステップへ
-          </button>
-        </div>
+      {/* フッター */}
+      <StepFooter
+        showBackButton={true}
+        onBack={onBack}
+        onNext={handleNext}
+        nextButtonText="🎮 次のステップへ"
+        nextButtonDisabled={selected.length === 0}
+        isMobile={false}
+      />
       
     </div>
   );

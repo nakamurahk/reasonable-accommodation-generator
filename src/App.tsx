@@ -47,13 +47,15 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
         <MobileHeaderWrapper />
         <main>
           <Routes>
-            <Route path="/" element={<Navigate to="/step1" replace />} />
-            <Route path="/step1" element={<AccommodationGenerator />} />
+            <Route path="/" element={<Navigate to="/step1-1" replace />} />
+            <Route path="/step1-1" element={<AccommodationGenerator />} />
+            <Route path="/step1-2" element={<AccommodationGenerator />} />
+            <Route path="/step1-3" element={<AccommodationGenerator />} />
             <Route path="/step2" element={<AccommodationGenerator />} />
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
             <Route path="/step5" element={<AccommodationGenerator />} />
-            <Route path="*" element={<Navigate to="/step1" replace />} />
+            <Route path="*" element={<Navigate to="/step1-1" replace />} />
           </Routes>
         </main>
       </div>
@@ -68,13 +70,15 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
         <SideNavWrapper />
         <main className="flex-1 overflow-auto">
           <Routes>
-            <Route path="/" element={<Navigate to="/step1" replace />} />
-            <Route path="/step1" element={<AccommodationGenerator />} />
+            <Route path="/" element={<Navigate to="/step1-1" replace />} />
+            <Route path="/step1-1" element={<AccommodationGenerator />} />
+            <Route path="/step1-2" element={<AccommodationGenerator />} />
+            <Route path="/step1-3" element={<AccommodationGenerator />} />
             <Route path="/step2" element={<AccommodationGenerator />} />
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
             <Route path="/step5" element={<AccommodationGenerator />} />
-            <Route path="*" element={<Navigate to="/step1" replace />} />
+            <Route path="*" element={<Navigate to="/step1-1" replace />} />
           </Routes>
         </main>
       </div>
@@ -87,12 +91,14 @@ function MobileHeaderWrapper() {
   const location = useLocation();
   const getCurrentStep = () => {
     const path = location.pathname;
-    if (path === '/step1') return 'initial';
+    if (path === '/step1-1') return 'step1-1';
+    if (path === '/step1-2') return 'step1-2';
+    if (path === '/step1-3') return 'step1-3';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
     if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
-    return 'initial';
+    return 'step1-1';
   };
   
   return <MobileHeader currentStep={getCurrentStep()} />;
@@ -102,12 +108,14 @@ function HeaderWrapper() {
   const location = useLocation();
   const getCurrentStep = () => {
     const path = location.pathname;
-    if (path === '/step1') return 'initial';
+    if (path === '/step1-1') return 'step1-1';
+    if (path === '/step1-2') return 'step1-2';
+    if (path === '/step1-3') return 'step1-3';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
     if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
-    return 'initial';
+    return 'step1-1';
   };
   
   return <Header currentStep={getCurrentStep()} />;
@@ -117,12 +125,14 @@ function SideNavWrapper() {
   const location = useLocation();
   const getCurrentStep = () => {
     const path = location.pathname;
-    if (path === '/step1') return 'initial';
+    if (path === '/step1-1') return 'step1-1';
+    if (path === '/step1-2') return 'step1-2';
+    if (path === '/step1-3') return 'step1-3';
     if (path === '/step2') return 'thinking';
     if (path === '/step3') return 'deckbuilding';
     if (path === '/step4') return 'finalselection';
     if (path === '/step5') return 'display';
-    return 'initial';
+    return 'step1-1';
   };
   
   return <SideNav currentStep={getCurrentStep()} />;

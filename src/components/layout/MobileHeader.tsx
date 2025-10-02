@@ -7,8 +7,12 @@ interface MobileHeaderProps {
 const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
   const getPageTitle = (step: string) => {
     switch (step) {
-      case 'initial':
-        return 'ステップ①：出発（特性・環境を選ぶ）';
+      case 'step1-1':
+        return 'ステップ①：特性を選ぶ';
+      case 'step1-2':
+        return 'ステップ①：環境を選ぶ';
+      case 'step1-3':
+        return 'ステップ①：シチュエーションを選ぶ';
       case 'thinking':
         return 'ステップ②：探索（困りごとカードを集める）';
       case 'deckbuilding':
@@ -32,13 +36,32 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
         {/* プログレスインジケーター */}
         <div className="flex items-center justify-center space-x-1">
           {[1, 2, 3, 4, 5].map((step) => {
-            const stepKey = step === 1 ? 'initial' : step === 2 ? 'thinking' : step === 3 ? 'deckbuilding' : step === 4 ? 'finalselection' : 'display';
-            const isCompleted = 
-              (currentStep === 'thinking' && step <= 1) ||
+            // ステップ1の進捗状況を判定（ステップ②のロジックを参考）
+            const isStep1Completed = 
+              (currentStep === 'thinking' && step === 1) ||
+              (currentStep === 'deckbuilding' && step === 1) ||
+              (currentStep === 'finalselection' && step === 1) ||
+              (currentStep === 'display' && step === 1);
+            
+            const isStep1Current = 
+              (currentStep === 'step1-1' && step === 1) ||
+              (currentStep === 'step1-2' && step === 1) ||
+              (currentStep === 'step1-3' && step === 1);
+            
+            // 他のステップの進捗状況
+            const isOtherStepCompleted = 
               (currentStep === 'deckbuilding' && step <= 2) ||
               (currentStep === 'finalselection' && step <= 3) ||
               (currentStep === 'display' && step <= 4);
-            const isCurrent = currentStep === stepKey;
+            
+            const isOtherStepCurrent = 
+              (currentStep === 'thinking' && step === 2) ||
+              (currentStep === 'deckbuilding' && step === 3) ||
+              (currentStep === 'finalselection' && step === 4) ||
+              (currentStep === 'display' && step === 5);
+            
+            const isCompleted = isStep1Completed || isOtherStepCompleted;
+            const isCurrent = isStep1Current || isOtherStepCurrent;
             
             return (
               <React.Fragment key={step}>

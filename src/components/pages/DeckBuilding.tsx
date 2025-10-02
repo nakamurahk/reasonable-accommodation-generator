@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ViewModel } from '../../types/newDataStructure';
+import StepFooter from '../layout/StepFooter';
 
 type DeckBuildingProps = {
   selectedDifficulties: any[];
@@ -246,23 +247,15 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
           </div>
         </div>
 
-        {/* ナビゲーションボタン */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={onBack}
-            className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-colors"
-          >
-            ⬅️ 前のステップへ
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={deck.length === 0}
-            className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 hover:shadow-md transition-colors disabled:bg-gray-300 disabled:text-gray-400"
-          >
-            🎮 次のステップへ
-          </button>
-        </div>
+        {/* フッター */}
+        <StepFooter
+          showBackButton={true}
+          onBack={onBack}
+          onNext={handleNext}
+          nextButtonText="🎮 次のステップへ"
+          nextButtonDisabled={deck.length === 0}
+          isMobile={true}
+        />
       </div>
     </div>
   );
