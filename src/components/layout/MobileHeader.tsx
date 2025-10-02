@@ -8,15 +8,15 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
   const getPageTitle = (step: string) => {
     switch (step) {
       case 'initial':
-        return 'ステップ①：出発';
+        return 'ステップ①：出発（特性・環境を選ぶ）';
       case 'thinking':
-        return 'ステップ②：探索';
+        return 'ステップ②：探索（困りごとカードを集める）';
       case 'deckbuilding':
-        return 'ステップ③：選抜';
+        return 'ステップ③：選抜（困りごとを絞り込む）';
       case 'finalselection':
-        return 'ステップ④：決定';
+        return 'ステップ④：決定（最重要の困りごとを決める）';
       case 'display':
-        return 'ステップ⑤：確認';
+        return 'ステップ⑤：確認（配慮案を見る）';
       default:
         return '';
     }

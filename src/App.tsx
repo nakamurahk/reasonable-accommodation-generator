@@ -1,17 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import SideNav from './components/layout/SideNav';
 import AccommodationGenerator from './components/AccommodationGenerator';
 import Header from './components/layout/Header';
 import MobileHeader from './components/layout/MobileHeader';
+import StartPage from './components/pages/StartPage';
 import { useIsMobile } from './hooks/useIsMobile';
 
 function App() {
   const isMobile = useIsMobile();
+  const [hasStarted, setHasStarted] = useState(false);
 
   const handleAccommodationComplete = (accommodations: string[]) => {
     console.log('Accommodations:', accommodations);
   };
+
+  const handleStart = () => {
+    setHasStarted(true);
+  };
+
+  // スタートページが表示されていない場合のみ通常のレイアウトを表示
+  if (!hasStarted) {
+    return <StartPage onStart={handleStart} />;
+  }
 
   return (
     <Router>

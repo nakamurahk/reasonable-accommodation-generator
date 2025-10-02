@@ -75,7 +75,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
           <p className="text-gray-700 text-base leading-relaxed">
             <span className="font-bold">🔍 出発のステージ</span><br />
 ここから「困りごとを探す旅」が始まります。<br />
-まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
+まずは自分の特性を選び、次に環境を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。<br />
+最後に、困りごとが発生するシチュエーションを複数選択してください。
           </p>
         </div>
         
@@ -209,7 +210,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({ onComplete }) => {
                   <p className="text-gray-700 text-lg leading-relaxed">
             <span className="font-bold">🔍 出発のステージ</span><br />
 ここから「困りごとを探す旅」が始まります。<br />
-まずは自分の特性を選び、次に場面（環境）を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。
+まずは自分の特性を選び、次に環境を決めましょう。選んだ環境に応じて具体的なシチュエーションが現れます。<br />
+最後に、困りごとが発生するシチュエーションを複数選択してください。
           </p>
       </div>
       
