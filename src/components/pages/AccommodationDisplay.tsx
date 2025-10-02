@@ -337,7 +337,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
       </View>
         </View>
         <Text style={styles.footer}>
-          {dateStr} 合理的配慮ジェネレータ
+          {dateStr} FitBridge
         </Text>
     </Page>
   </Document>
@@ -759,7 +759,7 @@ ${userInput.trim() || '（記述なし）'}
     const text = [
       '配慮案を確認しましょう。',
       'これは、支援を進めるための調整マニュアルです。',
-      `${dateStr} 合理的配慮ジェネレータ`,
+      `${dateStr} FitBridge`,
       '',
       '【配慮依頼案】',
       accommodationText.trim(),
@@ -857,7 +857,7 @@ ${userInput.trim() || '（記述なし）'}
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `合理的配慮ジェネレータ_${dateStr}.pdf`;
+      link.download = `FitBridge_${dateStr}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

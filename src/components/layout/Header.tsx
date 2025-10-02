@@ -20,8 +20,8 @@ const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
       <div className="flex items-center space-x-2">
         {/* ロゴ部分（SVGや画像に差し替え可） */}
         <span className="text-teal text-2xl font-bold">🧩</span>
-        <span className="text-lg font-semibold text-gray-900 hidden sm:block">合理的配慮ジェネレータ</span>
-        <span className="text-lg font-semibold text-gray-900 sm:hidden">配慮ジェネレータ</span>
+        <span className="text-lg font-semibold text-gray-900 hidden sm:block">FitBridge</span>
+        <span className="text-lg font-semibold text-gray-900 sm:hidden">FitBridge</span>
       </div>
       
       {/* モバイル版ステップ表示 */}
