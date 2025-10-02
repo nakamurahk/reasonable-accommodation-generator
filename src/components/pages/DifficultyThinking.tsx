@@ -877,7 +877,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
             <span className="font-semibold">🗺️ 探索のステージ</span><br />
-            「困りごとの地図」を広げ、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
+            「困りごとの地図」を広げるように、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
           </p>
         </div>
         
@@ -1351,7 +1351,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
           <span className="font-semibold">🗺️ 探索のステージ</span><br />
-          「困りごとの地図」を広げ、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
+          「困りごとの地図」を広げるように、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
         </p>
       </div>
       

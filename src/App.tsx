@@ -9,7 +9,10 @@ import { useIsMobile } from './hooks/useIsMobile';
 
 function App() {
   const isMobile = useIsMobile();
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(() => {
+    // リロード時にlocalStorageから状態を復元
+    return localStorage.getItem('hasStarted') === 'true';
+  });
 
   const handleAccommodationComplete = (accommodations: string[]) => {
     console.log('Accommodations:', accommodations);
@@ -17,10 +20,15 @@ function App() {
 
   const handleStart = () => {
     setHasStarted(true);
+    localStorage.setItem('hasStarted', 'true');
   };
 
   // スタートページが表示されていない場合のみ通常のレイアウトを表示
   if (!hasStarted) {
+    // URLのステップ部分を削除してルートにリダイレクト
+    if (window.location.pathname !== '/') {
+      window.history.replaceState({}, '', '/');
+    }
     return <StartPage onStart={handleStart} />;
   }
 
@@ -45,6 +53,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
             <Route path="/step5" element={<AccommodationGenerator />} />
+            <Route path="*" element={<Navigate to="/step1" replace />} />
           </Routes>
         </main>
       </div>
@@ -65,6 +74,7 @@ function AppContent({ isMobile }: { isMobile: boolean }) {
             <Route path="/step3" element={<AccommodationGenerator />} />
             <Route path="/step4" element={<AccommodationGenerator />} />
             <Route path="/step5" element={<AccommodationGenerator />} />
+            <Route path="*" element={<Navigate to="/step1" replace />} />
           </Routes>
         </main>
       </div>

@@ -234,7 +234,15 @@ const AccommodationGenerator: React.FC = () => {
     // LocalStorageをクリア
     clearLocalStorage();
     
-    updateStep('initial');
+    // hasStartedもリセット
+    localStorage.removeItem('hasStarted');
+    
+    // 配慮案の選択状態もクリア
+    localStorage.removeItem('accommodation_selections');
+    
+    // URLをルートに変更してからページをリロード
+    window.history.replaceState({}, '', '/');
+    window.location.reload();
   };
 
   const handleBack = () => {
@@ -342,6 +350,8 @@ const AccommodationGenerator: React.FC = () => {
             onRestart={handleRestart}
             onBack={handleBack}
             viewModel={viewModel}
+            characteristics={selection.characteristics}
+            situations={selection.situations}
           />
         ) : (
           <div className="flex items-center justify-center h-full">

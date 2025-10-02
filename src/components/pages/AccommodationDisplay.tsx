@@ -8,7 +8,7 @@ import { getBase64Image } from '../../utils/imageUtils';
 import { Domain } from '../../types';
 import { useIsMobile } from '../../hooks/useIsMobile';
 // @ts-ignore
-import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName } from '../../data/newDataLoader';
+import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFromName, buildFilteredViewModel } from '../../data/newDataLoader';
 import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 
@@ -53,6 +53,8 @@ interface AccommodationDisplayProps {
   onRestart: () => void;
   onBack: () => void;
   viewModel?: ViewModel | null | undefined;
+  characteristics?: any[];
+  situations?: any[];
 }
 
 // アイコン画像パス
@@ -79,10 +81,11 @@ const CATEGORY_STYLES = {
 };
 
 // 困りごとタイトルからカテゴリを特定する関数（新データ構造対応）
-const getCategoryFromTitle = (title: string, viewModel: ViewModel | null | undefined) => {
-  if (!viewModel) return null;
+const getCategoryFromTitle = (title: string, viewModel: ViewModel | null | undefined, reconstructedViewModel?: ViewModel | null) => {
+  const effectiveViewModel = viewModel || reconstructedViewModel;
+  if (!effectiveViewModel) return null;
   
-  const item = viewModel.find((vm: any) => vm.concern.title === title);
+  const item = effectiveViewModel.find((vm: any) => vm.concern.title === title);
   return item ? item.concern.category : null;
 };
 
@@ -102,18 +105,23 @@ const points = [
 ];
 
 // 配慮案抽出関数（新データ構造のみ）
-const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null | undefined, selectedDomain: Domain | null) => {
+const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null | undefined, selectedDomain: Domain | null, reconstructedViewModel?: ViewModel | null) => {
   // console.log('getAccommodations called with:', { difficultyTitle, viewModel, selectedDomain });
-  if (!viewModel || !selectedDomain) {
+  
+  // まず元のviewModelを試し、なければ再構築されたviewModelを使用
+  const effectiveViewModel = viewModel || reconstructedViewModel;
+  
+  if (!effectiveViewModel || !selectedDomain) {
     // console.log('getAccommodations - returning empty array due to missing data');
     return []; // データが読み込まれていない場合は空配列を返す
   }
   
   const domain = getDomainFromName(selectedDomain.name);
-  const accommodations = getAccommodationsFromViewModel(viewModel, difficultyTitle, domain);
+  const accommodations = getAccommodationsFromViewModel(effectiveViewModel, difficultyTitle, domain);
   // console.log('getAccommodations - found accommodations:', accommodations);
   return accommodations;
 };
+
 
 // PDFのスタイル定義
 const styles = StyleSheet.create({
@@ -256,12 +264,13 @@ const styles = StyleSheet.create({
 });
 
 // PDFドキュメントコンポーネント
-const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain, selectedItems }: { 
+const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain, selectedItems, reconstructedViewModel }: { 
   difficulties: Difficulty[], 
   base64Images: { [key: string]: string },
   viewModel: ViewModel | null | undefined,
   selectedDomain: Domain | null,
-  selectedItems: { difficulties: string[], accommodations: { [difficultyId: string]: string[] } }
+  selectedItems: { difficulties: string[], accommodations: { [difficultyId: string]: string[] } },
+  reconstructedViewModel?: ViewModel | null
 }) => {
   const today = new Date();
   const dateStr = today.getFullYear() +
@@ -288,7 +297,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
             </View>
             <View style={styles.accommodationList}>
               {(() => {
-                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
+                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain, reconstructedViewModel);
                 const selectedAccommodationIds = selectedItems.accommodations[item.id] || [];
                 const selectedAccommodations = accommodations.filter((_, index) => 
                   selectedAccommodationIds.includes(String(index))
@@ -340,21 +349,68 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   selectedDomain,
   onRestart,
   onBack,
-  viewModel
+  viewModel,
+  characteristics = [],
+  situations = []
 }) => {
+  const [reconstructedViewModel, setReconstructedViewModel] = useState<ViewModel | null>(null);
   // console.log('AccommodationDisplay - viewModel:', viewModel);
   // console.log('AccommodationDisplay - selectedDifficulties:', selectedDifficulties);
   // console.log('AccommodationDisplay - selectedDomain:', selectedDomain);
   const isMobile = useIsMobile();
+
+  // viewModelがnullの場合に再構築を試行
+  useEffect(() => {
+    const reconstructViewModel = async () => {
+      if (!viewModel && selectedDomain && selectedDifficulties.length > 0) {
+        try {
+          // 実際の選択情報を使用して再構築
+          const query = {
+            traits: characteristics.map(c => c.name || c),
+            domain: selectedDomain.name,
+            situations: situations.map(s => s.name || s)
+          };
+          
+          console.log('viewModel再構築中:', query);
+          const vm = await buildFilteredViewModel(query);
+          setReconstructedViewModel(vm);
+          console.log('viewModel再構築完了:', vm);
+        } catch (error) {
+          console.error('viewModel再構築に失敗:', error);
+        }
+      }
+    };
+
+    reconstructViewModel();
+  }, [viewModel, selectedDomain, selectedDifficulties, characteristics, situations]);
   
   // 選択状態を管理するstate
   const [selectedItems, setSelectedItems] = useState<{
     difficulties: string[];
     accommodations: { [difficultyId: string]: string[] };
-  }>({
-    difficulties: [],
-    accommodations: {}
+  }>(() => {
+    // リロード時にlocalStorageから選択状態を復元
+    const saved = localStorage.getItem('accommodation_selections');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        console.log('保存された選択状態を復元:', parsed);
+        return parsed;
+      } catch (error) {
+        console.error('選択状態の復元に失敗:', error);
+      }
+    }
+    console.log('デフォルト選択状態を初期化');
+    return {
+      difficulties: [],
+      accommodations: {}
+    };
   });
+
+  // 選択状態をlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('accommodation_selections', JSON.stringify(selectedItems));
+  }, [selectedItems]);
   
   // プロンプト生成用のstate
   const [promptMode, setPromptMode] = useState<'colleague' | 'supervisor'>('supervisor');
@@ -404,17 +460,19 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   // 選択された配慮案のみをフィルタリングする関数
   const getSelectedAccommodations = (difficultyId: string, accommodations: any[]) => {
     const selectedAccommodationIds = selectedItems.accommodations[difficultyId] || [];
-    return accommodations.filter((_, index) => 
+    console.log(`配慮案選択状態 - 困りごとID: ${difficultyId}, 選択されたインデックス: ${selectedAccommodationIds}`);
+    
+    const selectedAccommodations = accommodations.filter((_, index) => 
       selectedAccommodationIds.includes(String(index))
     );
+    
+    console.log(`選択された配慮案:`, selectedAccommodations);
+    return selectedAccommodations;
   };
   
   // プロンプト生成関数
   const generatePrompt = () => {
-    if (!viewModel || !selectedDomain) {
-      alert('データが読み込まれていません。');
-      return;
-    }
+    // viewModelが利用できない場合でもフォールバック配慮案でプロンプト生成を続行
     
     const selectedDifficultiesToShow = getSelectedDifficulties();
     if (selectedDifficultiesToShow.length === 0) {
@@ -431,13 +489,16 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     // 配慮案テキストを生成
     let accommodationText = '';
     selectedDifficultiesToShow.forEach((difficulty: any) => {
-      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
       const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
       
       if (selectedAccommodations.length > 0) {
         accommodationText += `【${difficulty.title}】\n`;
         selectedAccommodations.forEach((acc: any, accIndex: number) => {
-          const accLabel = ['A', 'B', 'C'][accIndex] || String(accIndex + 1);
+          // 選択された配慮案の実際のインデックスを取得
+          const selectedAccommodationIds = selectedItems.accommodations[difficulty.id] || [];
+          const actualIndex = selectedAccommodationIds[accIndex];
+          const accLabel = ['A', 'B', 'C'][parseInt(actualIndex)] || String(parseInt(actualIndex) + 1);
           accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
           if (acc['詳細説明']) {
             const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
@@ -556,26 +617,50 @@ ${userInput.trim() || '（記述なし）'}
   }, []);
   
   // 初期化時にすべての困りごとを選択状態にし、各困りごとの最初の配慮案を自動選択する
+  // ただし、保存された選択状態がある場合はそれを優先
   useEffect(() => {
     if (selectedDifficulties.length > 0 && selectedItems.difficulties.length === 0) {
+      // 保存された選択状態をチェック
+      const saved = localStorage.getItem('accommodation_selections');
+      if (saved) {
+        try {
+          const savedSelections = JSON.parse(saved);
+          // 保存された選択状態が現在の困りごとと一致するかチェック
+          const currentDifficultyIds = selectedDifficulties.map(d => d.id);
+          const savedDifficultyIds = savedSelections.difficulties || [];
+          
+          if (currentDifficultyIds.every(id => savedDifficultyIds.includes(id))) {
+            // 保存された選択状態を使用
+            setSelectedItems(savedSelections);
+            return;
+          }
+        } catch (error) {
+          console.error('保存された選択状態の読み込みに失敗:', error);
+        }
+      }
+      
+      // 保存された選択状態がない場合、デフォルトの初期化を行う
       const initialAccommodations: { [difficultyId: string]: string[] } = {};
       
       selectedDifficulties.forEach(difficulty => {
-        if (viewModel && selectedDomain) {
-          const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
-          if (accommodations.length > 0) {
-            initialAccommodations[difficulty.id] = ['0']; // 最初の配慮案（インデックス0）を選択
-          }
+        const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
+        
+        if (accommodations.length > 0) {
+          initialAccommodations[difficulty.id] = ['0']; // 配慮案A（インデックス0）をデフォルト選択
         }
       });
       
-      setSelectedItems(prev => ({
-        ...prev,
+      const newSelectedItems = {
         difficulties: selectedDifficulties.map(d => d.id),
         accommodations: initialAccommodations
-      }));
+      };
+      
+      setSelectedItems(newSelectedItems);
+      
+      // デフォルト選択状態をlocalStorageに保存
+      localStorage.setItem('accommodation_selections', JSON.stringify(newSelectedItems));
     }
-  }, [selectedDifficulties, selectedItems.difficulties.length, viewModel, selectedDomain]);
+  }, [selectedDifficulties, selectedItems.difficulties.length, viewModel, selectedDomain, reconstructedViewModel]);
 
 
   const getCategoryIcon = (category: string) => {
@@ -611,20 +696,23 @@ ${userInput.trim() || '（記述なし）'}
     // 配慮依頼案のテキストを直接構築
     let accommodationText = '';
     selectedDifficultiesToShow.forEach((difficulty: any, index: number) => {
-      const category = getCategoryFromTitle(difficulty.title, viewModel);
+      const category = getCategoryFromTitle(difficulty.title, viewModel, reconstructedViewModel);
       const categoryIcon = getCategoryIcon(category || '');
       
       accommodationText += `${categoryIcon}${difficulty.title}\n`;
       accommodationText += `カテゴリ: ${category}\n`;
       
-      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
       const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
       
       if (selectedAccommodations.length === 0) {
         accommodationText += `（配慮案が選択されていません）\n`;
       } else {
         selectedAccommodations.forEach((acc: any, accIndex: number) => {
-          const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+          // 選択された配慮案の実際のインデックスを取得
+          const selectedAccommodationIds = selectedItems.accommodations[difficulty.id] || [];
+          const actualIndex = selectedAccommodationIds[accIndex];
+          const accLabel = ['A', 'B', 'C', 'D'][parseInt(actualIndex)] || String(parseInt(actualIndex) + 1);
           accommodationText += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
         });
       }
@@ -640,13 +728,16 @@ ${userInput.trim() || '（記述なし）'}
     // 具体的配慮案の詳細を追加
     let detailedAccommodations = '';
     selectedDifficultiesToShow.forEach((difficulty: any, index: number) => {
-      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain);
+      const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
       const selectedAccommodations = getSelectedAccommodations(difficulty.id, accommodations);
       
       if (selectedAccommodations.length > 0) {
         detailedAccommodations += `\n【${difficulty.title}の具体的配慮案】\n`;
         selectedAccommodations.forEach((acc: any, accIndex: number) => {
-          const accLabel = ['A', 'B', 'C', 'D'][accIndex] || String(accIndex + 1);
+          // 選択された配慮案の実際のインデックスを取得
+          const selectedAccommodationIds = selectedItems.accommodations[difficulty.id] || [];
+          const actualIndex = selectedAccommodationIds[accIndex];
+          const accLabel = ['A', 'B', 'C', 'D'][parseInt(actualIndex)] || String(parseInt(actualIndex) + 1);
           detailedAccommodations += `配慮案${accLabel}: ${acc['配慮案タイトル'] || acc.description}\n`;
           if (acc['詳細説明']) {
             const details = acc['詳細説明'].split('\n').filter((line: string) => line.trim());
@@ -754,6 +845,7 @@ ${userInput.trim() || '（記述なし）'}
           viewModel={viewModel}
           selectedDomain={selectedDomain}
           selectedItems={selectedItems}
+          reconstructedViewModel={reconstructedViewModel}
         />
       );
       
@@ -1014,10 +1106,10 @@ ${userInput.trim() || '（記述なし）'}
             <p className="text-sm text-gray-600 text-center mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           
           {selectedDifficulties.map((item, idx) => {
-            const category = getCategoryFromTitle(item.title, viewModel || null);
+            const category = getCategoryFromTitle(item.title, viewModel || null, reconstructedViewModel);
             const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
             const isDifficultySelected = selectedItems.difficulties.includes(item.id);
-            const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
+                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain, reconstructedViewModel);
             
             return (
               <div key={idx} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
@@ -1240,10 +1332,10 @@ ${userInput.trim() || '（記述なし）'}
           <p className="text-sm text-gray-600 mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           <ul className="space-y-6">
             {selectedDifficulties.map((item, idx) => {
-                const category = getCategoryFromTitle(item.title, viewModel || null);
+                const category = getCategoryFromTitle(item.title, viewModel || null, reconstructedViewModel);
                 const categoryStyle = category ? CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] : null;
                 const isDifficultySelected = selectedItems.difficulties.includes(item.id);
-                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain);
+                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain, reconstructedViewModel);
               
               return (
               <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
