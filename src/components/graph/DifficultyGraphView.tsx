@@ -776,9 +776,9 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
                   }
                 }, 150); // 遅延を少し長くして確実に実行
               }}
-              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+              className="text-white bg-teal-500 hover:bg-teal-600 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full"
             >
-              <span className="text-lg font-bold">✕</span>
+              ✕
             </button>
           </div>
 
@@ -856,6 +856,24 @@ const DifficultyGraphView: React.FC<DifficultyGraphViewProps> = ({
             </div>
           </div>
 
+          {/* フッター */}
+          <div className="px-4 py-4 border-t bg-gray-50">
+            <button
+              onClick={() => {
+                setSelectedTagForBottomSheet(null);
+                // モーダルを閉じる時にグラフの位置とズームを元に戻す（PC版と統一）
+                setTimeout(() => {
+                  if (cyRef.current) {
+                    cyRef.current.fit(undefined, 20);
+                    cyRef.current.center();
+                  }
+                }, 150); // 遅延を少し長くして確実に実行
+              }}
+              className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            >
+              閉じる
+            </button>
+          </div>
         </div>
       </div>
     );

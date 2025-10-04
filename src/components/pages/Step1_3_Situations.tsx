@@ -43,20 +43,23 @@ const Step1_3_Situations: React.FC<Step1_3_SituationsProps> = ({
     return (
       <div className="max-w-none mx-auto p-4 space-y-6">
         
+        {/* 説明文 */}
+        <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
+          <p className="text-gray-700 text-base leading-relaxed">
+            <span className="font-bold">旅のシーン：困りごとが起きやすい状況は？</span><br />
+            先ほど選んだ環境で、あなたの『困りごと』が起きやすい具体的なシーンを選んでください。（複数選択可）
+          </p>
+        </div>
+        
         {/* シチュエーション選択 */}
         <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
-          <h2 className="text-base font-bold text-gray-700">
-            📝シチュエーションを選んでください<br />
-            （複数選択可 / {selectedSituations.length}件選択中）
-          </h2>
-          <div className="border-b border-gray-200 my-2"></div>
           
           <div className="flex justify-end">
             <button
               onClick={handleSelectAll}
-              className="px-3 py-1 bg-teal-500 text-white text-sm rounded-lg hover:bg-teal-600 transition-colors"
+              className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md hover:bg-gray-200 transition-colors"
             >
-              全部選択する
+              ☑️ すべて選択する
             </button>
           </div>
           
@@ -110,20 +113,23 @@ const Step1_3_Situations: React.FC<Step1_3_SituationsProps> = ({
   return (
     <div className="max-w-none mx-auto p-6 space-y-8">
       
+      {/* 説明文 */}
+      <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
+        <p className="text-gray-700 text-lg leading-relaxed">
+          <span className="font-bold">旅のシーン：困りごとが起きやすい状況は？</span><br />
+          先ほど選んだ活動場所で、あなたの『困りごと』が起きやすい具体的なシチュエーションを選んでください。（複数選択可）
+        </p>
+      </div>
+      
       {/* シチュエーション選択 */}
       <div className="space-y-4 bg-sand pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-700">
-          📝シチュエーションを選んでください<br />
-          （複数選択可 / {selectedSituations.length}件選択中）
-        </h2>
-        <div className="border-b border-gray-200 my-4"></div>
         
         <div className="flex justify-end">
           <button
             onClick={handleSelectAll}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-md hover:bg-gray-200 transition-colors"
           >
-            全部選択する
+            よくある場面をすべて選択
           </button>
         </div>
         

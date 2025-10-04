@@ -877,8 +877,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         {/* 説明文 */}
         <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            <span className="font-semibold">🗺️ 探索のステージ</span><br />
-            「困りごとの地図」を広げるように、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
+            <span className="font-semibold">🗺️ 探索：あなたの困りごとを探そう</span><br />
+            あなたが抱える困りごとを、関連するカテゴリから見つけていきましょう。リストにない場合は追加もできます。
           </p>
         </div>
         
@@ -910,7 +910,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             onClick={() => setShowSelectionModal(true)}
             className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            📚 コレクション ({selected.length}枚)
+            📚 選択中の困りごと ({selected.length}枚)
           </button>
         </div>
         
@@ -1067,7 +1067,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
                   className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
               >
-                  残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
+                  残りのリストを表示
               </button>
               </div>
             </div>
@@ -1378,7 +1378,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             onClick={() => setShowSelectionModal(true)}
             className="py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
-            📚 コレクション ({selected.length}枚)
+            📚 選択中の困りごと ({selected.length}枚)
           </button>
         </div>
       </div>
@@ -1558,7 +1558,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       onClick={() => showMore(selectedCategory, currentCategoryDifficulties.length)}
                       className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
           >
-                      残り{currentCategoryDifficulties.length - getVisibleCount(selectedCategory, currentCategoryDifficulties.length)}件を表示
+                      残りのリストを表示
           </button>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
     <div className="min-h-screen bg-sand flex items-center justify-center p-4">
       <div className={`${isMobile ? 'w-full max-w-md' : 'w-full max-w-2xl'} bg-white rounded-2xl shadow-xl overflow-hidden`}>
         {/* ヘッダー */}
-        <div className="relative bg-gradient-to-br from-teal-300 via-teal-500 to-teal-700 text-white p-6 text-center overflow-hidden" style={{
+        <div className="relative bg-gradient-to-br from-teal-300 via-teal-500 to-teal-700 text-white p-4 text-center overflow-hidden" style={{
           background: 'linear-gradient(135deg, #5eead4 0%, #14b8a6 25%, #0d9488 50%, #0f766e 75%, #134e4a 100%)'
         }}>
           {/* 抽象的なパターン背景 */}
@@ -71,7 +71,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
           {/* コンテンツ */}
           <div className="relative z-10">
             <h1 className="text-2xl font-bold mb-2">FitBridge</h1>
-            <p className="text-teal-100 text-sm">困りごとから、あなたにぴったりのサポートを見つけるツール</p>
+            <p className="text-teal-100 text-sm">困りごとを整理し、必要なサポートを見つけるツール</p>
           </div>
         </div>
 
@@ -81,45 +81,50 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
           <div className="bg-light-sand border border-teal-500 rounded-lg p-4">
             <h2 className="text-lg font-semibold text-gray-800 mb-3 text-center">✨ このツールでできること ✨</h2>
             <div className="text-sm text-gray-700 space-y-3">
-              <p className="text-center">このツールは、あなたの「困りごと」を整理し、自分にぴったりのサポートを見つけるお手伝いをします。</p>
+              <p className="text-center">困りごとを整理し、あなたに合った 合理的配慮や環境調整の候補 を見つけるお手伝いをします。</p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-green-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                {/* モバイル版のステップ間の接続線 */}
+                <div className="block md:hidden absolute top-1/4 left-1/2 w-1.5 h-6 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-full"></div>
+                <div className="block md:hidden absolute top-1/2 left-1/2 w-1.5 h-6 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-full"></div>
+                <div className="block md:hidden absolute top-3/4 left-1/2 w-1.5 h-6 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-full"></div>
+                
+                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
-                    <span className="text-green-500 text-xl">✅</span>
+                    <span className="text-green-500 text-xl">📍</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-sm">あなたについて教えてください</p>
-                      <p className="text-xs text-gray-600 mt-1">あなたの特性や環境を教えてね</p>
+                      <p className="font-semibold text-gray-800 text-sm">【出発】あなたのことを知る旅へ</p>
+                      <p className="text-xs text-gray-600 mt-1">特性と環境を教えてください。</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white border border-blue-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
-                    <span className="text-blue-500 text-xl">❓</span>
+                    <span className="text-blue-500 text-xl">🔍</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-sm">どんなことで困っていますか？</p>
-                      <p className="text-xs text-gray-600 mt-1">具体的な困りごとを選んでみよう</p>
+                      <p className="font-semibold text-gray-800 text-sm">【探索】困りごとを見つける</p>
+                      <p className="text-xs text-gray-600 mt-1">リストから困りごとを探しましょう。</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white border border-yellow-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
-                    <span className="text-yellow-500 text-xl">💡</span>
+                    <span className="text-yellow-500 text-xl">🔽</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-sm">必要なサポートを選びましょう</p>
-                      <p className="text-xs text-gray-600 mt-1">あなたに合う配慮案を見つけよう</p>
+                      <p className="font-semibold text-gray-800 text-sm">【選抜】必要なサポートを見つける</p>
+                      <p className="text-xs text-gray-600 mt-1">配慮案を見つけ出します。</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white border border-purple-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
                     <span className="text-purple-500 text-xl">📝</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-sm">相談用の文章を作成</p>
-                      <p className="text-xs text-gray-600 mt-1">上司や先生に伝える準備をしよう</p>
+                      <p className="font-semibold text-gray-800 text-sm">【決定】相談の準備をしよう</p>
+                      <p className="text-xs text-gray-600 mt-1">AIを使って相談準備を整えましょう。</p>
                     </div>
                   </div>
                 </div>
@@ -127,31 +132,6 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
             </div>
           </div>
 
-               {/* 利用規約・プライバシーポリシー */}
-               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                 <div className="space-y-2">
-                   <a
-                     href="#"
-                     className="block text-teal-500 hover:text-teal-600 text-sm underline"
-                     onClick={(e) => {
-                       e.preventDefault();
-                       setShowTermsModal(true);
-                     }}
-                   >
-                     利用規約を確認する →
-                   </a>
-                   <a
-                     href="#"
-                     className="block text-teal-500 hover:text-teal-600 text-sm underline"
-                     onClick={(e) => {
-                       e.preventDefault();
-                       setShowPrivacyModal(true);
-                     }}
-                   >
-                     プライバシーポリシーを確認する →
-                   </a>
-                 </div>
-               </div>
 
           {/* 同意チェックボックス */}
           <div className="flex items-start space-x-3">
@@ -163,7 +143,22 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
               className="mt-1 h-4 w-4 text-teal-500 border-gray-300 rounded focus:ring-teal-500"
             />
             <label htmlFor="agreement" className="text-sm text-gray-700">
-              利用規約とプライバシーポリシーに同意し、このツールを利用することを承諾します
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-teal-600 hover:text-teal-800 underline"
+              >
+                利用規約
+              </button>
+              と
+              <button
+                type="button"
+                onClick={() => setShowPrivacyModal(true)}
+                className="text-teal-600 hover:text-teal-800 underline"
+              >
+                プライバシーポリシー
+              </button>
+              に同意します
             </label>
           </div>
 
@@ -178,7 +173,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {isAgreed ? '✨ はじめる！' : '同意してはじめる'}
+              {isAgreed ? '✨ サポート探しの旅へ出発！' : '同意してはじめる'}
             </button>
           </div>
 
@@ -186,9 +181,8 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
           <div className="text-sm text-gray-600 text-center font-medium">
             <p className="flex items-center justify-center gap-2">
               <span className="text-orange-400">⚠️</span>
-              <span>このツールで生成される配慮案は参考情報です。</span>
+              <span>このツールで生成される配慮案は参考情報です。実際の配慮については、専門家や関係者とご相談ください。</span>
             </p>
-            <p className="mt-1">実際の配慮については、専門家や関係者とご相談ください。</p>
           </div>
         </div>
       </div>
