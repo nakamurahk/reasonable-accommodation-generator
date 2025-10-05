@@ -655,19 +655,33 @@ ${userInput.trim() || '（記述なし）'}
             // 保存された選択状態を使用
             setSelectedItems(savedSelections);
             
-            // 戻って来た際に、selected_aidsをリセットしてから新しい選択をログに記録
+            // 各困りごとで配慮案が選択されていない場合は、デフォルトで配慮案Aを選択
+            const updatedSelections = { ...savedSelections };
+            let hasChanges = false;
             
             selectedDifficulties.forEach(difficulty => {
               const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
               if (accommodations.length > 0) {
-                const defaultAccommodation = accommodations[0];
-                logSelection('step5', 'accommodation_select', {
-                  difficulty_id: difficulty.id,
-                  accommodation_id: defaultAccommodation?.id || `care_${1000}`,
-                  action: 'select'
-                });
+                const currentSelections = updatedSelections.accommodations[difficulty.id] || [];
+                if (currentSelections.length === 0) {
+                  // 配慮案が選択されていない場合は、デフォルトで配慮案Aを選択
+                  updatedSelections.accommodations[difficulty.id] = ['0'];
+                  hasChanges = true;
+                  
+                  // デフォルト選択のログを送信
+                  const defaultAccommodation = accommodations[0];
+                  logSelection('step5', 'accommodation_select', {
+                    difficulty_id: difficulty.id,
+                    accommodation_id: defaultAccommodation?.id || `care_${1000}`,
+                    action: 'select'
+                  });
+                }
               }
             });
+            
+            if (hasChanges) {
+              setSelectedItems(updatedSelections);
+            }
             return;
           }
         } catch (error) {
@@ -1346,7 +1360,7 @@ ${userInput.trim() || '（記述なし）'}
 
   // PC版UI
   return (
-    <div className="max-w-6xl mx-auto py-10">
+    <div className="max-w-6xl mx-auto py-10 min-h-screen pb-32">
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes cardGlow {
@@ -1534,12 +1548,12 @@ ${userInput.trim() || '（記述なし）'}
         </div>
         
       </div>
-      <div className="mt-10 flex flex-wrap gap-4 mb-4 justify-center">
+      <div className="mt-10 flex flex-wrap gap-4 mb-8 justify-center">
         <button
-          onClick={handleDownloadPDF}
-          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition text-center cursor-pointer"
+          disabled
+          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition text-center"
         >
-          PDFをダウンロード
+          PDFをダウンロード（未実装）
         </button>
         <button
           onClick={() => setShowPromptModal(true)}
@@ -1557,14 +1571,16 @@ ${userInput.trim() || '（記述なし）'}
       <div className="text-xs text-gray-400 mt-2 flex justify-end">
         ※支援者に渡す前に、自分でもメモに残しておくと安心です
       </div>
-      <StepFooter
-        showBackButton={true}
-        onBack={onBack}
-        onNext={onRestart}
-        nextButtonText="🎮 最初から"
-        nextButtonDisabled={false}
-        isMobile={false}
-      />
+      <div className="mt-8 mb-4">
+        <StepFooter
+          showBackButton={true}
+          onBack={onBack}
+          onNext={onRestart}
+          nextButtonText="🎮 最初から"
+          nextButtonDisabled={false}
+          isMobile={false}
+        />
+      </div>
     </div>
   );
 };

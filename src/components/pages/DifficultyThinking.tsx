@@ -788,7 +788,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         }} />
         {/* 選択件数固定表示 - カードの束（リスト表示時のみ） */}
         {viewMode !== 'graph' && (
-          <div className="fixed bottom-20 right-0 z-50">
+          <div className="fixed bottom-20 right-0 z-40">
             <div 
               className="relative w-[120px] h-[120px] cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setShowSelectionModal(true)}
@@ -846,7 +846,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         {/* 3/10テキスト表示 - カードの束の上に表示（リスト表示時のみ） */}
         {viewMode !== 'graph' && (
-          <div className="fixed bottom-28 right-6 z-[60]">
+          <div className="fixed bottom-28 right-6 z-40">
           <div 
             className="text-lg font-bold cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setShowSelectionModal(true)}
@@ -971,10 +971,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="flex space-x-1 bg-sand p-1 rounded-lg mb-4">
+          <div className={`flex ${isMobile ? 'space-x-1' : 'space-x-4'} bg-sand ${isMobile ? 'p-1' : 'p-3'} rounded-lg mb-4`}>
             <button
               onClick={() => setViewMode('keyword')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`${isMobile ? 'flex-1' : ''} py-2 ${isMobile ? 'px-4' : 'px-12'} rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'keyword'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -984,7 +984,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             </button>
             <button
               onClick={() => setViewMode('category')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`${isMobile ? 'flex-1' : ''} py-2 ${isMobile ? 'px-4' : 'px-12'} rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'category'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -1557,18 +1557,18 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
       {/* 説明文 */}
       <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
         <p className="text-gray-700 text-lg leading-relaxed">
-          <span className="font-semibold">🗺️ 探索のステージ</span><br />
-          「困りごとの地図」を広げるように、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
+          <span className="font-semibold">🗺️ 探索：あなたの困りごとを探そう</span><br />
+          キーワード または カテゴリ で、あなたの抱える困りごとカードを見つけましょう。
         </p>
         </div>
 
       {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="mb-4">
           <div className="flex space-x-1 bg-sand p-1 rounded-lg">
             <button
               onClick={() => setViewMode('keyword')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2 px-8 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'keyword'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -1578,7 +1578,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             </button>
             <button
               onClick={() => setViewMode('category')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2 px-8 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'category'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -1619,7 +1619,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               type="text"
                   value={customSearchTerm}
                   onChange={(e) => setCustomSearchTerm(e.target.value)}
-                  placeholder="困りごとを検索してください..."
+                  placeholder="例：タスク、遅刻、休憩etc…"
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg"
             />
             <button
@@ -1651,7 +1651,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       該当する困りごとは見つかりませんでした。
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {customSearchResults.map((item: any) => {
                         const isSelected = selected.includes(item['困りごと内容']);
                         const isDisabled = !isSelected && selected.length >= maxSelectable;
@@ -1800,7 +1800,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               <div className="text-sm text-gray-500 mb-4 text-right">
                 候補の困りごと: {currentCategoryDifficulties.length}件
               </div>
-              <div className="grid grid-cols-2 gap-4 content-start">
+              <div className="grid grid-cols-1 gap-4 content-start">
                 {currentCategoryDifficulties.length === 0 && (
                   <div className="text-gray-400 col-span-2">このカテゴリには該当する困りごとは見つかりませんでした。</div>
                 )}
