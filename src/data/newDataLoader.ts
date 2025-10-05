@@ -257,6 +257,7 @@ export function getAccommodationsFromViewModel(
   if (!item) return [];
 
   return item.careCards.map(card => ({
+    'id': card.care.id, // care_1000～care_1368形式のIDを追加
     '困りごと内容': item.concern.title,
     'カテゴリ': item.concern.category,
     '配慮案タイトル': card.care.title, // cares.jsonのtitle

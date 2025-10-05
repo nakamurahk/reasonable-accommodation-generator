@@ -4,6 +4,7 @@ import { Domain } from '../../types';
 import { DOMAINS } from '../../data/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StepFooter from '../layout/StepFooter';
+import { logSelection } from '../../lib/analytics';
 
 type Step1_2_DomainProps = {
   selectedDomain: Domain | null;
@@ -22,6 +23,12 @@ const Step1_2_Domain: React.FC<Step1_2_DomainProps> = ({
 
   const handleDomainSelect = (domain: Domain) => {
     onDomainChange(domain);
+    // 環境選択ログ
+    logSelection('step1-2', 'domain_select', {
+      domain_id: domain.id,
+      domain_name: domain.name,
+      previous_domain: selectedDomain?.name || null
+    });
   };
 
   const canProceed = selectedDomain !== null;

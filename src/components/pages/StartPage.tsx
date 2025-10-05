@@ -89,7 +89,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                 <div className="block md:hidden absolute top-1/2 left-1/2 w-1.5 h-6 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-full"></div>
                 <div className="block md:hidden absolute top-3/4 left-1/2 w-1.5 h-6 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-full"></div>
                 
-                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
+                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
                     <span className="text-green-500 text-xl">📍</span>
                     <div className="flex-1">
@@ -99,7 +99,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                   </div>
                 </div>
                 
-                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
+                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
                     <span className="text-blue-500 text-xl">🔍</span>
                     <div className="flex-1">
@@ -109,7 +109,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                   </div>
                 </div>
                 
-                <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
+                <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
                     <span className="text-yellow-500 text-xl">🔽</span>
                     <div className="flex-1">
@@ -119,7 +119,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                   </div>
                 </div>
                 
-                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow relative z-10">
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow relative z-10">
                   <div className="flex items-start space-x-3">
                     <span className="text-purple-500 text-xl">📝</span>
                     <div className="flex-1">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Situation } from '../../types';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StepFooter from '../layout/StepFooter';
+import { logSelection, logUsage } from '../../lib/analytics';
 
 type Step1_3_SituationsProps = {
   selectedSituations: Situation[];
@@ -30,8 +31,25 @@ const Step1_3_Situations: React.FC<Step1_3_SituationsProps> = ({
     }
   };
 
+  // 次のステップへ進む時の処理
+  const handleComplete = () => {
+    // シチュエーション選択完了ログ
+    logUsage('step1-3', 'situation_select', {
+      action: 'select',
+      situations: selectedSituations.map(s => s.id)
+    });
+    
+    onComplete();
+  };
+
   const handleSelectAll = () => {
     onSituationsChange([...availableSituations]);
+    // 全選択ログ
+    logSelection('step1-3', 'situation_select', {
+      action: 'select_all',
+      selected_count: availableSituations.length,
+      total_available: availableSituations.length
+    });
   };
 
   const canProceed = selectedSituations.length > 0;
@@ -100,7 +118,7 @@ const Step1_3_Situations: React.FC<Step1_3_SituationsProps> = ({
         <StepFooter
           showBackButton={true}
           onBack={onBack}
-          onNext={onComplete}
+          onNext={handleComplete}
           nextButtonText="次のステップへ ➡️"
           nextButtonDisabled={!canProceed}
           isMobile={true}
@@ -170,7 +188,7 @@ const Step1_3_Situations: React.FC<Step1_3_SituationsProps> = ({
       <StepFooter
         showBackButton={true}
         onBack={onBack}
-        onNext={onComplete}
+        onNext={handleComplete}
         nextButtonText="次のステップへ ➡️"
         nextButtonDisabled={!canProceed}
         isMobile={false}

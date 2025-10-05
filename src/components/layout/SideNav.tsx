@@ -6,16 +6,14 @@ interface SideNavProps {
 
 const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
        const steps = [
-         { id: 'step1-1', title: '特性を選ぶ' },
-         { id: 'step1-2', title: '環境を選ぶ' },
-         { id: 'step1-3', title: 'シチュエーションを選ぶ' },
+         { id: 'step1', title: '出発ステージ' },
          { id: 'thinking', title: '探索ステージ' },
          { id: 'deckbuilding', title: '選抜ステージ' },
          { id: 'finalselection', title: '決定ステージ' },
          { id: 'display', title: '確認ステージ' },
        ];
 
-  // ステップ1の進捗状況を判定（ステップ②のロジックを参考）
+  // ステップ1の進捗状況を判定
   const isStep1Completed = 
     currentStep === 'thinking' ||
     currentStep === 'deckbuilding' ||
@@ -34,10 +32,10 @@ const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
           let isCompleted = false;
           let isCurrent = false;
           
-          if (step.id.startsWith('step1-')) {
-            // ステップ1のサブステップ
+          if (step.id === 'step1') {
+            // ステップ1（3つのサブステップをまとめて扱う）
             isCompleted = isStep1Completed;
-            isCurrent = isStep1Current && step.id === currentStep;
+            isCurrent = isStep1Current;
           } else {
             // 他のステップ
             const currentStepIndex = steps.findIndex(s => s.id === currentStep);
@@ -73,7 +71,7 @@ const SideNav: React.FC<SideNavProps> = ({ currentStep }) => {
                   text-xs
                 `}
               >
-                {step.id.startsWith('step1-') ? '①' : idx + 1}
+                {step.id === 'step1' ? '①' : idx + 1}
               </span>
               <span className="text-base">{step.title}</span>
             </li>

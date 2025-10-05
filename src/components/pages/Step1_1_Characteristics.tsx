@@ -5,6 +5,7 @@ import { CHARACTERISTICS } from '../../data/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StepFooter from '../layout/StepFooter';
 import HelpModal from '../layout/HelpModal';
+import { logSelection, logUsage } from '../../lib/analytics';
 
 // 特性グループ定義
 const CHARACTERISTIC_GROUPS = [
@@ -50,6 +51,17 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
     } else {
       onCharacteristicsChange([...selectedCharacteristics, characteristic]);
     }
+  };
+
+  // 次のステップへ進む時の処理
+  const handleNext = () => {
+    // 特性選択完了ログ（start段階）- 1回のINSERTで全選択特性を送信
+    logUsage('step1-1', 'characteristic_select', {
+      action: 'select',
+      characteristics: selectedCharacteristics.map(c => c.id)
+    });
+    
+    onNext();
   };
 
   const canProceed = selectedCharacteristics.length > 0;
@@ -117,7 +129,7 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
         {/* フッター */}
         <StepFooter
           showBackButton={false}
-          onNext={onNext}
+          onNext={handleNext}
           nextButtonText="次のステップへ ➡️"
           nextButtonDisabled={!canProceed}
           isMobile={true}
@@ -203,7 +215,7 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
       {/* フッター */}
       <StepFooter
         showBackButton={false}
-        onNext={onNext}
+        onNext={handleNext}
         nextButtonText="次のステップへ ➡️"
         nextButtonDisabled={!canProceed}
         isMobile={false}

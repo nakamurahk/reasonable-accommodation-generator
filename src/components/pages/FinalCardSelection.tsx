@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StepFooter from '../layout/StepFooter';
+import { logSelection, logUsage } from '../../lib/analytics';
 
 type FinalCardSelectionProps = {
   selectedDifficulties: any[];
@@ -15,6 +16,13 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [finalSelection, setFinalSelection] = useState<any[]>([]);
+
+  // デバッグ：selectedDifficultiesの構造を確認
+  console.log(`[Debug] selectedDifficulties:`, selectedDifficulties);
+  if (selectedDifficulties && selectedDifficulties.length > 0) {
+    console.log(`[Debug] First difficulty structure:`, selectedDifficulties[0]);
+    console.log(`[Debug] First difficulty keys:`, Object.keys(selectedDifficulties[0]));
+  }
 
   // カテゴリのアイコンを取得する関数
   const getCategoryIcon = (category: string) => {
@@ -34,14 +42,49 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
   const addToFinalSelection = (card: any) => {
     if (finalSelection.length < 3 && !finalSelection.find(c => c.id === card.id)) {
       setFinalSelection(prev => [...prev, card]);
+      
+      // デバッグ：cardオブジェクトの構造を確認
+      console.log(`[Debug] Final selection - card:`, card);
+      console.log(`[Debug] Card keys:`, Object.keys(card));
+      
+      // 正しいIDを取得（conc_1等の形式）
+      const correctId = card.conc_id || card.id;
+      console.log(`[Debug] Final difficulty_id: "${correctId}"`);
+      
+      // 最終選択ログ（IDのみ）
+      logSelection('step4', 'final_select', {
+        action: 'select',
+        difficulty_id: correctId, // conc_1～conc_123形式
+        final_selection_count: finalSelection.length + 1
+      });
     }
   };
 
   const removeFromFinalSelection = (card: any) => {
     setFinalSelection(prev => prev.filter(c => c.id !== card.id));
+    
+    // 正しいIDを取得（conc_1等の形式）
+    const correctId = card.conc_id || card.id;
+    console.log(`[Debug] Final deselection - difficulty_id: "${correctId}"`);
+    
+    // 最終選択解除ログ（IDのみ）
+    logSelection('step4', 'final_select', {
+      action: 'deselect',
+      difficulty_id: correctId, // conc_1～conc_123形式
+      final_selection_count: finalSelection.length - 1
+    });
   };
 
   const handleNext = () => {
+    // 最終選択完了時にfinal_issueをクリアしてから新しい選択を設定
+    logUsage('step4', 'final_select', {
+      action: 'clear_all',
+      final_issue: finalSelection.map(card => card.id)
+    });
+    
+    // Step4で困りごとを選び直した際に、selected_aidsをリセット
+    console.log(`[Debug] Resetting selected_aids for Step4 completion`);
+    
     onComplete(finalSelection);
   };
 
@@ -53,10 +96,10 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
     <div className="min-h-screen bg-sand p-4">
       <div className="max-w-6xl mx-auto">
         {/* 説明文 */}
-        <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
+        <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
-            <span className="font-semibold">🎯 決定のステージ</span><br />
-            残ったカードの中から3枚を選び、あなたが最も大事だと感じる困りごとにフォーカスします。
+            <span className="font-semibold">🎯 決定：大事な困りごとを選ぼう</span><br />
+            選んだカードの中から3枚を選び、あなたが今もっとも大事だと感じる困りごとにフォーカスしましょう。
           </p>
         </div>
 

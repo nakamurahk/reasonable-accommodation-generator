@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ViewModel } from '../../types/newDataStructure';
 import StepFooter from '../layout/StepFooter';
+import { logSelection } from '../../lib/analytics';
 
 type DeckBuildingProps = {
   selectedDifficulties: any[];
@@ -67,6 +68,15 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
         setDeck([...deck, card]);
         setCardPool(cardPool.filter(c => c.id !== card.id));
         setFlyingCard(null);
+        
+        // カード選択ログ
+        logSelection('step3', 'card_select', {
+          action: 'select',
+          card_id: card.id,
+          card_title: card.title,
+          deck_count: deck.length + 1,
+          max_deck_size: 10
+        });
       }, 1000); // アニメーション時間に合わせて調整
     }
   };
@@ -74,6 +84,15 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
   const removeFromDeck = (card: any) => {
     setDeck(deck.filter(c => c.id !== card.id));
     setCardPool([...cardPool, card]);
+    
+    // カード選択解除ログ
+    logSelection('step3', 'card_select', {
+      action: 'deselect',
+      card_id: card.id,
+      card_title: card.title,
+      deck_count: deck.length - 1,
+      max_deck_size: 10
+    });
   };
 
   const handleNext = () => {
@@ -143,10 +162,10 @@ const DeckBuilding: React.FC<DeckBuildingProps> = ({
         )}
         
         {/* 説明文 */}
-               <div className="bg-light-sand border border-teal-500 rounded-lg p-6 mb-8">
+               <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
                  <p className="text-gray-700 text-base leading-relaxed">
-                   <span className="font-semibold">💡 選抜のステージ</span><br />
-                   集めたカードの中から最大10枚を選び、あなたにとって特に重要だと感じる困りごとを絞り込みましょう。
+                   <span className="font-semibold">🪶 選抜：大事な困りごとを選ぼう</span><br />
+                   これまでに集めたカードの中から、あなたにとって特に大切だと感じる困りごとを選びましょう。（最大10枚）
                  </p>
                </div>
 

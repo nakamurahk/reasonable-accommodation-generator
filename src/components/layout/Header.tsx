@@ -239,59 +239,8 @@ const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
         <span className="text-lg font-semibold text-gray-900 sm:hidden">FitBridge</span>
       </div>
       
-      {/* ステップ表示とヘルプボタン */}
+      {/* ヘルプボタンのみ */}
       <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-1">
-          {steps.map((step, index) => {
-            let isCompleted = false;
-            let isCurrent = false;
-            
-            if (step.id.startsWith('step1-')) {
-              // ステップ1のサブステップ
-              isCompleted = isStep1Completed;
-              isCurrent = isStep1Current && step.id === currentStep;
-            } else {
-              // 他のステップ
-              const currentStepIndex = steps.findIndex(s => s.id === currentStep);
-              isCompleted = index < currentStepIndex;
-              isCurrent = index === currentStepIndex;
-            }
-            
-            const titles = ['出発', '探索', '選抜', '決定', '確認'];
-            
-            return (
-              <React.Fragment key={step.id}>
-                <div className="flex flex-col items-center space-y-1">
-                  {/* タイトル */}
-                  <div className="text-xs font-medium text-gray-600 w-9 text-center">
-                    {titles[index]}
-                  </div>
-                  {/* 数字 */}
-                  <div
-                    className={`
-                      w-9 h-9 flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300
-                      ${isCompleted
-                        ? 'bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg'
-                        : isCurrent
-                        ? 'bg-gradient-to-br from-teal-100 to-teal-200 text-teal-700 shadow-md'
-                        : 'bg-gray-200 text-gray-500'}
-                    `}
-                    title={step.title}
-                  >
-                    {isCompleted ? '✓' : step.short}
-                  </div>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={`w-4 h-1 rounded-full transition-all duration-300 ${
-                    isCompleted 
-                      ? 'bg-gradient-to-r from-teal-500 to-teal-400 shadow-sm' 
-                      : 'bg-gray-300'
-                  }`} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
         <button
           onClick={() => setShowHelpModal(true)}
           className="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center text-lg hover:bg-teal-600 transition-colors"

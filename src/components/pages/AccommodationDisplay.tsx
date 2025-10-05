@@ -12,6 +12,7 @@ import { loadStore, buildViewModel, getAccommodationsFromViewModel, getDomainFro
 import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 import StepFooter from '../layout/StepFooter';
+import { logPromptGeneration, logSelection } from '../../lib/analytics';
 
 // フォント登録
 Font.register({
@@ -418,6 +419,15 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   const [communicationMethod, setCommunicationMethod] = useState<'email' | 'oral' | 'chat' | 'document'>('email');
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [userInput, setUserInput] = useState<string>('');
+
+  // XSS対策：入力値のサニタイズ
+  const sanitizeInput = (input: string): string => {
+    return input
+      .replace(/[<>]/g, '') // < > を除去
+      .replace(/javascript:/gi, '') // javascript: を除去
+      .replace(/on\w+=/gi, '') // onイベントハンドラを除去
+      .trim();
+  };
   const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
   const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
   
@@ -449,6 +459,29 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
         [difficultyId]: [accommodationId] // 1つの困りごとに対して1つの配慮案のみ
       }
     }));
+    
+    // 配慮案選択ログ（IDのみ）
+    const difficulty = selectedDifficulties.find(d => d.id === difficultyId);
+    const accommodations = getAccommodations(difficulty?.title || '', viewModel, selectedDomain, reconstructedViewModel);
+    const selectedAccommodation = accommodations[parseInt(accommodationId)];
+    
+    // デバッグ：配慮案の構造を確認
+    console.log(`[Debug] Accommodation selection - difficulty: "${difficulty?.title}", accommodationId: "${accommodationId}"`);
+    console.log(`[Debug] Available accommodations:`, accommodations);
+    console.log(`[Debug] Selected accommodation:`, selectedAccommodation);
+    console.log(`[Debug] Selected accommodation keys:`, selectedAccommodation ? Object.keys(selectedAccommodation) : 'null');
+    
+    const accommodationId_final = selectedAccommodation?.id || `care_${1000 + parseInt(accommodationId)}`;
+    console.log(`[Debug] Final accommodation_id: "${accommodationId_final}"`);
+    
+    // デバッグ：現在のselectedItemsの状態を確認
+    console.log(`[Debug] Current selectedItems:`, selectedItems);
+    
+    logSelection('step5', 'accommodation_select', {
+      difficulty_id: difficultyId, // conc_1～conc_123形式
+      accommodation_id: accommodationId_final, // care_1000～care_1368形式
+      action: 'select'
+    });
   };
   
   // 選択された困りごとのみをフィルタリングする関数
@@ -580,6 +613,12 @@ ${userInput.trim() || '（記述なし）'}
     }
     
     setGeneratedPrompt(prompt);
+    
+    // デバッグ：プロンプト生成時のパラメータを確認
+    console.log(`[Debug] Prompt generation - promptMode: "${promptMode}", communicationMethod: "${communicationMethod}"`);
+    
+    // プロンプト生成ログ
+    logPromptGeneration(promptMode, communicationMethod);
   };
   
   // プロンプトをコピーする関数
@@ -620,7 +659,7 @@ ${userInput.trim() || '（記述なし）'}
   // 初期化時にすべての困りごとを選択状態にし、各困りごとの最初の配慮案を自動選択する
   // ただし、保存された選択状態がある場合はそれを優先
   useEffect(() => {
-    if (selectedDifficulties.length > 0 && selectedItems.difficulties.length === 0) {
+    if (selectedDifficulties.length > 0) {
       // 保存された選択状態をチェック
       const saved = localStorage.getItem('accommodation_selections');
       if (saved) {
@@ -633,6 +672,22 @@ ${userInput.trim() || '（記述なし）'}
           if (currentDifficultyIds.every(id => savedDifficultyIds.includes(id))) {
             // 保存された選択状態を使用
             setSelectedItems(savedSelections);
+            
+            // 戻って来た際に、selected_aidsをリセットしてから新しい選択をログに記録
+            console.log(`[Debug] Resetting selected_aids for Step5 re-entry`);
+            
+            selectedDifficulties.forEach(difficulty => {
+              const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
+              if (accommodations.length > 0) {
+                const defaultAccommodation = accommodations[0];
+                logSelection('step5', 'accommodation_select', {
+                  difficulty_id: difficulty.id,
+                  accommodation_id: defaultAccommodation?.id || `care_${1000}`,
+                  action: 'select'
+                });
+                console.log(`[Debug] Restored default accommodation selection - difficulty: "${difficulty.title}", accommodation:`, defaultAccommodation);
+              }
+            });
             return;
           }
         } catch (error) {
@@ -641,6 +696,7 @@ ${userInput.trim() || '（記述なし）'}
       }
       
       // 保存された選択状態がない場合、デフォルトの初期化を行う
+      console.log(`[Debug] Initializing default accommodations for Step5`);
       const initialAccommodations: { [difficultyId: string]: string[] } = {};
       
       selectedDifficulties.forEach(difficulty => {
@@ -648,6 +704,16 @@ ${userInput.trim() || '（記述なし）'}
         
         if (accommodations.length > 0) {
           initialAccommodations[difficulty.id] = ['0']; // 配慮案A（インデックス0）をデフォルト選択
+          
+          // デフォルト選択の配慮案Aのログを送信
+          const defaultAccommodation = accommodations[0]; // インデックス0の配慮案
+          console.log(`[Debug] Default accommodation selection - difficulty: "${difficulty.title}", accommodation:`, defaultAccommodation);
+          
+          logSelection('step5', 'accommodation_select', {
+            difficulty_id: difficulty.id, // conc_1～conc_123形式
+            accommodation_id: defaultAccommodation?.id || `care_${1000}`, // care_1000～care_1368形式
+            action: 'select'
+          });
         }
       });
       
@@ -658,10 +724,29 @@ ${userInput.trim() || '（記述なし）'}
       
       setSelectedItems(newSelectedItems);
       
+      // 既存の配慮案選択状態をsessionDataに反映
+      selectedDifficulties.forEach(difficulty => {
+        const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
+        const selectedAccommodationIds = newSelectedItems.accommodations[difficulty.id] || [];
+        
+        selectedAccommodationIds.forEach(accommodationId => {
+          const selectedAccommodation = accommodations[parseInt(accommodationId)];
+          if (selectedAccommodation) {
+            console.log(`[Debug] Restoring accommodation selection - difficulty: "${difficulty.title}", accommodation:`, selectedAccommodation);
+            
+            logSelection('step5', 'accommodation_select', {
+              difficulty_id: difficulty.id,
+              accommodation_id: selectedAccommodation.id || `care_${1000 + parseInt(accommodationId)}`,
+              action: 'select'
+            });
+          }
+        });
+      });
+      
       // デフォルト選択状態をlocalStorageに保存
       localStorage.setItem('accommodation_selections', JSON.stringify(newSelectedItems));
     }
-  }, [selectedDifficulties, selectedItems.difficulties.length, viewModel, selectedDomain, reconstructedViewModel]);
+  }, [selectedDifficulties, viewModel, selectedDomain, reconstructedViewModel]);
 
 
   const getCategoryIcon = (category: string) => {
@@ -1011,7 +1096,7 @@ ${userInput.trim() || '（記述なし）'}
                 </label>
                 <textarea
                   value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
+                  onChange={(e) => setUserInput(sanitizeInput(e.target.value))}
                   placeholder="例：特に伝えたいこと、状況の詳細など"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-teal resize-none"
                   rows={3}

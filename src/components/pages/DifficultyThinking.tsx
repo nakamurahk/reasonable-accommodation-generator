@@ -8,6 +8,7 @@ import DifficultyGraphView from '../graph/DifficultyGraphView';
 // @ts-ignore
 import { loadStore, buildViewModel, buildFilteredViewModel } from '../../data/newDataLoader';
 import { ViewModel } from '../../types/newDataStructure';
+import { logSearch, logSelection } from '../../lib/analytics';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 import StepFooter from '../layout/StepFooter';
 
@@ -33,6 +34,18 @@ const CATEGORY_ICONS = {
   'コミュニケーション': '💬',
   '生活・変化対応': '🔄',
   '職場・社会不安': '🏢'
+};
+
+// カテゴリの表示名マッピング
+const CATEGORY_DISPLAY_NAMES = {
+  '身体症状・体調': '🏥 身体・体調',
+  '感覚・環境': '💡 感覚・環境',
+  '注意・集中': '🎯 注意・集中',
+  '実行・計画・記憶': '📋 実行・計画',
+  '感情・ストレス反応': '❤️ 感情',
+  'コミュニケーション': '💬 コミュ',
+  '生活・変化対応': '🔄 生活・変化',
+  '職場・社会不安': '🏢 職場・社会'
 };
 
 const SUGGESTS = [
@@ -127,7 +140,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [isDecreasingNumber, setIsDecreasingNumber] = useState<number | null>(null); // 減少時の数字表示用
   const [isDecreasingAnimating, setIsDecreasingAnimating] = useState(false); // 減少時のアニメーション用
   const [showSelectionModal, setShowSelectionModal] = useState(false); // 選択済み困りごとモーダル表示用
-  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list'); // ビューモード（リスト or グラフ）
+  const [viewMode, setViewMode] = useState<'keyword' | 'category' | 'graph'>('keyword'); // ビューモード（キーワード or カテゴリ or グラフ）
   const [deselectedCard, setDeselectedCard] = useState<string | null>(null); // 選択解除されたカード
   const [isDeckAnimating, setIsDeckAnimating] = useState(false); // カードの束のアニメーション
   const [isDeckAdding, setIsDeckAdding] = useState(false); // カードの束に追加するアニメーション
@@ -135,6 +148,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [removingCard, setRemovingCard] = useState<{id: string, title: string, category: string} | null>(null); // 削除されるカード
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [visibleCounts, setVisibleCounts] = useState<{[key: string]: number}>({});
+  const [customSearchTerm, setCustomSearchTerm] = useState<string>(''); // カスタム検索用
+  const [showCustomSearch, setShowCustomSearch] = useState<boolean>(false); // カスタム検索表示用
   
   // 数値に応じた色を決定する関数
   const getBigNumberColor = (num: number) => {
@@ -258,6 +273,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     
     // buildFilteredViewModelで既にフィルタリング済みなので、そのまま使用
     return viewModel.map((vm: any) => ({
+      'id': vm.concern.id, // conc_1～conc_123形式のIDを追加
       '困りごと内容': vm.concern.title,
       'カテゴリ': vm.concern.category,
       '主要タグ': vm.concern.primary_tags.join(','),
@@ -335,6 +351,43 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     return difficultiesByCategory[selectedCategory] || [];
   }, [difficultiesByCategory, selectedCategory]);
 
+  // カスタム検索結果
+  const customSearchResults = useMemo(() => {
+    if (!customSearchTerm.trim()) return [];
+    
+    const searchTerm = customSearchTerm.toLowerCase();
+    return uniqueDifficulties.filter(item => {
+      const title = item['困りごと内容']?.toLowerCase() || '';
+      const description = item['困りごと説明']?.toLowerCase() || '';
+      const mainTags = item['主要タグ']?.toLowerCase() || '';
+      const subTags = item['補助タグ']?.toLowerCase() || '';
+      
+      return title.includes(searchTerm) || 
+             description.includes(searchTerm) || 
+             mainTags.includes(searchTerm) || 
+             subTags.includes(searchTerm);
+    });
+  }, [uniqueDifficulties, customSearchTerm]);
+
+  // 検索ワードを太文字にする関数（XSS対策済み）
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm.trim()) return text;
+    
+    // XSS対策：特殊文字をエスケープ
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    try {
+      const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+      return text.split(regex).map((part, index) => 
+        regex.test(part) ? <strong key={index} className="font-bold text-teal-600">{part}</strong> : part
+      );
+    } catch (error) {
+      // 正規表現エラーの場合は元のテキストをそのまま返す
+      console.warn('Regex error in highlightSearchTerm:', error);
+      return text;
+    }
+  };
+
   // --- 選択・追加ロジックは従来通り ---
   const maxSelectable = Infinity; // 制限なし
   const handleSelect = (content: string, event?: React.MouseEvent) => {
@@ -347,7 +400,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         }, 300);
         
         // カードの束のアニメーション
-        if (viewMode === 'list') {
+        if (viewMode !== 'graph') {
           const cardId = `${content}-${Date.now()}`;
           // カテゴリ情報を取得
           const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
@@ -382,10 +435,26 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         // 減少アニメーション終了後に状態をリセット
         setTimeout(() => setIsCountDecreasing(false), 600);
+        
+        // 困りごと選択解除ログ（IDのみ）
+        const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
+        console.log(`[Debug] Difficulty deselection - content: "${content}", difficultyItem:`, difficultyItem);
+        console.log(`[Debug] difficultyItem keys:`, difficultyItem ? Object.keys(difficultyItem) : 'null');
+        
+        // IDプロパティを探す
+        const difficultyId = difficultyItem?.id || difficultyItem?.ID || difficultyItem?.conc_id || content;
+        console.log(`[Debug] Final difficulty_id: "${difficultyId}"`);
+        
+        logSelection('step2', 'difficulty_select', {
+          action: 'deselect',
+          difficulty_id: difficultyId, // conc_1～conc_123形式
+          selected_count: prev.length - 1
+        });
+        
         return prev.filter(s => s !== content);
       } else if (prev.length < maxSelectable) {
         // カードの束に追加するアニメーション
-        if (viewMode === 'list') {
+        if (viewMode !== 'graph') {
           const cardId = `${content}-${Date.now()}`;
           // カテゴリ情報を取得
           const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
@@ -430,6 +499,23 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         // アニメーション終了後に状態をリセット
         setTimeout(() => setIsCountAnimating(false), 600);
+        
+        // 困りごと選択ログ（IDのみ）
+        const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
+        console.log(`[Debug] Difficulty selection - content: "${content}", difficultyItem:`, difficultyItem);
+        console.log(`[Debug] Available difficulties:`, uniqueDifficulties.slice(0, 3));
+        console.log(`[Debug] difficultyItem keys:`, difficultyItem ? Object.keys(difficultyItem) : 'null');
+        
+        // IDプロパティを探す
+        const difficultyId = difficultyItem?.id || difficultyItem?.ID || difficultyItem?.conc_id || content;
+        console.log(`[Debug] Final difficulty_id: "${difficultyId}"`);
+        
+        logSelection('step2', 'difficulty_select', {
+          action: 'select',
+          difficulty_id: difficultyId, // conc_1～conc_123形式
+          selected_count: prev.length + 1
+        });
+        
         return [...prev, content];
       } else {
         return prev;
@@ -487,8 +573,14 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     // 選択された困りごとをオブジェクト形式に変換
     const selectedDifficultiesWithDetails = selectedDifficulties.map(difficulty => {
       const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === difficulty.title);
+      console.log(`[Debug] Difficulty mapping - title: "${difficulty.title}", difficultyItem:`, difficultyItem);
+      console.log(`[Debug] Original difficulty.id: "${difficulty.id}", difficultyItem.id: "${difficultyItem?.id}"`);
+      
+      const finalId = difficultyItem ? difficultyItem.id : difficulty.id;
+      console.log(`[Debug] Final ID: "${finalId}"`);
+      
       return {
-        id: difficulty.id,
+        id: finalId, // conc_1等のIDを使用
         title: difficulty.title,
         category: difficultyItem ? difficultyItem['カテゴリ'] : 'その他',
         icon: difficulty.icon,
@@ -518,7 +610,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const renderCategoryTabs = () => {
     if (isMobile) {
   return (
-        <div className="grid grid-cols-2 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-2 mb-6">
           {CATEGORIES.map(category => {
             const count = difficultiesByCategory[category]?.length || 0;
             return (
@@ -526,7 +618,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 disabled={count === 0}
-                className={`px-3 py-2 text-sm rounded-lg border transition ${
+                className={`px-2 py-2 text-xs rounded-lg border transition ${
                   selectedCategory === category
                     ? 'bg-teal-500 text-white border-teal-500'
                     : count === 0
@@ -534,7 +626,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-teal-50'
                 }`}
               >
-                {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
+                <div className="text-center">
+                  <div className="text-sm mb-1">{CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]}</div>
+                  <div className="font-medium">{CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES].split(' ')[1]}</div>
+                </div>
               </button>
             );
           })}
@@ -543,7 +638,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     }
 
     return (
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="grid grid-cols-4 gap-3 mb-6">
         {CATEGORIES.map(category => {
           const count = difficultiesByCategory[category]?.length || 0;
           return (
@@ -551,7 +646,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               key={category}
               onClick={() => setSelectedCategory(category)}
               disabled={count === 0}
-              className={`px-4 py-2 text-sm rounded-lg border transition ${
+              className={`px-3 py-3 text-sm rounded-lg border transition ${
                 selectedCategory === category
                   ? 'bg-teal-500 text-white border-teal-500'
                   : count === 0
@@ -559,7 +654,10 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-teal-50'
               }`}
             >
-              {CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]} {category} ({selected.filter(item => difficultiesByCategory[category]?.some((d: any) => d['困りごと内容'] === item)).length}/{count})
+              <div className="text-center">
+                <div className="text-lg mb-1">{CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]}</div>
+                <div className="font-medium text-sm">{CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES].split(' ')[1]}</div>
+              </div>
             </button>
           );
         })}
@@ -703,9 +801,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           `
         }} />
         {/* 選択件数固定表示 - カードの束（リスト表示時のみ） */}
-        {viewMode === 'list' && (
+        {viewMode !== 'graph' && (
           <div className="fixed bottom-20 right-0 z-50">
-            <div className="relative w-[120px] h-[120px]">
+            <div 
+              className="relative w-[120px] h-[120px] cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setShowSelectionModal(true)}
+            >
               {/* カードの束の背景 */}
               <div 
                 className="absolute bottom-2 right-2 w-16 h-20 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-lg shadow-lg transform rotate-3"
@@ -758,7 +859,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         )}
         
         {/* 3/10テキスト表示 - カードの束の上に表示（リスト表示時のみ） */}
-        {viewMode === 'list' && (
+        {viewMode !== 'graph' && (
           <div className="fixed bottom-28 right-6 z-[60]">
           <div 
             className="text-lg font-bold cursor-pointer hover:opacity-80 transition-opacity"
@@ -806,9 +907,9 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               {/* モーダルヘッダー */}
               <div className="bg-teal-500 text-white px-6 py-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
-                  選択済みの困りごとリスト
+                  📚 集めた困りごとカード
                   <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
-                    （{selected.length}件）
+                    （{selected.length}枚）
                   </span>
                 </h3>
                 <button 
@@ -878,44 +979,212 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
             <span className="font-semibold">🗺️ 探索：あなたの困りごとを探そう</span><br />
-            あなたが抱える困りごとを、関連するカテゴリから見つけていきましょう。リストにない場合は追加もできます。
+            キーワード または カテゴリ で、あなたの抱える困りごとカードを見つけましょう。
           </p>
         </div>
         
         {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="flex space-x-1 bg-sand p-1 rounded-lg mb-3">
+          <div className="flex space-x-1 bg-sand p-1 rounded-lg mb-4">
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode('keyword')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'list'
+                viewMode === 'keyword'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              📋 リスト表示
+              🔍 キーワード
             </button>
             <button
-              onClick={() => setViewMode('graph')}
+              onClick={() => setViewMode('category')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'graph'
+                viewMode === 'category'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              🔗 グラフ表示
+              📂 カテゴリ
             </button>
           </div>
-          <button
-            onClick={() => setShowSelectionModal(true)}
-            className="w-full py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors"
-          >
-            📚 選択中の困りごと ({selected.length}枚)
-          </button>
+          
+          {/* グラフ表示ボタン */}
+          <div className="flex justify-center">
+            <div className={`w-full p-1 rounded-lg ${viewMode === 'graph' ? 'bg-sand' : ''}`}>
+              <button
+                onClick={() => setViewMode('graph')}
+                className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'graph'
+                    ? 'bg-white text-teal-600 shadow-sm'
+                    : 'bg-sand text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                🔗 グラフ表示
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className="space-y-4">
-          {viewMode === 'list' ? (
+          {viewMode === 'keyword' ? (
+            <>
+              {/* キーワード検索セクション */}
+              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                <h3 className="text-base font-medium text-gray-700 mb-4">
+                  🔍 困りごとをキーワードで探す
+                </h3>
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    value={customSearchTerm}
+                    onChange={(e) => setCustomSearchTerm(e.target.value)}
+                    placeholder="例：タスク、遅刻、休憩etc…"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => {
+                      setShowCustomSearch(!showCustomSearch);
+                      // キーワード検索ログ
+                      if (!showCustomSearch && customSearchTerm.trim()) {
+                        logSearch(customSearchTerm, customSearchResults.length);
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      showCustomSearch
+                        ? 'bg-teal-500 text-white shadow-lg'
+                        : 'bg-teal-500 text-white hover:bg-teal-600'
+                    }`}
+                  >
+                    検索
+                  </button>
+                </div>
+                
+                {/* 検索結果表示 */}
+                {showCustomSearch && customSearchTerm.trim() && (
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-600 mb-3">
+                      「{customSearchTerm}」の検索結果: {customSearchResults.length}件
+                    </div>
+                    {customSearchResults.length === 0 ? (
+                      <div className="text-gray-400 text-center py-4">
+                        該当する困りごとは見つかりませんでした。
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-3">
+                        {customSearchResults.map((item: any) => {
+              const isSelected = selected.includes(item['困りごと内容']);
+              const isDisabled = !isSelected && selected.length >= maxSelectable;
+                          
+              return (
+                            <div
+                  key={item['困りごと内容']}
+                              className={`rounded-lg border-2 transition-all duration-300 ${
+                                isSelected
+                                  ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg'
+                                  : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
+                              } ${isDisabled ? 'opacity-40' : ''}`}
+                            >
+                              <div className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <button
+                                    onClick={(e) => handleSelect(item['困りごと内容'], e)}
+                  disabled={isDisabled}
+                                    className={`flex-1 text-left transition ${
+                                      isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-gray-900">
+                                        {highlightSearchTerm(item['困りごと内容'], customSearchTerm)}
+                                      </span>
+                                      {isSelected && (
+                                        <div className="ml-auto">
+                                          <div className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
+                                            <span className="text-white text-xs">✓</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </button>
+                                  <button
+                                    onClick={() => toggleAccordion(item['困りごと内容'])}
+                                    className="ml-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+                                  >
+                                    {expandedCards.has(item['困りごと内容']) ? '▲閉じる' : '▼詳細'}
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              {/* アコーディオン内容 */}
+                              {expandedCards.has(item['困りごと内容']) && (
+                                <div className="px-4 pb-4 border-t border-gray-100 pt-3 bg-gradient-to-b from-transparent to-gray-50/30">
+                                  <div className="space-y-3">
+                                    {/* 困りごと説明 */}
+                                    {item['困りごと説明'] && (
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">📝 説明</h4>
+                                        <p className="text-sm text-gray-500 leading-relaxed">
+                                          {item['困りごと説明']}
+                                        </p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* 具体例 */}
+                                    {(() => {
+                                      let example = '';
+                                      if (domain?.name === '企業' && item['企業具体例']) {
+                                        example = item['企業具体例'];
+                                      } else if (domain?.name === '教育機関' && item['教育機関具体例']) {
+                                        example = item['教育機関具体例'];
+                                      } else if (domain?.name === '支援機関' && item['支援機関具体例']) {
+                                        example = item['支援機関具体例'];
+                                      }
+                                      
+                                      return example ? (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-gray-700 mb-2">💡 具体例</h4>
+                                          <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
+                                            {example.split(',').map((item: string, index: number) => (
+                                              <li key={index}>{item.trim()}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      ) : null;
+                                    })()}
+                                    
+                                    {/* 関連タグ */}
+                                    {(item['主要タグ'] || item['補助タグ']) && (
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">🏷️ 関連タグ</h4>
+                                        <div className="flex flex-wrap gap-1">
+                                          {/* 主要タグ */}
+                                          {item['主要タグ'] && item['主要タグ'].split(',').map((tag: string, index: number) => (
+                                            <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
+                                              #{tag.trim()} : {getTagName(tag.trim())}
+                                            </span>
+                                          ))}
+                                          {/* 補助タグ */}
+                                          {item['補助タグ'] && item['補助タグ'].split(',').map((tag: string, index: number) => (
+                                            <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
+                                              #{tag.trim()} : {getTagName(tag.trim())}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : viewMode === 'category' ? (
             <>
               {/* カテゴリタブ */}
               {renderCategoryTabs()}
@@ -962,23 +1231,16 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               return (
                 <div
                   key={item['困りごと内容']}
-                  className={`rounded-xl border-2 transition-all duration-300 w-full ${
-                    isExpanded 
-                      ? 'shadow-md' 
-                      : 'shadow-sm hover:shadow-md'
-                  } ${
+                  className={`rounded-lg border-2 transition-all duration-300 ${
                     isSelected
-                      ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg transform scale-[1.02]'
+                      ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg'
                       : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
                   } ${isDisabled ? 'opacity-40' : ''}`}
                   style={{
-                    backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
-                    backgroundSize: '20px 20px',
                     animation: deselectedCard === item['困りごと内容'] ? 'deselectBounce 0.3s ease-in-out' : undefined
                   }}
                 >
-                  {/* カードのヘッダー部分（選択可能） */}
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="flex items-center justify-between">
                       <button
                         onClick={(e) => handleSelect(item['困りごと内容'], e)}
@@ -991,24 +1253,20 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                     <span className="font-medium text-gray-900">{item['困りごと内容']}</span>
                           {isSelected && (
                             <div className="ml-auto">
-                              <div className="w-6 h-6 bg-teal rounded-full flex items-center justify-center">
+                              <div className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                   </div>
-          </div>
+                            </div>
                           )}
                         </div>
-              </button>
-                      
-                      {/* 詳細表示ボタン（右端） */}
-                <button
-                        onClick={() => toggleAccordion(item['困りごと内容'])}
-                        className="ml-2 flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 transition-colors px-2 py-1 rounded hover:bg-teal-50"
-                >
-                        <span className="transition-all duration-200">
-                          {isExpanded ? '▲' : '▼'}
-                  </span>
-                        <span className="text-xs">{isExpanded ? '閉じる' : '詳細'}</span>
                 </button>
+                      
+                      <button
+                        onClick={() => toggleAccordion(item['困りごと内容'])}
+                        className="ml-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+                      >
+                        {isExpanded ? '▲閉じる' : '▼詳細'}
+                      </button>
                     </div>
                   </div>
 
@@ -1018,7 +1276,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                       <div className="space-y-3">
                         {/* 具体例 */}
                         <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">具体例</h4>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">💡 具体例</h4>
                           <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
                             {exampleList}
                           </ul>
@@ -1027,7 +1285,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                         {/* タグ表示 */}
                         {(mainTags.length > 0 || subTags.length > 0) && (
                           <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">関連タグ</h4>
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">🏷️ 関連タグ</h4>
                             <div className="flex flex-wrap gap-1">
                               {/* 主要タグ */}
                               {mainTags.map((tag: string, index: number) => (
@@ -1074,48 +1332,17 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           )}
         </div>
 
-              {/* カスタム困りごと入力 */}
-              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                <h3 className="text-base font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
-                <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={input}
-                    onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-                    placeholder="(未実装)"
-                    disabled
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
-            />
-            <button
-              onClick={handleAddCustom}
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
-            >
-              送信
-            </button>
-          </div>
-          {customDifficulties.length > 0 && (
-                  <div className="space-y-2">
-                {customDifficulties.map((difficulty, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
-                    <span className="text-gray-700">{difficulty}</span>
-                    <button
-                      onClick={() => handleRemoveCustom(difficulty)}
-                          className="text-red-500 hover:text-red-700"
-                    >
-                      ✕
-                    </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+        {/* カテゴリ検索の下部余白 */}
+        <div className="h-24"></div>
+
             </>
-          ) : (
-            /* グラフ表示 */
+          ) : null}
+
+
+          {/* グラフ表示 */}
+          {viewMode === 'graph' && (
             <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-              <h3 className="text-lg font-medium text-gray-700 mb-4">
+              <h3 className="text-lg font-medium text-gray-700 mb-4 text-center">
                 選択した困りごとの関連性
               </h3>
               <DifficultyGraphView 
@@ -1272,17 +1499,17 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
             {/* モーダルヘッダー */}
             <div className="bg-teal-500 text-white px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">
-                選択済みの困りごとリスト
+                📚 集めた困りごとカード
                 <span className={selected.length >= 11 ? 'text-red-500' : 'text-white'}>
-                  （{selected.length}件）
+                  （{selected.length}枚）
                 </span>
               </h3>
-              <button
+                <button
                 onClick={() => setShowSelectionModal(false)}
                 className="text-white bg-teal-600 hover:bg-teal-700 transition-colors text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full"
-              >
+                >
                 ✕
-              </button>
+                </button>
             </div>
             
             {/* モーダルコンテンツ */}
@@ -1347,44 +1574,212 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           <span className="font-semibold">🗺️ 探索のステージ</span><br />
           「困りごとの地図」を広げるように、当てはまるカードを集めていきましょう。集めたカードは整理でき、関連性が🔗グラフで可視化されていきます。
         </p>
-      </div>
-      
+        </div>
+
       {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mb-4">
           <div className="flex space-x-1 bg-sand p-1 rounded-lg">
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode('keyword')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'list'
+                viewMode === 'keyword'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              📋 リスト表示
+              🔍 キーワード
             </button>
             <button
-              onClick={() => setViewMode('graph')}
+              onClick={() => setViewMode('category')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'graph'
+                viewMode === 'category'
                   ? 'bg-white text-teal-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📂 カテゴリ
+            </button>
+          </div>
+        </div>
+        
+        {/* グラフ表示ボタン */}
+        <div className="flex justify-center">
+          <div className={`w-full p-1 rounded-lg ${viewMode === 'graph' ? 'bg-sand' : ''}`}>
+            <button
+              onClick={() => setViewMode('graph')}
+              className={`w-full py-3 px-6 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'graph'
+                  ? 'bg-white text-teal-600 shadow-sm'
+                  : 'bg-sand text-gray-500 hover:text-gray-700'
               }`}
             >
               🔗 グラフ表示
             </button>
           </div>
-          <button
-            onClick={() => setShowSelectionModal(true)}
-            className="py-2.5 px-4 rounded-md text-sm font-medium bg-sand text-gray-700 hover:bg-gray-200 transition-colors whitespace-nowrap"
-          >
-            📚 選択中の困りごと ({selected.length}枚)
-          </button>
         </div>
-      </div>
-      
+          </div>
+
       <div className="space-y-6">
-        {viewMode === 'list' ? (
+        {viewMode === 'keyword' ? (
+          <>
+            {/* キーワード検索セクション */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">
+                🔍 困りごとをキーワードで探す
+              </h3>
+              <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+                  value={customSearchTerm}
+                  onChange={(e) => setCustomSearchTerm(e.target.value)}
+                  placeholder="困りごとを検索してください..."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg"
+            />
+            <button
+                  onClick={() => {
+                    setShowCustomSearch(!showCustomSearch);
+                    // キーワード検索ログ
+                    if (!showCustomSearch && customSearchTerm.trim()) {
+                      logSearch(customSearchTerm, customSearchResults.length);
+                    }
+                  }}
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    showCustomSearch
+                      ? 'bg-teal-500 text-white shadow-lg'
+                      : 'bg-teal-500 text-white hover:bg-teal-600'
+                  }`}
+                >
+                  検索
+            </button>
+          </div>
+
+              {/* 検索結果表示 */}
+              {showCustomSearch && customSearchTerm.trim() && (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600 mb-4">
+                    「{customSearchTerm}」の検索結果: {customSearchResults.length}件
+                  </div>
+                  {customSearchResults.length === 0 ? (
+                    <div className="text-gray-400 text-center py-8">
+                      該当する困りごとは見つかりませんでした。
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      {customSearchResults.map((item: any) => {
+                        const isSelected = selected.includes(item['困りごと内容']);
+                        const isDisabled = !isSelected && selected.length >= maxSelectable;
+                        
+                        return (
+                          <div
+                            key={item['困りごと内容']}
+                            className={`rounded-lg border-2 transition-all duration-300 ${
+                              isSelected
+                                ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg'
+                                : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
+                            } ${isDisabled ? 'opacity-40' : ''}`}
+                          >
+                            <div className="p-4">
+                              <div className="flex items-center justify-between">
+                    <button
+                                  onClick={(e) => handleSelect(item['困りごと内容'], e)}
+                                  disabled={isDisabled}
+                                  className={`flex-1 text-left transition ${
+                                    isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-900">
+                                      {highlightSearchTerm(item['困りごと内容'], customSearchTerm)}
+                                    </span>
+                                    {isSelected && (
+                                      <div className="ml-auto">
+                                        <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center">
+                                          <span className="text-white text-sm">✓</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                    </button>
+                                  <button
+                                    onClick={() => toggleAccordion(item['困りごと内容'])}
+                                    className="ml-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+                                  >
+                                    {expandedCards.has(item['困りごと内容']) ? '▲閉じる' : '▼詳細'}
+                                  </button>
+                              </div>
+                            </div>
+                            
+                            {/* アコーディオン内容 */}
+                            {expandedCards.has(item['困りごと内容']) && (
+                              <div className="px-4 pb-4 border-t border-gray-100 pt-3 bg-gradient-to-b from-transparent to-gray-50/30">
+                                <div className="space-y-3">
+                                  {/* 困りごと説明 */}
+                                  {item['困りごと説明'] && (
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">📝 説明</h4>
+                                      <p className="text-sm text-gray-500 leading-relaxed">
+                                        {item['困りごと説明']}
+                                      </p>
+                                    </div>
+                                  )}
+                                  
+                                  {/* 具体例 */}
+                                  {(() => {
+                                    let example = '';
+                                    if (domain?.name === '企業' && item['企業具体例']) {
+                                      example = item['企業具体例'];
+                                    } else if (domain?.name === '教育機関' && item['教育機関具体例']) {
+                                      example = item['教育機関具体例'];
+                                    } else if (domain?.name === '支援機関' && item['支援機関具体例']) {
+                                      example = item['支援機関具体例'];
+                                    }
+                                    
+                                    return example ? (
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">💡 具体例</h4>
+                                        <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
+                                          {example.split(',').map((item: string, index: number) => (
+                                            <li key={index}>{item.trim()}</li>
+                ))}
+              </ul>
+                                      </div>
+                                    ) : null;
+                                  })()}
+                                  
+                                  {/* 関連タグ */}
+                                  {(item['主要タグ'] || item['補助タグ']) && (
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-700 mb-2">🏷️ 関連タグ</h4>
+                                      <div className="flex flex-wrap gap-1">
+                                        {/* 主要タグ */}
+                                        {item['主要タグ'] && item['主要タグ'].split(',').map((tag: string, index: number) => (
+                                          <span key={`main-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
+                                            #{tag.trim()} : {getTagName(tag.trim())}
+                                          </span>
+                                        ))}
+                                        {/* 補助タグ */}
+                                        {item['補助タグ'] && item['補助タグ'].split(',').map((tag: string, index: number) => (
+                                          <span key={`sub-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-sand text-gray-600">
+                                            #{tag.trim()} : {getTagName(tag.trim())}
+                                          </span>
+                                        ))}
+                                      </div>
+            </div>
+          )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        ) : viewMode === 'category' ? (
           <>
             {/* カテゴリタブと選択数表示 */}
             <div className="flex items-center justify-between">
@@ -1409,7 +1804,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   </span>
                 </div>
               </div>
-            </div>
+        </div>
 
             {/* フィルタされた困りごとカード */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -1441,7 +1836,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   const exampleList = specificExample.split(',').map((example, index) => (
                     <li key={index} className="text-sm text-gray-500 mb-1">
                       {example.trim()}
-                    </li>
+                  </li>
                   ));
 
                   // タグ情報を取得
@@ -1453,25 +1848,19 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                   return (
                     <div
                       key={item['困りごと内容']}
-                      className={`rounded-xl border-2 transition-all duration-300 w-full ${
-                        isExpanded 
-                          ? 'shadow-md' 
-                          : 'shadow-sm hover:shadow-md'
-                      } ${
+                      className={`rounded-lg border-2 transition-all duration-300 ${
                         isSelected
-                          ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg transform scale-[1.02]'
+                          ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg'
                           : 'border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white'
                       } ${isDisabled ? 'opacity-40' : ''}`}
                       style={{
-                        backgroundImage: isSelected ? undefined : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.1) 1px, transparent 0) !important',
-                        backgroundSize: '20px 20px',
                         animation: deselectedCard === item['困りごと内容'] ? 'deselectBounce 0.3s ease-in-out' : undefined
                       }}
                     >
                       {/* カードのヘッダー部分（選択可能） */}
                       <div className="p-3">
                         <div className="flex items-center justify-between">
-                          <button
+          <button
                             onClick={(e) => handleSelect(item['困りごと内容'], e)}
                             disabled={isDisabled}
                             className={`flex-1 text-left transition ${
@@ -1485,23 +1874,19 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                                   <div className="w-5 h-5 bg-teal rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs">✓</span>
                                   </div>
-                                </div>
-                              )}
-                            </div>
-                          </button>
-                          
-                          {/* 詳細表示ボタン（右端） */}
-                          <button
+            </div>
+          )}
+        </div>
+          </button>
+
+          <button
                             onClick={() => toggleAccordion(item['困りごと内容'])}
-                            className="ml-2 flex items-center gap-1 text-sm text-teal-600 hover:text-teal-800 transition-colors px-2 py-1 rounded hover:bg-teal-50"
-                          >
-                            <span className="transition-all duration-200">
-                              {isExpanded ? '▲' : '▼'}
-                            </span>
-                            <span className="text-xs">{isExpanded ? '閉じる' : '詳細'}</span>
-                          </button>
-                        </div>
-                      </div>
+                            className="ml-2 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors"
+          >
+                            {isExpanded ? '▲閉じる' : '▼詳細'}
+          </button>
+        </div>
+      </div>
 
                       {/* アコーディオン内容 */}
                       {isExpanded && (
@@ -1509,7 +1894,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                           <div className="space-y-3">
                             {/* 具体例 */}
                             <div>
-                              <h4 className="text-sm font-medium text-gray-700 mb-2">具体例</h4>
+                              <h4 className="text-sm font-medium text-gray-700 mb-2">💡 具体例</h4>
                               <ul className="list-disc pl-4 text-sm text-gray-500 space-y-1">
                                 {exampleList}
               </ul>
@@ -1518,7 +1903,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
                             {/* タグ表示 */}
                             {(mainTags.length > 0 || subTags.length > 0) && (
                               <div>
-                                <h4 className="text-sm font-medium text-gray-700 mb-2">関連タグ</h4>
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">🏷️ 関連タグ</h4>
                                 <div className="flex flex-wrap gap-1">
                                   {/* 主要タグ */}
                                   {mainTags.map((tag: string, index: number) => (
@@ -1560,53 +1945,20 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
           >
                       残りのリストを表示
           </button>
-                  </div>
-                </div>
+        </div>
+      </div>
               )}
             </div>
 
-            {/* カスタム困りごと入力 */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-              <h3 className="text-xl font-medium text-gray-700 mb-4">その他の困りごとがあれば追加してください（未実装）</h3>
-              <div className="flex gap-4 mb-4">
-            <input
-              type="text"
-              value={input}
-                  onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-                  placeholder="(未実装)"
-                  disabled
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal disabled:bg-sand disabled:text-gray-400"
-            />
-          <button
-              onClick={handleAddCustom}
-                  disabled
-                  className="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium disabled:cursor-not-allowed"
-            >
-              送信
-          </button>
-        </div>
-          {customDifficulties.length > 0 && (
-                <div className="space-y-2">
-                {customDifficulties.map((difficulty, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-sand rounded-lg">
-                    <span className="text-gray-700">{difficulty}</span>
-                    <button
-                      onClick={() => handleRemoveCustom(difficulty)}
-                        className="text-red-500 hover:text-red-700"
-                    >
-                      ✕
-                    </button>
-      </div>
-                  ))}
-                </div>
-              )}
-            </div>
+
           </>
-        ) : (
-          /* グラフ表示 */
+        ) : null}
+
+
+        {/* グラフ表示 */}
+        {viewMode === 'graph' && (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <h3 className="text-xl font-medium text-gray-700 mb-4">
+            <h3 className="text-xl font-medium text-gray-700 mb-4 text-center">
               選択した困りごとの関連性
             </h3>
             <DifficultyGraphView 
@@ -1614,9 +1966,12 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               domain={domain}
               viewModel={viewModel}
             />
-            </div>
-          )}
+          </div>
+        )}
         </div>
+
+        {/* 下部余白 */}
+        <div className="h-24"></div>
 
       {/* フッター */}
       <StepFooter

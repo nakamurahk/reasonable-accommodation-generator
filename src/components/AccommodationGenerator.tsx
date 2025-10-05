@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CharacteristicType, Domain, Situation } from '../types';
 import { ViewModel } from '../types/newDataStructure';
+import { logStepStart, logStepComplete } from '../lib/analytics';
 import Step1_1_Characteristics from './pages/Step1_1_Characteristics';
 import Step1_2_Domain from './pages/Step1_2_Domain';
 import Step1_3_Situations from './pages/Step1_3_Situations';
@@ -110,6 +111,9 @@ const AccommodationGenerator: React.FC = () => {
   useEffect(() => {
     const newStep = getCurrentStep();
     setCurrentStep(newStep);
+    
+    // ステップ開始ログ
+    logStepStart(newStep as any);
     
     // ステップ③（deckbuilding）に直接アクセスした時は、元の全選択肢を復元
     if (newStep === 'deckbuilding') {
