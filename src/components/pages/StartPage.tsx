@@ -18,7 +18,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
   };
 
   return (
-    <div className="min-h-screen bg-sand flex items-center justify-center p-4">
+    <div className="min-h-screen bg-sand flex flex-col items-center justify-center p-4">
       <div className={`${isMobile ? 'w-full max-w-md' : 'w-full max-w-2xl'} bg-white rounded-2xl shadow-xl overflow-hidden`}>
         {/* ヘッダー */}
         <div className="relative bg-gradient-to-br from-teal-300 via-teal-500 to-teal-700 text-white p-4 text-center overflow-hidden" style={{
@@ -185,6 +185,18 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* フッター */}
+      <div className="mt-8 text-center text-sm text-gray-500 w-full">
+        <p className="mb-2">© 2025 FitBridge. All rights reserved.</p>
+        <p>
+          お問い合わせ: Fitty2501（
+          <a href="mailto:nnito9546@gmail.com" className="text-teal-600 hover:text-teal-800 underline">
+            nnito9546@gmail.com
+          </a>
+          ）
+        </p>
       </div>
 
       {/* 利用規約モーダル */}

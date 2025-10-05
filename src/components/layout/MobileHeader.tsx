@@ -10,19 +10,18 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
 
   const helpContent = {
     'step1-1': {
-      title: '特性を選ぶ',
+      title: 'あなたの特性を選ぶ',
       content: (
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">🎯 このステップの目的</h4>
             <p className="text-gray-600 text-sm">
-              あなたの特性を選択することで、より適切なサポートを見つけることができます。
+              あなたの特性を選択することで、よくある困りごとをリストアップできます。
             </p>
           </div>
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">📝 使い方</h4>
             <ul className="text-gray-600 text-sm space-y-1">
-              <li>• 複数の特性を選択できます</li>
               <li>• 当てはまる特性をすべて選択してください</li>
               <li>• 選択後、「次のステップへ」ボタンで進みます</li>
             </ul>
@@ -30,14 +29,14 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">💡 ヒント</h4>
             <p className="text-gray-600 text-sm">
-              迷った場合は、現在の状況で最も当てはまる特性を選んでください。後から変更することも可能です。
+              迷った場合は、現在の状況で当てはまる特性をすべて選んでください。
             </p>
           </div>
         </div>
       )
     },
     'step1-2': {
-      title: '環境を選ぶ',
+      title: 'サポートが必要な『環境』は？',
       content: (
         <div className="space-y-4">
           <div>
@@ -64,49 +63,48 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
       )
     },
     'step1-3': {
-      title: 'シチュエーションを選ぶ',
+      title: '困りごとが起きやすい状況は？',
       content: (
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">🎯 このステップの目的</h4>
             <p className="text-gray-600 text-sm">
-              困りごとが発生する具体的なシチュエーションを選択します。
+              困りごとが発生する具体的なシーンを選択します。
             </p>
           </div>
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">📝 使い方</h4>
             <ul className="text-gray-600 text-sm space-y-1">
-              <li>• 複数のシチュエーションを選択できます</li>
-              <li>• 「全部選択する」ボタンで一括選択も可能</li>
-              <li>• 当てはまるシチュエーションをすべて選択してください</li>
+              <li>• 複数のシーンを選択できます</li>
+              <li>• 「すべて選択する」ボタンで一括選択も可能</li>
+              <li>• 当てはまるシーンをすべて選択してください</li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">💡 ヒント</h4>
             <p className="text-gray-600 text-sm">
-              選択したシチュエーションが多いほど、より具体的なサポート案が生成されます。
+              選択したシーンが多いほど、多くの困りごとリストが生成されます。
             </p>
           </div>
         </div>
       )
     },
     'thinking': {
-      title: '困りごとカードを集める',
+      title: 'あなたの困りごとを探そう',
       content: (
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">🎯 このステップの目的</h4>
             <p className="text-gray-600 text-sm">
-              あなたの困りごとに関連するカードを集めて、困りごとの地図を作成します。
+              あなたの困りごとに関連するカードを集めて、困りごとをざっくり把握します。
             </p>
           </div>
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">📝 使い方</h4>
             <ul className="text-gray-600 text-sm space-y-1">
-              <li>• 関連するカードをタップして選択</li>
-              <li>• 選択したカードはコレクションに追加</li>
-              <li>• グラフビューで関連性を確認できます</li>
-              <li>• コレクションから不要なカードを削除可能</li>
+              <li>• キーワードかカテゴリから、困りごとカードを選択</li>
+              <li>• 選択したカードは右下のカードの束から確認可能</li>
+              <li>• グラフ表示で関連性を確認できます</li>
             </ul>
           </div>
           <div>
@@ -119,7 +117,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
       )
     },
     'deckbuilding': {
-      title: '困りごとを絞り込む',
+      title: '大事な困りごとを選ぼう',
       content: (
         <div className="space-y-4">
           <div>
@@ -140,7 +138,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ currentStep }) => {
           <div>
             <h4 className="font-semibold text-gray-800 mb-2">💡 ヒント</h4>
             <p className="text-gray-600 text-sm">
-              環境において困る頻度が高いものを優先して選択してください。
+              環境において困る頻度が高いものや、自分では対処が難しいものを優先して選択してください。
             </p>
           </div>
         </div>

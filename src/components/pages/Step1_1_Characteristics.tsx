@@ -4,7 +4,6 @@ import { CharacteristicType } from '../../types';
 import { CHARACTERISTICS } from '../../data/constants';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StepFooter from '../layout/StepFooter';
-import HelpModal from '../layout/HelpModal';
 import { logSelection, logUsage } from '../../lib/analytics';
 
 // 特性グループ定義
@@ -41,7 +40,6 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
   onBack
 }) => {
   const isMobile = useIsMobile();
-  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // 特性: 複数選択可
   const handleCharacteristicToggle = (characteristic: CharacteristicType) => {
@@ -78,15 +76,6 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
           </p>
         </div>
         
-        {/* ヘルプリンク */}
-        <div className="text-right">
-          <button
-            onClick={() => setShowHelpModal(true)}
-            className="text-sm text-teal-600 hover:text-teal-800 underline"
-          >
-            💡特性の選び方
-          </button>
-        </div>
         
         {/* 特性選択 */}
         <div className="space-y-4 bg-sand pt-4 pb-4 pl-4 pr-2 rounded-md border border-gray-200 shadow-sm">
@@ -135,19 +124,6 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
           isMobile={true}
         />
         
-        {/* ヘルプモーダル */}
-        <HelpModal
-          isOpen={showHelpModal}
-          onClose={() => setShowHelpModal(false)}
-          title="特性選択について"
-          content={
-            <div className="space-y-4">
-              <p className="text-gray-600 text-sm">
-                診断を受けていない場合も、当てはまる症状があれば選択いただけます。
-              </p>
-            </div>
-          }
-        />
       </div>
     );
   }
@@ -164,15 +140,6 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
         </p>
       </div>
       
-      {/* ヘルプリンク */}
-      <div className="text-right">
-        <button
-          onClick={() => setShowHelpModal(true)}
-          className="text-sm text-teal-600 hover:text-teal-800 underline"
-        >
-          💡特性に迷ったら
-        </button>
-      </div>
       
       {/* 特性選択 */}
       <div className="space-y-4 bg-sand pt-6 pb-6 pl-6 pr-2 rounded-md border border-gray-200 shadow-sm">
@@ -221,19 +188,6 @@ const Step1_1_Characteristics: React.FC<Step1_1_CharacteristicsProps> = ({
         isMobile={false}
       />
       
-      {/* ヘルプモーダル */}
-      <HelpModal
-        isOpen={showHelpModal}
-        onClose={() => setShowHelpModal(false)}
-        title="特性選択について"
-        content={
-          <div className="space-y-4">
-            <p className="text-gray-600 text-sm">
-              診断を受けていない場合も、当てはまる症状があれば選択いただけます。
-            </p>
-          </div>
-        }
-      />
     </div>
   );
 };

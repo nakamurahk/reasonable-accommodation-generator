@@ -201,7 +201,6 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   // 表示件数を取得する関数
   const getVisibleCount = (category: string, totalCount: number) => {
     const count = visibleCounts[category] || Math.min(4, totalCount);
-    console.log('getVisibleCount:', { category, totalCount, visibleCounts, result: count });
     return count;
   };
   
@@ -438,12 +437,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         // 困りごと選択解除ログ（IDのみ）
         const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
-        console.log(`[Debug] Difficulty deselection - content: "${content}", difficultyItem:`, difficultyItem);
-        console.log(`[Debug] difficultyItem keys:`, difficultyItem ? Object.keys(difficultyItem) : 'null');
-        
         // IDプロパティを探す
         const difficultyId = difficultyItem?.id || difficultyItem?.ID || difficultyItem?.conc_id || content;
-        console.log(`[Debug] Final difficulty_id: "${difficultyId}"`);
         
         logSelection('step2', 'difficulty_select', {
           action: 'deselect',
@@ -502,13 +497,8 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         
         // 困りごと選択ログ（IDのみ）
         const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === content);
-        console.log(`[Debug] Difficulty selection - content: "${content}", difficultyItem:`, difficultyItem);
-        console.log(`[Debug] Available difficulties:`, uniqueDifficulties.slice(0, 3));
-        console.log(`[Debug] difficultyItem keys:`, difficultyItem ? Object.keys(difficultyItem) : 'null');
-        
         // IDプロパティを探す
         const difficultyId = difficultyItem?.id || difficultyItem?.ID || difficultyItem?.conc_id || content;
-        console.log(`[Debug] Final difficulty_id: "${difficultyId}"`);
         
         logSelection('step2', 'difficulty_select', {
           action: 'select',
@@ -573,11 +563,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
     // 選択された困りごとをオブジェクト形式に変換
     const selectedDifficultiesWithDetails = selectedDifficulties.map(difficulty => {
       const difficultyItem = uniqueDifficulties.find(item => item['困りごと内容'] === difficulty.title);
-      console.log(`[Debug] Difficulty mapping - title: "${difficulty.title}", difficultyItem:`, difficultyItem);
-      console.log(`[Debug] Original difficulty.id: "${difficulty.id}", difficultyItem.id: "${difficultyItem?.id}"`);
-      
       const finalId = difficultyItem ? difficultyItem.id : difficulty.id;
-      console.log(`[Debug] Final ID: "${finalId}"`);
       
       return {
         id: finalId, // conc_1等のIDを使用

@@ -12,13 +12,7 @@ const isLoggingAllowed = (): boolean => {
   const allowedDomain = 'fitbridge.net';
   
   // fitbridge.netからの操作のみログ送信
-  if (currentDomain === allowedDomain) {
-    console.log(`[Analytics] Logging allowed for domain: ${currentDomain}`);
-    return true;
-  } else {
-    console.log(`[Analytics] Logging disabled for domain: ${currentDomain} (only ${allowedDomain} allowed)`);
-    return false;
-  }
+  return currentDomain === allowedDomain;
 };
 
 // セッション状態を管理
@@ -41,7 +35,6 @@ export const logUsage = async (
   try {
     // fitbridge.netからの操作のみログ送信
     if (!isLoggingAllowed()) {
-      console.log(`[Analytics] Logging skipped for step: ${step}, action: ${action}`);
       return;
     }
 
@@ -51,20 +44,11 @@ export const logUsage = async (
     }
 
     // セッション状態を更新（最小単位のID情報のみ）
-    console.log(`[Debug] Updating sessionData - step: ${step}, action: ${action}, data:`, data);
-    console.log(`[Debug] Current sessionData before update:`, {
-      traits: sessionData.traits,
-      domain: sessionData.domain,
-      scenes: sessionData.scenes,
-      selected_issues: sessionData.selected_issues,
-      final_issue: sessionData.final_issue
-    });
     
     if (step === 'step1-1' && action === 'characteristic_select' && data) {
       if (data.action === 'select' && data.characteristics) {
         // 特性選択完了時：全選択特性を一括で設定
         sessionData.traits = data.characteristics;
-        console.log(`[Debug] Updated traits:`, sessionData.traits);
       }
     } else if (step === 'step1-2' && action === 'domain_select' && data) {
       sessionData.domain = data.domain_id; // ドメインIDのみ
@@ -99,16 +83,6 @@ export const logUsage = async (
         sessionData.final_issue = data.final_issue || [];
         // Step4で困りごとを選び直した際に、selected_aidsをリセット
         sessionData.selected_aids = [];
-        console.log(`[Debug] Cleared and set final_issue:`, sessionData.final_issue);
-        console.log(`[Debug] Cleared selected_aids for Step4 completion`);
-        console.log(`[Debug] SessionData after clear_all:`, {
-          traits: sessionData.traits,
-          domain: sessionData.domain,
-          scenes: sessionData.scenes,
-          selected_issues: sessionData.selected_issues,
-          final_issue: sessionData.final_issue,
-          selected_aids: sessionData.selected_aids
-        });
       }
     } else if (step === 'step5' && action === 'accommodation_select' && data) {
       // Step5に戻って来た際は、全てのselected_aidsをリセットしてから新しい選択を追加
@@ -124,15 +98,11 @@ export const logUsage = async (
           accommodation_id: data.accommodation_id // care_1000～care_1368形式
         });
         
-        console.log(`[Debug] Updated selected_aids for difficulty: ${data.difficulty_id}, accommodation: ${data.accommodation_id}`);
-        console.log(`[Debug] Current selected_aids:`, sessionData.selected_aids);
       }
     } else if (step === 'display' && action === 'prompt_generate' && data) {
       // プロンプト生成時のモードと手段を記録
-      console.log(`[Debug] Prompt generation data:`, data);
       sessionData.selected_mode = data.prompt_mode; // 'colleague' or 'supervisor'
       sessionData.selected_method = data.communication_method; // 'email', 'oral', 'chat', 'document'
-      console.log(`[Debug] Set selected_mode: "${sessionData.selected_mode}", selected_method: "${sessionData.selected_method}"`);
     }
 
     // 3段階で送信：特性選択完了、Step5表示、プロンプト生成（全てINSERT）
@@ -197,7 +167,6 @@ export const logUsage = async (
         // 注意：前に戻るボタンでデータが失われないよう、リセット処理を削除
         // セッション終了は新しいセッションIDが生成された時のみ
         if (sendReason === 'goal_with_options') {
-          console.log(`[Debug] Session data preserved for navigation`);
         }
       }
     }

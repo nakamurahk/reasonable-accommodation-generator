@@ -373,10 +373,8 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
             situations: situations.map(s => s.name || s)
           };
           
-          console.log('viewModel再構築中:', query);
           const vm = await buildFilteredViewModel(query);
           setReconstructedViewModel(vm);
-          console.log('viewModel再構築完了:', vm);
         } catch (error) {
           console.error('viewModel再構築に失敗:', error);
         }
@@ -396,13 +394,11 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        console.log('保存された選択状態を復元:', parsed);
         return parsed;
       } catch (error) {
         console.error('選択状態の復元に失敗:', error);
       }
     }
-    console.log('デフォルト選択状態を初期化');
     return {
       difficulties: [],
       accommodations: {}
@@ -465,17 +461,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     const accommodations = getAccommodations(difficulty?.title || '', viewModel, selectedDomain, reconstructedViewModel);
     const selectedAccommodation = accommodations[parseInt(accommodationId)];
     
-    // デバッグ：配慮案の構造を確認
-    console.log(`[Debug] Accommodation selection - difficulty: "${difficulty?.title}", accommodationId: "${accommodationId}"`);
-    console.log(`[Debug] Available accommodations:`, accommodations);
-    console.log(`[Debug] Selected accommodation:`, selectedAccommodation);
-    console.log(`[Debug] Selected accommodation keys:`, selectedAccommodation ? Object.keys(selectedAccommodation) : 'null');
-    
     const accommodationId_final = selectedAccommodation?.id || `care_${1000 + parseInt(accommodationId)}`;
-    console.log(`[Debug] Final accommodation_id: "${accommodationId_final}"`);
-    
-    // デバッグ：現在のselectedItemsの状態を確認
-    console.log(`[Debug] Current selectedItems:`, selectedItems);
     
     logSelection('step5', 'accommodation_select', {
       difficulty_id: difficultyId, // conc_1～conc_123形式
@@ -494,13 +480,9 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   // 選択された配慮案のみをフィルタリングする関数
   const getSelectedAccommodations = (difficultyId: string, accommodations: any[]) => {
     const selectedAccommodationIds = selectedItems.accommodations[difficultyId] || [];
-    console.log(`配慮案選択状態 - 困りごとID: ${difficultyId}, 選択されたインデックス: ${selectedAccommodationIds}`);
-    
     const selectedAccommodations = accommodations.filter((_, index) => 
       selectedAccommodationIds.includes(String(index))
     );
-    
-    console.log(`選択された配慮案:`, selectedAccommodations);
     return selectedAccommodations;
   };
   
@@ -551,7 +533,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
       // 同僚向けAIプロンプト
       const methodText = communicationMethod === 'email' ? 'メール' : 
                         communicationMethod === 'oral' ? '口頭' : 
-                        communicationMethod === 'chat' ? 'チャット' : '資料';
+                        communicationMethod === 'chat' ? 'チャット' : 'メール';
       
       prompt = `あなたは、チーム内の相互理解を促進し、パフォーマンスを最大化させるためのコミュニケーション設計の専門家です。
 次の困りごとと配慮案を、同僚に「チームを円滑にするための工夫」として${methodText}で伝える想定で整理してください。
@@ -581,7 +563,7 @@ ${userInput.trim() || '（記述なし）'}
       // 上司・人事向けAIプロンプト
       const methodText = communicationMethod === 'email' ? 'メール' : 
                         communicationMethod === 'oral' ? '口頭' : 
-                        communicationMethod === 'chat' ? 'チャット' : '資料';
+                        communicationMethod === 'chat' ? 'チャット' : 'メール';
       
       prompt = `あなたは、合理的配慮と生産性向上を両立させる調整のスペシャリストです。上司や人事が前向きに検討できる、建設的で論理的な「合理的配慮の調整案」を提示してください。
 
@@ -596,6 +578,7 @@ ${userInput.trim() || '（記述なし）'}
 - 依頼用の文面は、謙虚かつ前向きな姿勢を保ち、感謝の意と成果で貢献する意思を必ず盛り込む
 - 提案が実現した場合の費用対効果（生産性向上、ミス削減など）を間接的に示唆する
 - 上司や相手方に取ってほしいアクションが明確になるように依頼文を構成する
+- 自分の側で対策を行う上で、上司に支援してほしいことを明確にして、提案してください
 
 # 困りごと
 ${difficultyText.trim()}
@@ -615,7 +598,6 @@ ${userInput.trim() || '（記述なし）'}
     setGeneratedPrompt(prompt);
     
     // デバッグ：プロンプト生成時のパラメータを確認
-    console.log(`[Debug] Prompt generation - promptMode: "${promptMode}", communicationMethod: "${communicationMethod}"`);
     
     // プロンプト生成ログ
     logPromptGeneration(promptMode, communicationMethod);
@@ -674,7 +656,6 @@ ${userInput.trim() || '（記述なし）'}
             setSelectedItems(savedSelections);
             
             // 戻って来た際に、selected_aidsをリセットしてから新しい選択をログに記録
-            console.log(`[Debug] Resetting selected_aids for Step5 re-entry`);
             
             selectedDifficulties.forEach(difficulty => {
               const accommodations = getAccommodations(difficulty.title, viewModel, selectedDomain, reconstructedViewModel);
@@ -685,7 +666,6 @@ ${userInput.trim() || '（記述なし）'}
                   accommodation_id: defaultAccommodation?.id || `care_${1000}`,
                   action: 'select'
                 });
-                console.log(`[Debug] Restored default accommodation selection - difficulty: "${difficulty.title}", accommodation:`, defaultAccommodation);
               }
             });
             return;
@@ -696,7 +676,6 @@ ${userInput.trim() || '（記述なし）'}
       }
       
       // 保存された選択状態がない場合、デフォルトの初期化を行う
-      console.log(`[Debug] Initializing default accommodations for Step5`);
       const initialAccommodations: { [difficultyId: string]: string[] } = {};
       
       selectedDifficulties.forEach(difficulty => {
@@ -707,7 +686,6 @@ ${userInput.trim() || '（記述なし）'}
           
           // デフォルト選択の配慮案Aのログを送信
           const defaultAccommodation = accommodations[0]; // インデックス0の配慮案
-          console.log(`[Debug] Default accommodation selection - difficulty: "${difficulty.title}", accommodation:`, defaultAccommodation);
           
           logSelection('step5', 'accommodation_select', {
             difficulty_id: difficulty.id, // conc_1～conc_123形式
@@ -732,7 +710,6 @@ ${userInput.trim() || '（記述なし）'}
         selectedAccommodationIds.forEach(accommodationId => {
           const selectedAccommodation = accommodations[parseInt(accommodationId)];
           if (selectedAccommodation) {
-            console.log(`[Debug] Restoring accommodation selection - difficulty: "${difficulty.title}", accommodation:`, selectedAccommodation);
             
             logSelection('step5', 'accommodation_select', {
               difficulty_id: difficulty.id,
@@ -986,7 +963,7 @@ ${userInput.trim() || '（記述なし）'}
             <h3 className="text-lg font-semibold text-gray-800 text-center">🤖 AIプロンプト生成</h3>
             <div className="border-t border-gray-200 my-3"></div>
             <p className="text-sm text-gray-600 text-center">
-              選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。これをChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼文が作成できます。
+              選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。生成したプロンプトをコピーしてChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼が作成できます。
             </p>
             <button
               onClick={() => setShowPromptModal(false)}
@@ -1034,7 +1011,7 @@ ${userInput.trim() || '（記述なし）'}
 
               <div>
                 <h4 className="text-md font-medium text-gray-700 mb-3">伝達手段を選択してください</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
@@ -1074,19 +1051,6 @@ ${userInput.trim() || '（記述なし）'}
                       <div className="font-medium text-gray-900">チャット</div>
                     </div>
                   </label>
-                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="communicationMethod"
-                      value="document"
-                      checked={communicationMethod === 'document'}
-                      onChange={(e) => setCommunicationMethod(e.target.value as 'document')}
-                      className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
-                    />
-                    <div>
-                      <div className="font-medium text-gray-900">資料</div>
-                    </div>
-                  </label>
                 </div>
               </div>
 
@@ -1116,6 +1080,14 @@ ${userInput.trim() || '（記述なし）'}
                 >
                   キャンセル
                 </button>
+              </div>
+
+              {/* AI出力に関する注意書き */}
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800">
+                  <span className="font-medium">⚠️ ご注意：</span>
+                  AIが生成する内容は必ずしも正確ではありません。生成された依頼文は参考としてご活用いただき、実際の相談時は専門家や関係者と十分にご確認ください。
+                </p>
               </div>
 
               {generatedPrompt && (
