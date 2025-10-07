@@ -192,8 +192,8 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
         <p className="mb-2">© 2025 FitBridge. All rights reserved.</p>
         <p>
           お問い合わせ: Fitty2501（
-          <a href="mailto:nnito9546@gmail.com" className="text-teal-600 hover:text-teal-800 underline">
-            nnito9546@gmail.com
+          <a href="mailto:fitty2501@gmail.com" className="text-teal-600 hover:text-teal-800 underline">
+            fitty2501@gmail.com
           </a>
           ）
         </p>

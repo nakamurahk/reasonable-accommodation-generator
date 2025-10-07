@@ -970,7 +970,7 @@ ${userInput.trim() || '（記述なし）'}
   const renderPromptModal = () => {
     if (!showPromptModal) return null;
 
-    return (
+  return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pb-24">
         <div className="bg-sand rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto mx-auto">
           <div className="relative p-4 border-b">
@@ -989,10 +989,10 @@ ${userInput.trim() || '（記述なし）'}
           <div className="p-4">
             {/* プロンプト生成タブの内容をここに配置 */}
             <div className="space-y-4">
-              <div>
-                <h4 className="text-md font-medium text-gray-700 mb-3">モードを選択してください</h4>
+      <div>
+                <h4 className="text-md font-medium text-gray-700 mb-3">伝えたい相手を選んでください</h4>
                 <div className="space-y-3">
-                  <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                  <label className="flex items-start cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
                       name="promptMode"
@@ -1002,11 +1002,11 @@ ${userInput.trim() || '（記述なし）'}
                       className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
                     />
                     <div className="ml-3">
-                      <div className="font-medium text-gray-700">合理的配慮モード</div>
-                      <div className="text-sm text-gray-500">上長・人事に法的根拠に基づく依頼</div>
+                      <div className="font-medium text-gray-700">上司・人事（合理的配慮モード）</div>
+                      <div className="text-sm text-gray-500">法的な配慮を前提にした相談（オープン想定）</div>
                     </div>
                   </label>
-                  <label className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                  <label className="flex items-start cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
                       name="promptMode"
@@ -1016,17 +1016,17 @@ ${userInput.trim() || '（記述なし）'}
                       className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
                     />
                     <div className="ml-3">
-                      <div className="font-medium text-gray-700">環境調整モード</div>
-                      <div className="text-sm text-gray-500">同僚に協力的な依頼</div>
+                      <div className="font-medium text-gray-700">同僚（環境調整モード）</div>
+                      <div className="text-sm text-gray-500">特性を伝えずに調整も可（クローズOK）</div>
                     </div>
                   </label>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-md font-medium text-gray-700 mb-3">伝達手段を選択してください</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                <h4 className="text-md font-medium text-gray-700 mb-3">どのように伝えますか？</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="flex items-center space-x-2 cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
                       name="communicationMethod"
@@ -1036,10 +1036,10 @@ ${userInput.trim() || '（記述なし）'}
                       className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">メール</div>
+                      <div className="font-medium text-gray-900 text-sm">メール</div>
                     </div>
                   </label>
-                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                  <label className="flex items-center space-x-2 cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
                       name="communicationMethod"
@@ -1049,10 +1049,10 @@ ${userInput.trim() || '（記述なし）'}
                       className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">口頭</div>
+                      <div className="font-medium text-gray-900 text-sm">口頭</div>
                     </div>
                   </label>
-                  <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                  <label className="flex items-center space-x-2 cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
                     <input
                       type="radio"
                       name="communicationMethod"
@@ -1062,7 +1062,7 @@ ${userInput.trim() || '（記述なし）'}
                       className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">チャット</div>
+                      <div className="font-medium text-gray-900 text-sm">チャット</div>
                     </div>
                   </label>
                 </div>
@@ -1070,29 +1070,23 @@ ${userInput.trim() || '（記述なし）'}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  追加の情報や要望があれば記入してください（任意）
+                  職場での立場や状況を補足してください（任意）
                 </label>
                 <textarea
                   value={userInput}
                   onChange={(e) => setUserInput(sanitizeInput(e.target.value))}
-                  placeholder="例：特に伝えたいこと、状況の詳細など"
+                  placeholder="例：新入社員で在宅勤務が多い／管理職としてチームをまとめている／上司が忙しく話しかけづらい　など"
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-teal resize-none"
                   rows={3}
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex">
                 <button
                   onClick={generatePrompt}
-                  className="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+                  className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
                 >
-                  プロンプトを生成
-                </button>
-                <button
-                  onClick={() => setShowPromptModal(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                >
-                  キャンセル
+                  依頼文作成プロンプトを生成
                 </button>
               </div>
 
@@ -1164,7 +1158,7 @@ ${userInput.trim() || '（記述なし）'}
         <h1 className="text-lg md:text-2xl font-bold text-gray-800 mb-4">
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
-        <p className="text-gray-600 text-base md:text-lg">
+        <p className="text-gray-600 text-sm md:text-base">
           選んだカードから実用的な配慮案を準備しました。必要な案を選び、AIに依頼文を作成してもらえるようプロンプトを作成しましょう。
         </p>
       </div>
@@ -1172,10 +1166,6 @@ ${userInput.trim() || '（記述なし）'}
         
         {/* 配慮案の確認 */}
         <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-800 text-center mb-6">
-              📋 配慮案の確認
-            </h2>
-            <p className="text-sm text-gray-600 text-center mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           
           {selectedDifficulties.map((item, idx) => {
             const category = getCategoryFromTitle(item.title, viewModel || null, reconstructedViewModel);
@@ -1185,30 +1175,19 @@ ${userInput.trim() || '（記述なし）'}
             
             return (
               <div key={idx} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                {/* 困りごとの選択チェックボックス */}
+                {/* 困りごとの表示 */}
                 <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id={`mobile-difficulty-${item.id}`}
-                      checked={isDifficultySelected}
-                      onChange={() => toggleDifficultySelection(item.id)}
-                      className="w-5 h-5 text-teal border-gray-300 rounded focus:ring-teal"
-                    />
-                    <label htmlFor={`mobile-difficulty-${item.id}`} className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{categoryStyle ? categoryStyle.icon : '🎯'}</span>
-      <div>
-                          <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-                          <p className="text-sm text-gray-600">カテゴリ: {category}</p>
-                        </div>
-                      </div>
-                    </label>
+                    <span className="text-2xl">{categoryStyle ? categoryStyle.icon : '🎯'}</span>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                      <p className="text-sm text-gray-600">カテゴリ: {category}</p>
+                    </div>
                   </div>
                 </div>
                 
-                {/* 配慮案の選択（困りごとが選択されている場合のみ表示） */}
-                {isDifficultySelected && (
+                {/* 配慮案の選択 */}
+                {(
                   <div className="p-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
                     <div className="space-y-3">
@@ -1277,7 +1256,7 @@ ${userInput.trim() || '（記述なし）'}
         <div className="bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
             📖 合意形成・調整のポイント
-          </h2>
+        </h2>
           
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <ul className="space-y-3">
@@ -1383,7 +1362,7 @@ ${userInput.trim() || '（記述なし）'}
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
           ✨ あなたが選んだ重要な困りごと ✨
         </h1>
-        <p className="text-gray-600 text-lg">
+        <p className="text-gray-600 text-sm">
           選んだカードから実用的な配慮案を準備しました。必要な案を選び、AIに依頼文を作成してもらえるようプロンプトを作成しましょう。
         </p>
       </div>
@@ -1391,10 +1370,6 @@ ${userInput.trim() || '（記述なし）'}
       
       <div>
         <div className="bg-white rounded-xl shadow p-6 mb-10">
-          <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
-            📋 配慮案の確認
-          </h2>
-          <p className="text-sm text-gray-600 mb-6">必要な困りごとにチェックを入れ、各困りごとから1つの配慮案を選択してください</p>
           <ul className="space-y-6">
             {selectedDifficulties.map((item, idx) => {
                 const category = getCategoryFromTitle(item.title, viewModel || null, reconstructedViewModel);
@@ -1404,35 +1379,26 @@ ${userInput.trim() || '（記述なし）'}
               
               return (
               <li key={idx} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-                  {/* 困りごとの選択チェックボックス */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <input
-                      type="checkbox"
-                      id={`difficulty-${item.id}`}
-                      checked={isDifficultySelected}
-                      onChange={() => toggleDifficultySelection(item.id)}
-                      className="w-5 h-5 text-teal border-gray-300 rounded focus:ring-teal"
-                    />
-                    <label htmlFor={`difficulty-${item.id}`} className="flex-1 cursor-pointer">
-                      {categoryStyle && (
-                        <div 
-                          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium"
-                          style={{ backgroundColor: categoryStyle.bgColor }}
-                        >
-                          <span className="text-lg">{categoryStyle.icon}</span>
-                          <span className="text-gray-700 text-lg font-medium">{item.title}</span>
+                  {/* 困りごとの表示 */}
+                  <div className="mb-4">
+                    {categoryStyle && (
+                      <div 
+                        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium"
+                        style={{ backgroundColor: categoryStyle.bgColor }}
+                      >
+                        <span className="text-lg">{categoryStyle.icon}</span>
+                        <span className="text-gray-700 text-lg font-medium">{item.title}</span>
                 </div>
-                      )}
-                    </label>
+                    )}
+                    {categoryStyle && (
+                      <div className="text-sm text-gray-500 mb-3 ml-2">
+                        カテゴリ: {category}
+                      </div>
+                    )}
                   </div>
-                  {categoryStyle && (
-                    <div className="text-sm text-gray-500 mb-3 ml-8">
-                      カテゴリ: {category}
-                    </div>
-                  )}
                   
-                  {/* 配慮案の選択（困りごとが選択されている場合のみ表示） */}
-                  {isDifficultySelected && (
+                  {/* 配慮案の選択 */}
+                  {(
                     <div className="ml-8 border-l-2 border-gray-200 pl-4">
                       <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
                       <ul className="space-y-3">
@@ -1550,10 +1516,11 @@ ${userInput.trim() || '（記述なし）'}
       </div>
       <div className="mt-10 flex flex-wrap gap-4 mb-8 justify-center">
         <button
+          onClick={handleDownloadPDF}
           disabled
           className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition text-center"
         >
-          PDFをダウンロード（未実装）
+          📄 PDFをダウンロード
         </button>
         <button
           onClick={() => setShowPromptModal(true)}
@@ -1605,12 +1572,12 @@ const Modal = ({ isOpen, onClose, title, content }: {
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-          <button
+        <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-          >
+        >
             ✕
-          </button>
+        </button>
         </div>
         <div className="p-4 overflow-y-auto max-h-[60vh]">
           {content.includes('\n') ? (
