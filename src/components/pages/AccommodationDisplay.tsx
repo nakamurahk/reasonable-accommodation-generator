@@ -974,17 +974,19 @@ ${userInput.trim() || '（記述なし）'}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pb-24">
         <div className="bg-sand rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto mx-auto">
           <div className="relative p-4 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 text-center">🤖 AIプロンプト生成</h3>
+            <div className="flex items-center justify-center relative">
+              <h3 className="text-lg font-semibold text-gray-800">🤖 AIプロンプト生成</h3>
+              <button
+                onClick={() => setShowPromptModal(false)}
+                className="absolute right-0 text-white hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition"
+              >
+                ✕
+              </button>
+            </div>
             <div className="border-t border-gray-200 my-3"></div>
             <p className="text-sm text-gray-600 text-center">
               選択した困りごとと配慮案に基づき、話す相手に合わせたプロンプトを生成します。生成したプロンプトをコピーしてChatGPT等のAIに入力すると、あなたの状況に合わせた配慮依頼が作成できます。
             </p>
-            <button
-              onClick={() => setShowPromptModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-            >
-              ×
-            </button>
           </div>
           <div className="p-4">
             {/* プロンプト生成タブの内容をここに配置 */}
