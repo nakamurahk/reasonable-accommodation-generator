@@ -88,7 +88,7 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
         <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
             <span className="font-semibold">🎯 決定：最重要の困りごとを決める</span><br />
-            選んだカードの中から3枚を選び、あなたが最重要だと感じる困りごとにフォーカスしましょう。
+            選んだカードの中から、あなたが最重要だと感じる困りごとを選んでください。3枚まで選択できます。
           </p>
         </div>
 
@@ -177,20 +177,20 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
           </div>
         </div>
 
-        {/* 最終選択（3枚） */}
+        {/* 最終選択 */}
         <div className="bg-gradient-to-br from-yellow-50 to-orange-100 rounded-2xl shadow-lg p-6 mb-8 border-2 border-yellow-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-2 text-center">
             ⭐ 重要な困りごとカード選択 ({finalSelection.length}/3枚)
           </h2>
           <div className="text-center mb-4">
-            {finalSelection.length === 3 ? (
+            {finalSelection.length > 0 ? (
               <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg animate-pulse">
                 <p className="text-sm font-bold">⭐ 重要な困りごとカード選択完了！ ⭐</p>
               </div>
             ) : (
               <div className="bg-teal-100 text-teal-700 px-4 py-2 rounded-full">
                 <p className="text-sm font-medium">
-                  {3 - finalSelection.length}枚選択してください
+                  1枚以上選択してください
                 </p>
               </div>
             )}
@@ -247,7 +247,7 @@ const FinalCardSelection: React.FC<FinalCardSelectionProps> = ({
           onBack={onBack}
           onNext={handleNext}
           nextButtonText="🎮 次のステップへ"
-          nextButtonDisabled={finalSelection.length !== 3}
+          nextButtonDisabled={finalSelection.length === 0}
           isMobile={true}
         />
       </div>
