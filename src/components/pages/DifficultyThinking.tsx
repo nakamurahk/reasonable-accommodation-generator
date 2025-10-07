@@ -140,7 +140,7 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
   const [isDecreasingNumber, setIsDecreasingNumber] = useState<number | null>(null); // 減少時の数字表示用
   const [isDecreasingAnimating, setIsDecreasingAnimating] = useState(false); // 減少時のアニメーション用
   const [showSelectionModal, setShowSelectionModal] = useState(false); // 選択済み困りごとモーダル表示用
-  const [viewMode, setViewMode] = useState<'keyword' | 'category' | 'graph'>('keyword'); // ビューモード（キーワード or カテゴリ or グラフ）
+  const [viewMode, setViewMode] = useState<'keyword' | 'category' | 'graph'>('category'); // ビューモード（キーワード or カテゴリ or グラフ）
   const [deselectedCard, setDeselectedCard] = useState<string | null>(null); // 選択解除されたカード
   const [isDeckAnimating, setIsDeckAnimating] = useState(false); // カードの束のアニメーション
   const [isDeckAdding, setIsDeckAdding] = useState(false); // カードの束に追加するアニメーション
@@ -965,23 +965,13 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
         <div className="bg-light-sand border border-teal-500 rounded-lg p-4 mb-6">
           <p className="text-gray-700 text-base leading-relaxed">
             <span className="font-semibold">🗺️ 探索：あなたの困りごとを探そう</span><br />
-            キーワード または カテゴリ で、あなたの抱える困りごとカードを見つけましょう。
+            カテゴリまたはキーワードで、あなたの抱える困りごとカードを見つけましょう。
           </p>
         </div>
         
         {/* ビューモード切り替えタブ */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
           <div className={`flex ${isMobile ? 'space-x-1' : 'space-x-4'} bg-sand ${isMobile ? 'p-1' : 'p-3'} rounded-lg mb-4`}>
-            <button
-              onClick={() => setViewMode('keyword')}
-              className={`${isMobile ? 'flex-1' : ''} py-2 ${isMobile ? 'px-4' : 'px-12'} rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'keyword'
-                  ? 'bg-white text-teal-600 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              🔍 キーワード
-            </button>
             <button
               onClick={() => setViewMode('category')}
               className={`${isMobile ? 'flex-1' : ''} py-2 ${isMobile ? 'px-4' : 'px-12'} rounded-md text-sm font-medium transition-colors ${
@@ -991,6 +981,16 @@ const DifficultyThinking: React.FC<DifficultyThinkingProps> = ({
               }`}
             >
               📂 カテゴリ
+            </button>
+            <button
+              onClick={() => setViewMode('keyword')}
+              className={`${isMobile ? 'flex-1' : ''} py-2 ${isMobile ? 'px-4' : 'px-12'} rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'keyword'
+                  ? 'bg-white text-teal-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              🔍 キーワード
             </button>
           </div>
           
