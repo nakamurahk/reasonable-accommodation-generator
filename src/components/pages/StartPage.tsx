@@ -69,8 +69,46 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
           </div>
           
           {/* コンテンツ */}
-          <div className="relative z-10">
-            <h1 className="text-2xl font-bold mb-2">FitBridge</h1>
+          <div className="relative z-10 flex flex-col items-center">
+            {/* ロゴ */}
+            <div className="flex flex-col items-center mb-4">
+              {/* ブリッジグラフィック */}
+              <div className="relative w-16 h-10 mb-2">
+                <svg viewBox="0 0 60 30" className="w-full h-full">
+                  {/* メインアーチ */}
+                  <path d="M10 20 Q30 5 50 20" stroke="url(#bridgeGradient)" strokeWidth="2" fill="none"/>
+                  {/* 垂直サポート */}
+                  <line x1="15" y1="20" x2="15" y2="15" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+                  <line x1="25" y1="20" x2="25" y2="12" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+                  <line x1="35" y1="20" x2="35" y2="12" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+                  <line x1="45" y1="20" x2="45" y2="15" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+                  {/* サポートの上部円 */}
+                  <circle cx="15" cy="15" r="1.5" fill="url(#bridgeGradient)"/>
+                  <circle cx="25" cy="12" r="1.5" fill="url(#bridgeGradient)"/>
+                  <circle cx="35" cy="12" r="1.5" fill="url(#bridgeGradient)"/>
+                  <circle cx="45" cy="15" r="1.5" fill="url(#bridgeGradient)"/>
+                  {/* 波線 */}
+                  <path d="M5 25 Q15 22 25 25 T45 25" stroke="url(#bridgeGradient)" strokeWidth="1" fill="none" opacity="0.6"/>
+                  <path d="M8 27 Q18 24 28 27 T48 27" stroke="url(#bridgeGradient)" strokeWidth="1" fill="none" opacity="0.4"/>
+                  <defs>
+                    <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#3B82F6"/>
+                      <stop offset="50%" stopColor="#14B8A6"/>
+                      <stop offset="100%" stopColor="#10B981"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              {/* テキスト */}
+              <h1 className="text-2xl font-bold mb-2 text-white">
+                <span className="text-white">Inclus</span>
+                <span className="text-blue-300 relative">
+                  i
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-200 rounded-full"></span>
+                </span>
+                <span className="text-white">Bridge</span>
+              </h1>
+            </div>
             <p className="text-teal-100 text-sm">困りごとを整理し、必要なサポートを見つけるツール</p>
           </div>
         </div>
@@ -189,7 +227,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
 
       {/* フッター */}
       <div className="mt-8 text-center text-sm text-gray-500 w-full">
-        <p className="mb-2">© 2025 FitBridge. All rights reserved.</p>
+        <p className="mb-2">© 2025 InclusiBridge. All rights reserved.</p>
         <p>
           お問い合わせ: Fitty2501（
           <a href="mailto:fitty2501@gmail.com" className="text-teal-600 hover:text-teal-800 underline">
@@ -218,7 +256,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               <div className="space-y-6 text-sm">
                 <p>
-                  この利用規約（以下「本規約」）は、FitBridge（以下「本ツール」）の利用条件を定めるものです。利用者は、本ツールを利用することにより、本規約に同意したものとみなします。
+                  この利用規約（以下「本規約」）は、InclusiBridge（以下「本ツール」）の利用条件を定めるものです。利用者は、本ツールを利用することにより、本規約に同意したものとみなします。
                 </p>
 
                 <div>
@@ -325,7 +363,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               <div className="space-y-6 text-sm">
                 <p>
-                  本プライバシーポリシーは、FitBridge（以下「本ツール」）における利用者の情報の取り扱いについて定めるものです。利用者は、本ツールを利用することで、本ポリシーに同意したものとみなします。
+                  本プライバシーポリシーは、InclusiBridge（以下「本ツール」）における利用者の情報の取り扱いについて定めるものです。利用者は、本ツールを利用することで、本ポリシーに同意したものとみなします。
                 </p>
 
                 <div>

@@ -230,11 +230,56 @@ const Header: React.FC<HeaderProps> = ({ currentStep = 'initial' }) => {
 
   return (
     <header className="w-full bg-sand shadow flex items-center justify-between px-4 py-3 relative z-10">
-      <div className="flex items-center space-x-2">
-        {/* ロゴ部分（SVGや画像に差し替え可） */}
-        <span className="text-teal text-2xl font-bold">🧩</span>
-        <span className="text-lg font-semibold text-gray-900 hidden sm:block">FitBridge</span>
-        <span className="text-lg font-semibold text-gray-900 sm:hidden">FitBridge</span>
+      <div className="flex items-center space-x-3">
+        {/* ロゴ部分 */}
+        <div className="flex flex-col items-center">
+          {/* ブリッジグラフィック */}
+          <div className="relative w-12 h-8">
+            <svg viewBox="0 0 60 30" className="w-full h-full">
+              {/* メインアーチ */}
+              <path d="M10 20 Q30 5 50 20" stroke="url(#bridgeGradient)" strokeWidth="2" fill="none"/>
+              {/* 垂直サポート */}
+              <line x1="15" y1="20" x2="15" y2="15" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+              <line x1="25" y1="20" x2="25" y2="12" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+              <line x1="35" y1="20" x2="35" y2="12" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+              <line x1="45" y1="20" x2="45" y2="15" stroke="url(#bridgeGradient)" strokeWidth="1.5"/>
+              {/* サポートの上部円 */}
+              <circle cx="15" cy="15" r="1.5" fill="url(#bridgeGradient)"/>
+              <circle cx="25" cy="12" r="1.5" fill="url(#bridgeGradient)"/>
+              <circle cx="35" cy="12" r="1.5" fill="url(#bridgeGradient)"/>
+              <circle cx="45" cy="15" r="1.5" fill="url(#bridgeGradient)"/>
+              {/* 波線 */}
+              <path d="M5 25 Q15 22 25 25 T45 25" stroke="url(#bridgeGradient)" strokeWidth="1" fill="none" opacity="0.6"/>
+              <path d="M8 27 Q18 24 28 27 T48 27" stroke="url(#bridgeGradient)" strokeWidth="1" fill="none" opacity="0.4"/>
+              <defs>
+                <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3B82F6"/>
+                  <stop offset="50%" stopColor="#14B8A6"/>
+                  <stop offset="100%" stopColor="#10B981"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          {/* テキスト */}
+          <div className="flex items-center">
+            <span className="text-lg font-bold text-gray-800 hidden sm:block">
+              <span className="text-gray-800">Inclus</span>
+              <span className="text-blue-500 relative">
+                i
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full"></span>
+              </span>
+              <span className="text-gray-800">Bridge</span>
+            </span>
+            <span className="text-lg font-bold text-gray-800 sm:hidden">
+              <span className="text-gray-800">Inclus</span>
+              <span className="text-blue-500 relative">
+                i
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full"></span>
+              </span>
+              <span className="text-gray-800">Bridge</span>
+            </span>
+          </div>
+        </div>
       </div>
       
       {/* ヘルプボタンのみ */}

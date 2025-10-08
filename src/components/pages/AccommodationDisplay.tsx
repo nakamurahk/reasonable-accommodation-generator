@@ -339,7 +339,7 @@ const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selec
       </View>
         </View>
         <Text style={styles.footer}>
-          {dateStr} FitBridge
+          {dateStr} InclusiBridge
         </Text>
     </Page>
   </Document>
@@ -836,7 +836,7 @@ ${userInput.trim() || '（記述なし）'}
     const text = [
       '配慮案を確認しましょう。',
       'これは、支援を進めるための調整マニュアルです。',
-      `${dateStr} FitBridge`,
+      `${dateStr} InclusiBridge`,
       '',
       '【配慮依頼案】',
       accommodationText.trim(),
@@ -934,7 +934,7 @@ ${userInput.trim() || '（記述なし）'}
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `FitBridge_${dateStr}.pdf`;
+      link.download = `InclusiBridge_${dateStr}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1258,7 +1258,7 @@ ${userInput.trim() || '（記述なし）'}
         <div className="md:hidden bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
             📖 合意形成・調整のポイント
-          </h2>
+        </h2>
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
