@@ -88,7 +88,7 @@ export const logUsage = async (
       // Step5に戻って来た際は、全てのselected_aidsをリセットしてから新しい選択を追加
       if (data.action === 'select' && data.difficulty_id) {
         // 同じ困りごとに対する既存の選択を削除
-        sessionData.selected_aids = sessionData.selected_aids.filter(aid => 
+        sessionData.selected_aids = sessionData.selected_aids.filter((aid: any) => 
           aid.difficulty_id !== data.difficulty_id
         );
         

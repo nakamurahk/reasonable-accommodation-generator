@@ -21,6 +21,7 @@ export type StepAction =
   | 'difficulty_search'    // 困りごと検索
   | 'card_select'          // カード選択
   | 'final_select'         // 最終選択
+  | 'accommodation_select' // 配慮案選択
   | 'prompt_generate'      // プロンプト生成
   | 'prompt_copy'          // プロンプトコピー
   | 'file_download';       // ファイルダウンロード
@@ -33,4 +34,5 @@ export type StepName =
   | 'step2'    // 困りごと探索
   | 'step3'    // 困りごと選抜
   | 'step4'    // 最終決定
-  | 'step5';   // 結果表示
+  | 'step5'    // 結果表示
+  | 'display'; // 表示画面

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { ReasonableAccommodation } from '../../types';
 // import reasonableAccommodations from '../../data/user/ReasonableAccommodation.json';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 import { getBase64Image } from '../../utils/imageUtils';
 import { Domain } from '../../types';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -14,20 +11,8 @@ import { Domain as NewDomain } from '../../types/newDataStructure';
 import StepFooter from '../layout/StepFooter';
 import { logPromptGeneration, logSelection } from '../../lib/analytics';
 
-// フォント登録
-Font.register({
-  family: 'NotoSansJP',
-  src: '/fonts/NotoSansJP-Regular.ttf',
-  fontStyle: 'normal',
-  fontWeight: 'normal',
-});
-
-Font.register({
-  family: 'IPAexGothic',
-  src: '/fonts/ipaexg.ttf',
-  fontStyle: 'normal',
-  fontWeight: 'normal',
-});
+// PDF関連の動的インポート
+let PDFComponents: any = null;
 
 type Care = {
   id: string;
@@ -125,226 +110,14 @@ const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null 
 };
 
 
-// PDFのスタイル定義
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    backgroundColor: '#ffffff',
-    fontFamily: 'NotoSansJP',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    color: '#1a1a1a',
-    fontFamily: 'NotoSansJP',
-    textAlign: 'center',
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginRight: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  mainTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingBottom: 6,
-  },
-  accommodationList: {
-    marginLeft: 28,
-    width: '100%',
-  },
-  accommodationItem: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'flex-start',
-  },
-  accommodationLabel: {
-    width: 80,
-    fontSize: 12,
-    color: '#1a1a1a',
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  accommodationText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#4b5563',
-    marginLeft: 8,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-    padding: 24,
-    marginBottom: 20,
-  },
-  difficultyItem: {
-    marginBottom: 18,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    flexDirection: 'column',
-  },
-  difficultyTitle: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: '#1f2937',
-    fontFamily: 'NotoSansJP',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  star: {
-    fontSize: 16,
-    marginRight: 4,
-  },
-  accIcon: {
-    fontSize: 12,
-    marginRight: 2,
-  },
-  accLabel: {
-    fontWeight: 'bold',
-    color: '#374151',
-    marginRight: 2,
-  },
-  accType: {
-    fontSize: 10,
-    color: '#6b7280',
-    marginLeft: 4,
-  },
-  pointCard: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-    padding: 20,
-    marginBottom: 20,
-  },
-  pointTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingBottom: 6,
-  },
-  pointItem: {
-    fontSize: 10,
-    marginBottom: 4,
-    color: '#4b5563',
-    fontFamily: 'NotoSansJP',
-  },
-  pointText: {
-    fontSize: 11,
-    color: '#4b5563',
-    fontFamily: 'NotoSansJP',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    fontSize: 8,
-    color: '#6b7280',
-    fontFamily: 'NotoSansJP',
-  },
-});
-
-// PDFドキュメントコンポーネント
-const AccommodationPDFDocument = ({ difficulties, base64Images, viewModel, selectedDomain, selectedItems, reconstructedViewModel }: { 
-  difficulties: Difficulty[], 
-  base64Images: { [key: string]: string },
-  viewModel: ViewModel | null | undefined,
-  selectedDomain: Domain | null,
-  selectedItems: { difficulties: string[], accommodations: { [difficultyId: string]: string[] } },
-  reconstructedViewModel?: ViewModel | null
-}) => {
-  const today = new Date();
-  const dateStr = today.getFullYear() +
-    String(today.getMonth() + 1).padStart(2, '0') +
-    String(today.getDate()).padStart(2, '0');
-
-  return (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.title}>
-        このページは、あなたの支援を一歩前に進めるための"調整マニュアル"です
-      </Text>
-        <Text style={styles.mainTitle}>配慮依頼案</Text>
-        {difficulties.map((item, idx) => (
-          <View key={idx} style={styles.section}>
-            <View style={styles.sectionHeader}>
-              {base64Images.star && (
-                <Image src={base64Images.star} style={styles.icon} />
-              )}
-              {base64Images.note && (
-                <Image src={base64Images.note} style={styles.icon} />
-              )}
-              <Text style={styles.sectionTitle}>{item.title}</Text>
-            </View>
-            <View style={styles.accommodationList}>
-              {(() => {
-                const accommodations = getAccommodations(item.title, viewModel || null, selectedDomain, reconstructedViewModel);
-                const selectedAccommodationIds = selectedItems.accommodations[item.id] || [];
-                const selectedAccommodations = accommodations.filter((_, index) => 
-                  selectedAccommodationIds.includes(String(index))
-                );
-                
-                if (selectedAccommodations.length === 0) {
-                  return (
-                    <View style={styles.accommodationItem}>
-                      <Text style={styles.accommodationText}>（配慮案が選択されていません）</Text>
-              </View>
-                  );
-                }
-                
-                return selectedAccommodations.map((acc: any, accIdx: number) => (
-                  <View key={accIdx} style={styles.accommodationItem}>
-                    {base64Images[`acc${accIdx}`] && (
-                      <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
-                    )}
-                    <Text style={styles.accommodationLabel}>
-                      配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
-                    </Text>
-                    <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
-                  </View>
-                ));
-              })()}
-            </View>
-          </View>
-        ))}
-        <View style={styles.section}>
-          <Text style={styles.mainTitle}>合意形成のポイント</Text>
-          <View style={styles.accommodationList}>
-            {points.map((point, idx) => (
-              <View key={idx} style={styles.accommodationItem}>
-                <Text style={styles.pointText}>・{point}</Text>
-      </View>
-        ))}
-      </View>
-        </View>
-        <Text style={styles.footer}>
-          {dateStr} InclusiBridge
-        </Text>
-    </Page>
-  </Document>
-);
+// PDF関連の動的インポート用
+const loadPDFComponents = async () => {
+  if (!PDFComponents) {
+    PDFComponents = await import('@react-pdf/renderer');
+  }
+  return PDFComponents;
 };
+
 
 export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   selectedDifficulties,
@@ -915,19 +688,175 @@ ${userInput.trim() || '（記述なし）'}
       // console.log('選択された困りごと:', selectedDifficultiesToShow);
       // console.log('画像データ:', base64Images);
       
+      // PDFコンポーネントを動的インポート
+      const pdfComponents = await loadPDFComponents();
+      const { pdf, Document, Page, Text, View, StyleSheet, Font, Image } = pdfComponents;
+      
+      // フォント登録
+      Font.register({
+        family: 'NotoSansJP',
+        src: '/fonts/NotoSansJP-Regular.ttf',
+      });
+
+      Font.register({
+        family: 'IPAexGothic',
+        src: '/fonts/ipaexg.ttf',
+      });
+      
+      // PDFスタイル定義
+const styles = StyleSheet.create({
+  page: {
+          padding: 30,
+    fontFamily: 'NotoSansJP',
+          backgroundColor: '#ffffff',
+  },
+  title: {
+          fontSize: 16,
+    marginBottom: 20,
+          textAlign: 'center',
+    color: '#374151',
+    fontFamily: 'NotoSansJP',
+        },
+        mainTitle: {
+          fontSize: 18,
+    fontWeight: 'bold',
+          marginBottom: 15,
+          color: '#1f2937',
+    fontFamily: 'NotoSansJP',
+        },
+        section: {
+          marginBottom: 20,
+        },
+        sectionHeader: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 10,
+          backgroundColor: '#f3f4f6',
+          padding: 10,
+          borderRadius: 5,
+        },
+        sectionTitle: {
+    fontSize: 14,
+          fontWeight: 'bold',
+    color: '#1f2937',
+    fontFamily: 'NotoSansJP',
+          flex: 1,
+  },
+  icon: {
+          width: 16,
+          height: 16,
+          marginRight: 8,
+        },
+        accommodationList: {
+          marginLeft: 10,
+  },
+  accommodationItem: {
+    flexDirection: 'row',
+          marginBottom: 8,
+          alignItems: 'flex-start',
+        },
+        accommodationLabel: {
+          fontSize: 11,
+    fontWeight: 'bold',
+          color: '#6b7280',
+          marginRight: 8,
+          fontFamily: 'NotoSansJP',
+        },
+        accommodationText: {
+          flex: 1,
+          fontSize: 12,
+    color: '#374151',
+          lineHeight: 1.4,
+          fontFamily: 'NotoSansJP',
+        },
+        footer: {
+          position: 'absolute',
+          bottom: 30,
+          left: 30,
+          right: 30,
+          textAlign: 'center',
+    fontSize: 10,
+          color: '#9ca3af',
+          fontFamily: 'NotoSansJP',
+        },
+        pointText: {
+          fontSize: 11,
+    color: '#4b5563',
+          lineHeight: 1.4,
+    fontFamily: 'NotoSansJP',
+  },
+});
+
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+      
+      // PDFドキュメント作成
       const pdfDoc = (
-        <AccommodationPDFDocument
-          difficulties={selectedDifficultiesToShow}
-          base64Images={base64Images}
-          viewModel={viewModel}
-          selectedDomain={selectedDomain}
-          selectedItems={selectedItems}
-          reconstructedViewModel={reconstructedViewModel}
-        />
-      );
-      
-      // console.log('PDFドキュメント作成完了');
-      
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.title}>
+        このページは、あなたの支援を一歩前に進めるための"調整マニュアル"です
+      </Text>
+            <Text style={styles.mainTitle}>配慮依頼案</Text>
+            {selectedDifficultiesToShow.map((item, idx) => (
+              <View key={idx} style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  {base64Images.star && (
+                    <Image src={base64Images.star} style={styles.icon} />
+                  )}
+                  {base64Images.note && (
+                    <Image src={base64Images.note} style={styles.icon} />
+                  )}
+                  <Text style={styles.sectionTitle}>{item.title}</Text>
+            </View>
+                <View style={styles.accommodationList}>
+                  {(() => {
+                    const accommodations = getAccommodations(item.title, viewModel, selectedDomain, reconstructedViewModel);
+                    const selectedAccommodationIds = selectedItems.accommodations[item.id] || [];
+                    const selectedAccommodations = accommodations.filter((_, index) => 
+                      selectedAccommodationIds.includes(index.toString())
+                    );
+                    
+                    if (selectedAccommodations.length === 0) {
+                      return (
+                        <View style={styles.accommodationItem}>
+                          <Text style={styles.accommodationText}>（配慮案が選択されていません）</Text>
+              </View>
+                      );
+                    }
+                    
+                    return selectedAccommodations.map((acc: any, accIdx: number) => (
+                      <View key={accIdx} style={styles.accommodationItem}>
+                        {base64Images[`acc${accIdx}`] && (
+                          <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
+                        )}
+                        <Text style={styles.accommodationLabel}>
+                          配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
+                        </Text>
+                        <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
+                      </View>
+                    ));
+                  })()}
+                </View>
+          </View>
+        ))}
+            <View style={styles.section}>
+              <Text style={styles.mainTitle}>合意形成のポイント</Text>
+              <View style={styles.accommodationList}>
+                {points.map((point, idx) => (
+                  <View key={idx} style={styles.accommodationItem}>
+                    <Text style={styles.pointText}>・{point}</Text>
+      </View>
+        ))}
+      </View>
+            </View>
+            <Text style={styles.footer}>
+              {dateStr} InclusiBridge
+            </Text>
+    </Page>
+  </Document>
+);
+
       const blob = await pdf(pdfDoc).toBlob();
       // console.log('PDF Blob生成完了:', blob);
       
