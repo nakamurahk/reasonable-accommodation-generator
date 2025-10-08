@@ -1254,12 +1254,64 @@ ${userInput.trim() || '（記述なし）'}
           </div>
 
 
-        {/* 最終ガイド（シリアスな締め） */}
-        <div className="bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
+        {/* スマホ版：最終ガイド（シリアスな締め） */}
+        <div className="md:hidden bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
             📖 合意形成・調整のポイント
-        </h2>
-          
+          </h2>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">数より質を重視：</div>
+                  <div className="text-gray-700">配慮は3件以内に絞るのが理想</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">配慮と負担のバランスを意識：</div>
+                  <div className="text-gray-700">双方に無理のない形を探る</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">人事や支援担当を必ず通す：</div>
+                  <div className="text-gray-700">共有してリスクを減らす</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">段階的な導入を検討：</div>
+                  <div className="text-gray-700">一気にではなく、試行→拡張の流れで</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">定期的に見直す：</div>
+                  <div className="text-gray-700">状況に応じて調整や更新を行う</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="text-gray-800 font-medium">その場で即決しない：</div>
+                  <div className="text-gray-700">「持ち帰って検討します」と伝える</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* PC版：最終ガイド（シリアスな締め） */}
+        <div className="hidden md:block bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl shadow-lg p-6 border-2 border-gray-200 mb-10">
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+            📖 合意形成・調整のポイント
+          </h2>
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
@@ -1301,7 +1353,7 @@ ${userInput.trim() || '（記述なし）'}
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
                   <span className="text-gray-800 font-medium">その場で即決しない：</span>
-                  <span className="text-gray-700">「持ち帰って検討します」と伝える安心ワード</span>
+                  <span className="text-gray-700">「持ち帰って検討します」と伝える</span>
                 </div>
               </li>
             </ul>
@@ -1472,43 +1524,79 @@ ${userInput.trim() || '（記述なし）'}
               <li className="flex items-start gap-3">
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
-                  <span className="text-gray-800 font-medium">数より質を重視：</span>
-                  <span className="text-gray-700">配慮は3件以内に絞るのが理想</span>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">数より質を重視：</div>
+                    <div className="text-gray-700">配慮は3件以内に絞るのが理想</div>
       </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-teal-600 mt-1 font-bold">•</span>
-                <div>
-                  <span className="text-gray-800 font-medium">配慮と負担のバランスを意識：</span>
-                  <span className="text-gray-700">双方に無理のない形を探る</span>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">数より質を重視：</span>
+                    <span className="text-gray-700">配慮は3件以内に絞るのが理想</span>
+                  </span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
-                  <span className="text-gray-800 font-medium">人事や支援担当を必ず通す：</span>
-                  <span className="text-gray-700">共有してリスクを減らす</span>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">配慮と負担のバランスを意識：</div>
+                    <div className="text-gray-700">双方に無理のない形を探る</div>
+                  </div>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">配慮と負担のバランスを意識：</span>
+                    <span className="text-gray-700">双方に無理のない形を探る</span>
+                  </span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
-                  <span className="text-gray-800 font-medium">段階的な導入を検討：</span>
-                  <span className="text-gray-700">一気にではなく、試行→拡張の流れで</span>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">人事や支援担当を必ず通す：</div>
+                    <div className="text-gray-700">共有してリスクを減らす</div>
+                  </div>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">人事や支援担当を必ず通す：</span>
+                    <span className="text-gray-700">共有してリスクを減らす</span>
+                  </span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
-                  <span className="text-gray-800 font-medium">定期的に見直す：</span>
-                  <span className="text-gray-700">状況に応じて調整や更新を行う</span>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">段階的な導入を検討：</div>
+                    <div className="text-gray-700">一気にではなく、試行→拡張の流れで</div>
+                  </div>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">段階的な導入を検討：</span>
+                    <span className="text-gray-700">一気にではなく、試行→拡張の流れで</span>
+                  </span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal-600 mt-1 font-bold">•</span>
                 <div>
-                  <span className="text-gray-800 font-medium">その場で即決しない：</span>
-                  <span className="text-gray-700">「持ち帰って検討します」と伝える安心ワード</span>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">定期的に見直す：</div>
+                    <div className="text-gray-700">状況に応じて調整や更新を行う</div>
+                  </div>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">定期的に見直す：</span>
+                    <span className="text-gray-700">状況に応じて調整や更新を行う</span>
+                  </span>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-teal-600 mt-1 font-bold">•</span>
+                <div>
+                  <div className="md:hidden">
+                    <div className="text-gray-800 font-medium">その場で即決しない：</div>
+                    <div className="text-gray-700">「持ち帰って検討します」と伝える</div>
+                  </div>
+                  <span className="hidden md:inline">
+                    <span className="text-gray-800 font-medium">その場で即決しない：</span>
+                    <span className="text-gray-700">「持ち帰って検討します」と伝える</span>
+                  </span>
                 </div>
               </li>
             </ul>
