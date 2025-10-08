@@ -9,9 +9,9 @@ export const generateSessionId = (): string => {
 // ログ送信可能なドメインかチェック
 const isLoggingAllowed = (): boolean => {
   const currentDomain = window.location.hostname;
-  const allowedDomain = 'fitbridge.net';
+  const allowedDomain = 'inclusibridge.net';
   
-  // fitbridge.netからの操作のみログ送信
+  // inclusibridge.netからの操作のみログ送信
   return currentDomain === allowedDomain;
 };
 
