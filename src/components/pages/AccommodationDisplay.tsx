@@ -199,6 +199,8 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
   };
   const [activeTab, setActiveTab] = useState<'accommodations' | 'prompt'>('accommodations');
   const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
+  const [showPDFModal, setShowPDFModal] = useState<boolean>(false);
+  const [pdfType, setPdfType] = useState<'supervisor' | 'personal'>('supervisor');
   
   // ファイル名の生成（YYYYMMDD形式）
   const today = new Date();
@@ -895,6 +897,87 @@ const styles = StyleSheet.create({
     />
   );
 
+  // PDF作成モーダルをレンダリング
+  const renderPDFModal = () => {
+    if (!showPDFModal) return null;
+
+  return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pb-24">
+        <div className="bg-sand rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-auto">
+          <div className="relative p-4 border-b">
+            <div className="flex items-center justify-center relative">
+              <h3 className="text-lg font-semibold text-gray-800">📄 PDFを作成する</h3>
+              <button
+                onClick={() => setShowPDFModal(false)}
+                className="absolute right-0 text-white hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="border-t border-gray-200 my-3"></div>
+            <p className="text-sm text-gray-600 text-center">
+              選択した困りごとと配慮案に基づき、用途に合わせたPDFを作成します。
+            </p>
+          </div>
+          <div className="p-4">
+            <div className="space-y-4">
+      <div>
+                <h4 className="text-md font-medium text-gray-700 mb-3">PDFの種類を選択してください</h4>
+                <div className="space-y-3">
+                  <label className="flex items-start cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="pdfType"
+                      value="supervisor"
+                      checked={pdfType === 'supervisor'}
+                      onChange={(e) => setPdfType(e.target.value as 'supervisor' | 'personal')}
+                      className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
+                    />
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-700">上司・人事に渡す提案書</div>
+                      <div className="text-sm text-gray-500">要点を1枚に整理／依頼文テンプレ付</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start cursor-pointer px-2 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="pdfType"
+                      value="personal"
+                      checked={pdfType === 'personal'}
+                      onChange={(e) => setPdfType(e.target.value as 'supervisor' | 'personal')}
+                      className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
+                    />
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-700">個人の記録用レポート</div>
+                      <div className="text-sm text-gray-500">選んだ困りごと・配慮案を一覧化</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3 p-4 border-t border-gray-200">
+            <button
+              onClick={() => setShowPDFModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              取消
+            </button>
+            <button
+              onClick={async () => {
+                setShowPDFModal(false);
+                await handleDownloadPDF();
+              }}
+              className="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+            >
+              作成する
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // プロンプト生成モーダルをレンダリング
   const renderPromptModal = () => {
     if (!showPromptModal) return null;
@@ -1082,6 +1165,7 @@ const styles = StyleSheet.create({
           `
         }} />
         {renderModal()}
+        {renderPDFModal()}
         {renderPromptModal()}
       
       {/* ヒーローヘッダー */}
@@ -1297,6 +1381,13 @@ const styles = StyleSheet.create({
             🤖 AIプロンプト生成
           </button>
           <button
+            onClick={() => setShowPDFModal(true)}
+            disabled
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition"
+          >
+            📄 PDFを生成する（準備中）
+          </button>
+          <button
             onClick={handleCopyToClipboard}
             className="w-full px-4 py-3 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
           >
@@ -1338,6 +1429,7 @@ const styles = StyleSheet.create({
         `
       }} />
       {renderModal()}
+      {renderPDFModal()}
       {renderPromptModal()}
       
       {/* ヒーローヘッダー */}
@@ -1535,17 +1627,17 @@ const styles = StyleSheet.create({
       </div>
       <div className="mt-10 flex flex-wrap gap-4 mb-8 justify-center">
         <button
-          onClick={handleDownloadPDF}
-          disabled
-          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition text-center"
-        >
-          📄 PDFをダウンロード
-        </button>
-        <button
           onClick={() => setShowPromptModal(true)}
           className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
         >
           🤖 AIプロンプト生成
+        </button>
+        <button
+          onClick={() => setShowPDFModal(true)}
+          disabled
+          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition text-center"
+        >
+          📄 PDFを生成する（準備中）
         </button>
         <button
           onClick={handleCopyToClipboard}
