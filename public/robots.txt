@@ -1,3 +1,10 @@
 User-agent: *
 Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
 Sitemap: https://inclusibridge.com/sitemap.xml
