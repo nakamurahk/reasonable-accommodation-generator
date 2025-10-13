@@ -1,64 +1,51 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta http-equiv="Content-Language" content="ja" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <!-- apple-touch-iconは一時的に無効化 -->
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Language" content="ja" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://inclusibridge.com/">
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>InclusiBridge（インクルーシブリッジ）｜合理的配慮を支援するWebツール</title>
-    <meta name="description" content="InclusiBridgeは、職場・教育・支援現場における合理的配慮を設計・共有・合意形成するための支援ツールです。個人の困りごとを整理し、現実的な配慮案を提示します。">
-    <meta name="keywords" content="合理的配慮, インクルーシブリッジ, InclusiBridge, 障害者支援, 合意形成, インクルージョン, SaaS">
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "InclusiBridge",
-  "alternateName": "インクルーシブリッジ",
-  "applicationCategory": "Accessibility, Productivity",
-  "operatingSystem": "Web",
-  "url": "https://inclusibridge.com/",
-  "description": "InclusiBridgeは、職場・教育・支援現場における合理的配慮を設計・共有・合意形成するための支援ツールです。",
-  "creator": {
-    "@type": "Organization",
-    "name": "InclusiBridge Project"
-  },
-  "inLanguage": "ja",
-  "keywords": "合理的配慮, 合理的配慮ツール, インクルージョン, 障害者支援, 合意形成, SaaS"
-}
-    </script>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <title>InclusiBridge（インクルーシブリッジ）｜合理的配慮を支援するWebツール</title>
+  <meta name="description" content="InclusiBridgeは、職場・教育・支援現場における合理的配慮を設計・共有・合意形成するための支援ツールです。個人の困りごとを整理し、現実的な配慮案を提示します。">
+  <meta name="keywords" content="合理的配慮, 合理的配慮ツール, インクルーシブリッジ, InclusiBridge, 障害者支援, 合意形成, インクルージョン, SaaS">
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <!-- OGP/Twitter -->
+  <meta property="og:title" content="InclusiBridge｜合理的配慮を支援するWebツール">
+  <meta property="og:description" content="合理的配慮を構造化し、合意形成を前に進めるためのWebツール。">
+  <meta property="og:url" content="https://inclusibridge.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://inclusibridge.com/ogp.jpg">
+  <meta property="og:site_name" content="InclusiBridge">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- <meta name="twitter:site" content="@Fitty2501"> -->
+  <!-- <meta name="twitter:creator" content="@Fitty2501"> -->
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "InclusiBridge",
+    "alternateName": "インクルーシブリッジ",
+    "applicationCategory": "Accessibility, Productivity",
+    "operatingSystem": "Web",
+    "url": "https://inclusibridge.com/",
+    "description": "InclusiBridgeは、職場・教育・支援現場における合理的配慮を設計・共有・合意形成するための支援ツールです。",
+    "creator": { "@type": "Organization", "name": "InclusiBridge Project" },
+    "inLanguage": "ja",
+    "keywords": "合理的配慮, 合理的配慮ツール, インクルージョン, 障害者支援, 合意形成, SaaS"
+  }
+  </script>
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+</body>
 </html>
