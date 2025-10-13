@@ -5,6 +5,12 @@ import AccommodationGenerator from './components/AccommodationGenerator';
 import Header from './components/layout/Header';
 import MobileHeader from './components/layout/MobileHeader';
 import StartPage from './components/pages/StartPage';
+import LandingPage from './components/pages/LandingPage';
+import AboutPage from './components/pages/AboutPage';
+import ContactPage from './components/pages/ContactPage';
+import ConceptPage from './components/pages/ConceptPage';
+import PrivacyPage from './components/pages/PrivacyPage';
+import TermsPage from './components/pages/TermsPage';
 import { useIsMobile } from './hooks/useIsMobile';
 
 function App() {
@@ -23,66 +29,231 @@ function App() {
     localStorage.setItem('hasStarted', 'true');
   };
 
-  // スタートページが表示されていない場合のみ通常のレイアウトを表示
-  if (!hasStarted) {
-    // URLのステップ部分を削除してルートにリダイレクト
-    if (window.location.pathname !== '/') {
-      window.history.replaceState({}, '', '/');
-    }
-    return <StartPage onStart={handleStart} />;
-  }
-
   return (
     <Router>
-      <AppContent isMobile={isMobile} />
+      <AppContent isMobile={isMobile} hasStarted={hasStarted} onStart={handleStart} />
     </Router>
   );
 }
 
-function AppContent({ isMobile }: { isMobile: boolean }) {
-  // モバイル版レイアウト
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-sand">
-        <MobileHeaderWrapper />
-        <main>
-          <Routes>
-            <Route path="/" element={<Navigate to="/step1-1" replace />} />
-            <Route path="/step1-1" element={<AccommodationGenerator />} />
-            <Route path="/step1-2" element={<AccommodationGenerator />} />
-            <Route path="/step1-3" element={<AccommodationGenerator />} />
-            <Route path="/step2" element={<AccommodationGenerator />} />
-            <Route path="/step3" element={<AccommodationGenerator />} />
-            <Route path="/step4" element={<AccommodationGenerator />} />
-            <Route path="/step5" element={<AccommodationGenerator />} />
-            <Route path="*" element={<Navigate to="/step1-1" replace />} />
-          </Routes>
-        </main>
-      </div>
-    );
-  }
-
-  // PC版レイアウト（既存のまま）
+function AppContent({ isMobile, hasStarted, onStart }: { isMobile: boolean; hasStarted: boolean; onStart: () => void }) {
   return (
-    <div className="h-screen flex flex-col bg-sand">
-      <HeaderWrapper />
-      <div className="flex-1 flex overflow-hidden">
-        <SideNavWrapper />
-        <main className="flex-1 overflow-auto">
-          <Routes>
-            <Route path="/" element={<Navigate to="/step1-1" replace />} />
-            <Route path="/step1-1" element={<AccommodationGenerator />} />
-            <Route path="/step1-2" element={<AccommodationGenerator />} />
-            <Route path="/step1-3" element={<AccommodationGenerator />} />
-            <Route path="/step2" element={<AccommodationGenerator />} />
-            <Route path="/step3" element={<AccommodationGenerator />} />
-            <Route path="/step4" element={<AccommodationGenerator />} />
-            <Route path="/step5" element={<AccommodationGenerator />} />
-            <Route path="*" element={<Navigate to="/step1-1" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
+    <Routes>
+      {/* ランディングページ */}
+      <Route path="/" element={<LandingPage />} />
+      
+      {/* アプリページ */}
+      <Route path="/app" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      {/* アプリのステップページ */}
+      <Route path="/step1-1" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step1-2" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step1-3" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step2" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step3" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step4" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      <Route path="/step5" element={
+        hasStarted ? (
+          isMobile ? (
+            <div className="min-h-screen bg-sand">
+              <MobileHeaderWrapper />
+              <main>
+                <AccommodationGenerator />
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex flex-col bg-sand">
+              <HeaderWrapper />
+              <div className="flex-1 flex overflow-hidden">
+                <SideNavWrapper />
+                <main className="flex-1 overflow-auto">
+                  <AccommodationGenerator />
+                </main>
+              </div>
+            </div>
+          )
+        ) : (
+          <StartPage onStart={onStart} />
+        )
+      } />
+      
+      {/* その他のページ */}
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/concept" element={<ConceptPage />} />
+      <Route path="/blog" element={<div className="min-h-screen bg-white p-8"><h1 className="text-2xl">Blog Page</h1></div>} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
