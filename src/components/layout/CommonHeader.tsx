@@ -34,6 +34,9 @@ const CommonHeader: React.FC = () => {
             <Link to="/about" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
               About
             </Link>
+            <Link to="/concept" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
+              Concept
+            </Link>
             <Link to="/app" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
               App
             </Link>
@@ -89,6 +92,13 @@ const CommonHeader: React.FC = () => {
                     className="block px-4 py-3 text-lg font-semibold text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                   >
                     About
+                  </Link>
+                  <Link 
+                    to="/concept" 
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-3 text-lg font-semibold text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                  >
+                    Concept
                   </Link>
                   <Link 
                     to="/app" 

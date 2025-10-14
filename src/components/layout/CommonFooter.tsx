@@ -7,6 +7,7 @@ const CommonFooter: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="flex flex-wrap justify-center gap-6 mb-4">
               <Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link>
+              <Link to="/concept" className="text-gray-400 hover:text-white transition-colors">Concept</Link>
               <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link>
               <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy</Link>
               <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms</Link>
