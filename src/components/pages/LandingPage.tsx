@@ -22,7 +22,7 @@ const LandingPage: React.FC = () => {
               必要なサポートを見つけるツール
             </h1>
             <p 
-              className="text-xl text-white mb-8 max-w-3xl mx-auto animate-fade-in-up"
+              className="text-xl text-white mb-6 max-w-3xl mx-auto animate-fade-in-up"
               style={{
                 animation: 'fadeInUp 1s ease-out 0.4s both'
               }}
@@ -39,7 +39,7 @@ const LandingPage: React.FC = () => {
                 to="/app" 
                 className="bg-white text-teal-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                アプリを試す
+                無料で使ってみる
               </Link>
               <Link 
                 to="/concept" 
@@ -48,6 +48,22 @@ const LandingPage: React.FC = () => {
                 もっと知る
               </Link>
             </div>
+            <p 
+              className="text-sm text-white mt-6 animate-fade-in-up"
+              style={{
+                animation: 'fadeInUp 1s ease-out 0.7s both'
+              }}
+            >
+              💚 すべての当事者向けサービスは完全無料です
+            </p>
+            <p 
+              className="text-sm text-white mt-2 animate-fade-in-up"
+              style={{
+                animation: 'fadeInUp 1s ease-out 0.8s both'
+              }}
+            >
+              💡登録不要・5分であなたに合った支援案がわかる
+            </p>
           </div>
         </div>
         
@@ -84,14 +100,17 @@ const LandingPage: React.FC = () => {
             <div>
               <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">130+</div>
               <div className="text-lg font-semibold text-gray-700">困りごとデータ</div>
+              <div className="text-sm text-gray-500">（継続追加中）</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">390+</div>
-              <div className="text-lg font-semibold text-gray-700">配慮提案を用意</div>
+              <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">1,200+</div>
+              <div className="text-lg font-semibold text-gray-700">配慮案を生成</div>
+              <div className="text-sm text-gray-500">（実利用データ）</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">30%</div>
-              <div className="text-lg font-semibold text-gray-700">アプリ完走率</div>
+              <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">5分</div>
+              <div className="text-lg font-semibold text-gray-700">配慮案が完成</div>
+              <div className="text-sm text-gray-500">（登録不要）</div>
             </div>
           </div>
         </div>
@@ -141,10 +160,6 @@ const LandingPage: React.FC = () => {
               </p>
               <p className="text-lg text-gray-600 mb-6">
                 InclusiBridge は、困りごと＋配慮のデータベースと AI の力で、あなたの「見えない困難」を可視化。 当事者が主体的に、支援を「選べる」社会を目指します。
-              </p>
-              <hr className="border-gray-300 mb-6" />
-              <p className="text-lg text-teal-600 font-semibold">
-                💚 すべての当事者向けサービスは完全無料です
               </p>
             </div>
           </div>
