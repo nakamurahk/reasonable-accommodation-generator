@@ -18,16 +18,24 @@ const LandingPage: React.FC = () => {
                 animation: 'fadeInUp 1s ease-out 0.2s both'
               }}
             >
-              困りごとを整理し、<br />
-              必要なサポートを見つけるツール
+              困りごとを整理して、<br />
+              あなたに合う合理的配慮の形を見つけよう。
             </h1>
             <p 
-              className="text-xl text-white mb-6 max-w-3xl mx-auto animate-fade-in-up"
+              className="text-sm text-white mb-2 animate-fade-in-up"
               style={{
                 animation: 'fadeInUp 1s ease-out 0.4s both'
               }}
             >
-              あなたの『困りごと』を言語化し、配慮をデータ化するプラットフォーム
+              💚 すべての当事者向けサービスは<span style={{ color: '#ef4444', fontWeight: 'bold' }}>完全無料</span>です
+            </p>
+            <p 
+              className="text-sm text-white mb-8 animate-fade-in-up"
+              style={{
+                animation: 'fadeInUp 1s ease-out 0.5s both'
+              }}
+            >
+              💡<span style={{ color: '#ef4444', fontWeight: 'bold' }}>登録不要・5分</span>であなたに合った支援案がわかる
             </p>
             <div 
               className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up"
@@ -48,22 +56,6 @@ const LandingPage: React.FC = () => {
                 もっと知る
               </Link>
             </div>
-            <p 
-              className="text-sm text-white mt-6 animate-fade-in-up"
-              style={{
-                animation: 'fadeInUp 1s ease-out 0.7s both'
-              }}
-            >
-              💚 すべての当事者向けサービスは完全無料です
-            </p>
-            <p 
-              className="text-sm text-white mt-2 animate-fade-in-up"
-              style={{
-                animation: 'fadeInUp 1s ease-out 0.8s both'
-              }}
-            >
-              💡登録不要・5分であなたに合った支援案がわかる
-            </p>
           </div>
         </div>
         
@@ -91,7 +83,7 @@ const LandingPage: React.FC = () => {
       {/* Stats Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">3,500+</div>
               <div className="text-lg font-semibold text-gray-700">ユーザーが利用</div>
@@ -106,11 +98,6 @@ const LandingPage: React.FC = () => {
               <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">1,200+</div>
               <div className="text-lg font-semibold text-gray-700">配慮案を生成</div>
               <div className="text-sm text-gray-500">（実利用データ）</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold text-teal-600 mb-2">5分</div>
-              <div className="text-lg font-semibold text-gray-700">配慮案が完成</div>
-              <div className="text-sm text-gray-500">（登録不要）</div>
             </div>
           </div>
         </div>
