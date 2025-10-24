@@ -85,10 +85,12 @@ const PDF_ACC_ICONS = [
 const PDF_ACC_LABELS = ['A', 'B', 'C'];
 
 const points = [
-  '配慮は"数"より"質"。伝える数は3件以内にしぼるのがおすすめです',
-  '配慮案を支援者の担当や体制も意識して整理しましょう',
-  '配慮を伝えるときは、上司だけでなく人事や支援担当にも共有しましょう（異動時のリスク低減）',
-  'その場で決めず「一度持ち帰って検討いただく」とも伝えると安心です',
+  '数より質を重視：配慮は3件以内に絞るのが理想',
+  '配慮と負担のバランスを意識：双方に無理のない形を探る',
+  '人事や支援担当を必ず通す：共有してリスクを減らす',
+  '段階的な導入を検討：一気にではなく、試行→拡張の流れで',
+  '定期的に見直す：状況に応じて調整や更新を行う',
+  'その場で即決しない：「持ち帰って検討します」と伝える',
 ];
 
 // 配慮案抽出関数（新データ構造のみ）
@@ -710,14 +712,17 @@ const styles = StyleSheet.create({
   page: {
           padding: 30,
     fontFamily: 'NotoSansJP',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#faf7f0',
   },
   title: {
           fontSize: 16,
+    marginTop: 20,
     marginBottom: 20,
           textAlign: 'center',
     color: '#374151',
     fontFamily: 'NotoSansJP',
+          fontWeight: 'bold',
+          textDecoration: 'underline',
         },
         mainTitle: {
           fontSize: 18,
@@ -753,63 +758,191 @@ const styles = StyleSheet.create({
           marginLeft: 10,
   },
   accommodationItem: {
-    flexDirection: 'row',
-          marginBottom: 8,
-          alignItems: 'flex-start',
+    flexDirection: 'column',
+          marginBottom: 12,
         },
         accommodationLabel: {
           fontSize: 11,
     fontWeight: 'bold',
           color: '#6b7280',
-          marginRight: 8,
+          marginBottom: 4,
           fontFamily: 'NotoSansJP',
         },
         accommodationText: {
-          flex: 1,
           fontSize: 12,
     color: '#374151',
           lineHeight: 1.4,
           fontFamily: 'NotoSansJP',
+          marginBottom: 8,
         },
-        footer: {
-          position: 'absolute',
-          bottom: 30,
-          left: 30,
-          right: 30,
-          textAlign: 'center',
-    fontSize: 10,
-          color: '#9ca3af',
+        exampleContainer: {
+          marginTop: 8,
+          paddingLeft: 16,
+          borderLeft: 2,
+          borderColor: '#e5e7eb',
+        },
+        exampleLabel: {
+          fontSize: 10,
+          color: '#6b7280',
+          fontWeight: 'bold',
+          marginBottom: 4,
           fontFamily: 'NotoSansJP',
+        },
+        exampleText: {
+          fontSize: 11,
+          color: '#4b5563',
+          lineHeight: 1.3,
+          fontFamily: 'NotoSansJP',
+        },
+        accommodationContent: {
+          marginTop: 4,
+          marginBottom: 8,
+        },
+        accommodationTitleText: {
+          fontSize: 12,
+          fontWeight: 'bold',
+          color: '#374151',
+          marginBottom: 8,
+          fontFamily: 'NotoSansJP',
+        },
+        accommodationDetailContainer: {
+          marginTop: 8,
+          marginLeft: 16,
+          paddingLeft: 12,
+          borderLeftWidth: 3,
+          borderLeftColor: '#d1d5db',
+          backgroundColor: '#f9fafb',
+          padding: 8,
+          borderRadius: 4,
+        },
+        accommodationDetailText: {
+          fontSize: 10,
+          color: '#4b5563',
+          lineHeight: 1.6,
+          fontFamily: 'NotoSansJP',
+        },
+        pointsSection: {
+          marginTop: 20,
+          marginBottom: 20,
+        },
+        pointsHeader: {
+          backgroundColor: '#14b8a6',
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 12,
+        },
+        pointsTitle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#ffffff',
+          textAlign: 'center',
+          fontFamily: 'NotoSansJP',
+        },
+        pointsContainer: {
+          backgroundColor: '#f0fdfa',
+          borderWidth: 2,
+          borderColor: '#14b8a6',
+          borderRadius: 8,
+          padding: 16,
+        },
+        pointItem: {
+          marginBottom: 8,
         },
         pointText: {
           fontSize: 11,
-    color: '#4b5563',
-          lineHeight: 1.4,
-    fontFamily: 'NotoSansJP',
-  },
+          color: '#0f766e',
+          lineHeight: 1.5,
+          fontFamily: 'NotoSansJP',
+        },
+        header: {
+          marginBottom: 20,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingBottom: 10,
+          borderBottomWidth: 1,
+          borderBottomColor: '#E0E0E0',
+        },
+        headerLeft: {
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: '#374151',
+          fontFamily: 'NotoSansJP',
+        },
+        headerRight: {
+          fontSize: 12,
+          color: '#6b7280',
+          fontFamily: 'NotoSansJP',
+        },
+        footer: {
+          position: 'absolute',
+          bottom: 20,
+          left: 30,
+          right: 30,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: '#E0E0E0',
+          backgroundColor: '#faf7f0',
+        },
+        footerLeft: {
+          fontSize: 9,
+          color: '#6b7280',
+          fontFamily: 'NotoSansJP',
+          flex: 1,
+        },
+        footerRight: {
+          fontSize: 9,
+          color: '#6b7280',
+          fontFamily: 'NotoSansJP',
+          fontWeight: 'bold',
+        },
+        accommodationSection: {
+          marginTop: 20,
+          padding: 16,
+          backgroundColor: '#f0fdfa',
+          borderWidth: 2,
+          borderColor: '#14b8a6',
+          borderRadius: 8,
+        },
+        accommodationTitle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#ffffff',
+          backgroundColor: '#14b8a6',
+          padding: 8,
+          textAlign: 'center',
+          marginBottom: 12,
+          fontFamily: 'NotoSansJP',
+        },
 });
 
       const today = new Date();
       const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+      const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       
       // PDFドキュメント作成
       const pdfDoc = (
   <Document>
     <Page size="A4" style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.headerLeft}>InclusiBridge Self Report</Text>
+        <Text style={styles.headerRight}>{formattedDate}</Text>
+      </View>
       <Text style={styles.title}>
-        このページは、あなたの支援を一歩前に進めるための"調整マニュアル"です
+        あなたの支援を一歩前に進めるための"調整マニュアル"です
       </Text>
-            <Text style={styles.mainTitle}>配慮依頼案</Text>
-            {selectedDifficultiesToShow.map((item, idx) => (
-              <View key={idx} style={styles.section}>
+            <View style={styles.accommodationSection}>
+              <Text style={styles.accommodationTitle}>配慮依頼案</Text>
+              {selectedDifficultiesToShow.map((item, idx) => (
+                <View key={idx} style={styles.section}>
                 <View style={styles.sectionHeader}>
                   {base64Images.star && (
                     <Image src={base64Images.star} style={styles.icon} />
                   )}
-                  {base64Images.note && (
-                    <Image src={base64Images.note} style={styles.icon} />
-                  )}
-                  <Text style={styles.sectionTitle}>{item.title}</Text>
+                  <Text style={styles.sectionTitle}>困りごと：{item.title}</Text>
             </View>
                 <View style={styles.accommodationList}>
                   {(() => {
@@ -827,34 +960,54 @@ const styles = StyleSheet.create({
                       );
                     }
                     
-                    return selectedAccommodations.map((acc: any, accIdx: number) => (
+                    return selectedAccommodations.map((acc: any, accIdx: number) => {
+                      // 選択された配慮案の実際のインデックスを取得
+                      const actualIndex = accommodations.findIndex(originalAcc => 
+                        originalAcc['配慮案タイトル'] === acc['配慮案タイトル'] && 
+                        originalAcc['具体的な配慮'] === acc['具体的な配慮']
+                      );
+                      return (
                       <View key={accIdx} style={styles.accommodationItem}>
-                        {base64Images[`acc${accIdx}`] && (
-                          <Image src={base64Images[`acc${accIdx}`]} style={styles.icon} />
-                        )}
-                        <Text style={styles.accommodationLabel}>
-                          配慮案{PDF_ACC_LABELS[accIdx % PDF_ACC_LABELS.length]}:
+                        <Text style={styles.accommodationTitleText}>
+                          配慮案：{acc['配慮案タイトル'] || acc.description}
                         </Text>
-                        <Text style={styles.accommodationText}>{acc['配慮案タイトル'] || acc.description}</Text>
+                        {acc['具体的な配慮'] && (
+                          <View style={styles.accommodationDetailContainer}>
+                            {acc['具体的な配慮'].split('\n').map((bullet: string, bulletIdx: number) => (
+                              <Text key={bulletIdx} style={styles.accommodationDetailText}>
+                                ・{bullet}
+                              </Text>
+                            ))}
+                          </View>
+                        )}
                       </View>
-                    ));
+                      );
+                    });
                   })()}
                 </View>
           </View>
         ))}
-            <View style={styles.section}>
-              <Text style={styles.mainTitle}>合意形成のポイント</Text>
-              <View style={styles.accommodationList}>
-                {points.map((point, idx) => (
-                  <View key={idx} style={styles.accommodationItem}>
-                    <Text style={styles.pointText}>・{point}</Text>
-      </View>
-        ))}
-      </View>
             </View>
-            <Text style={styles.footer}>
-              {dateStr} InclusiBridge
-            </Text>
+            <View style={styles.pointsSection}>
+              <View style={styles.pointsHeader}>
+                <Text style={styles.pointsTitle}>合意形成・調整のポイント</Text>
+              </View>
+              <View style={styles.pointsContainer}>
+                {points.map((point, idx) => (
+                  <View key={idx} style={styles.pointItem}>
+                    <Text style={styles.pointText}>・{point}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.footer}>
+              <Text style={styles.footerLeft}>
+                This document is a self-managed support record generated by InclusiBridge.
+              </Text>
+              <Text style={styles.footerRight}>
+                InclusiBridge © 2025
+              </Text>
+            </View>
     </Page>
   </Document>
 );
@@ -865,7 +1018,17 @@ const styles = StyleSheet.create({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `InclusiBridge_${dateStr}.pdf`;
+      // ファイル名をPDFタイプに応じて設定
+      const downloadDate = new Date();
+      const downloadFormattedDate = downloadDate.getFullYear() + '-' +
+        String(downloadDate.getMonth() + 1).padStart(2, '0') + '-' +   
+        String(downloadDate.getDate()).padStart(2, '0');
+      
+      const fileName = pdfType === 'personal' 
+        ? `IB_SelfReport_${downloadFormattedDate}.pdf`
+        : `InclusiBridge_${downloadFormattedDate}.pdf`;
+      
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -906,7 +1069,7 @@ const styles = StyleSheet.create({
         <div className="bg-sand rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-auto">
           <div className="relative p-4 border-b">
             <div className="flex items-center justify-center relative">
-              <h3 className="text-lg font-semibold text-gray-800">📄 PDFを作成する</h3>
+              <h3 className="text-lg font-semibold text-gray-800">📄 PDFを生成する</h3>
               <button
                 onClick={() => setShowPDFModal(false)}
                 className="absolute right-0 text-white hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 transition"
@@ -970,7 +1133,7 @@ const styles = StyleSheet.create({
               }}
               className="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
             >
-              作成する
+              生成する
             </button>
           </div>
         </div>
@@ -1381,11 +1544,10 @@ const styles = StyleSheet.create({
             🤖 AIプロンプト生成
           </button>
           <button
-            onClick={() => setShowPDFModal(true)}
-            disabled
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition"
+            onClick={handleDownloadPDF}
+            className="w-full px-4 py-3 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
           >
-            📄 PDFを生成する（準備中）
+            📄 PDFを生成する
           </button>
           <button
             onClick={handleCopyToClipboard}
@@ -1633,11 +1795,10 @@ const styles = StyleSheet.create({
           🤖 AIプロンプト生成
         </button>
         <button
-          onClick={() => setShowPDFModal(true)}
-          disabled
-          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-gray-300 bg-gray-400 text-gray-600 font-medium shadow cursor-not-allowed transition text-center"
+          onClick={handleDownloadPDF}
+          className="flex-1 min-w-[140px] px-4 py-2 rounded-lg border border-teal-300 bg-teal-500 text-white font-medium shadow hover:bg-teal-600 transition"
         >
-          📄 PDFを生成する（準備中）
+          📄 PDFを生成する
         </button>
         <button
           onClick={handleCopyToClipboard}
