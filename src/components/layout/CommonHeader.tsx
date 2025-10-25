@@ -29,20 +29,23 @@ const CommonHeader: React.FC = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link to="/" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
-              Home
+              ホーム
             </Link>
             <Link to="/about" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
-              About
+              合理的配慮とは
             </Link>
             <Link to="/concept" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
-              Concept
+              理念と目指すもの
             </Link>
             <Link to="/app" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
-              App
+              アプリを試す
             </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
-              Contact
-            </Link>
+        <Link to="/contact" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
+          お問い合わせ
+        </Link>
+        <Link to="/developer" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
+          開発者紹介
+        </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -88,7 +91,7 @@ const CommonHeader: React.FC = () => {
                     className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
                   >
                     <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
-                    Home
+                    ホーム
                   </Link>
                   <Link 
                     to="/about" 
@@ -96,7 +99,7 @@ const CommonHeader: React.FC = () => {
                     className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
                   >
                     <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
-                    About
+                    合理的配慮とは
                   </Link>
                   <Link 
                     to="/concept" 
@@ -104,7 +107,7 @@ const CommonHeader: React.FC = () => {
                     className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
                   >
                     <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
-                    Concept
+                    理念と目指すもの
                   </Link>
                   <Link 
                     to="/app" 
@@ -112,16 +115,24 @@ const CommonHeader: React.FC = () => {
                     className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
                   >
                     <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
-                    App
+                    アプリを試す
                   </Link>
-                  <Link 
-                    to="/contact" 
-                    onClick={closeMobileMenu}
-                    className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
-                  >
-                    <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
-                    Contact
-                  </Link>
+         <Link 
+           to="/contact" 
+           onClick={closeMobileMenu}
+           className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
+         >
+           <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
+           お問い合わせ
+         </Link>
+         <Link 
+           to="/developer" 
+           onClick={closeMobileMenu}
+           className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
+         >
+           <span className="w-2 h-2 bg-gray-300 rounded-full mr-3 group-hover:bg-teal-500 transition-colors duration-200"></span>
+           開発者紹介
+         </Link>
                 </nav>
 
                 {/* Mobile Menu Footer */}

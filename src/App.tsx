@@ -9,6 +9,7 @@ import LandingPage from './components/pages/LandingPage';
 import AboutPage from './components/pages/AboutPage';
 import ContactPage from './components/pages/ContactPage';
 import ConceptPage from './components/pages/ConceptPage';
+import Developer from './components/pages/Developer';
 import PrivacyPage from './components/pages/PrivacyPage';
 import TermsPage from './components/pages/TermsPage';
 import { useIsMobile } from './hooks/useIsMobile';
@@ -247,6 +248,7 @@ function AppContent({ isMobile, hasStarted, onStart }: { isMobile: boolean; hasS
       {/* その他のページ */}
       <Route path="/about" element={<AboutPage />} />
       <Route path="/concept" element={<ConceptPage />} />
+      <Route path="/developer" element={<Developer />} />
       <Route path="/blog" element={<div className="min-h-screen bg-white p-8"><h1 className="text-2xl">Blog Page</h1></div>} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
