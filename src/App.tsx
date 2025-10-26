@@ -16,10 +16,7 @@ import { useIsMobile } from './hooks/useIsMobile';
 
 function App() {
   const isMobile = useIsMobile();
-  const [hasStarted, setHasStarted] = useState(() => {
-    // リロード時にlocalStorageから状態を復元
-    return localStorage.getItem('hasStarted') === 'true';
-  });
+  const [hasStarted, setHasStarted] = useState(false);
 
   const handleAccommodationComplete = (accommodations: string[]) => {
     console.log('Accommodations:', accommodations);
@@ -27,7 +24,6 @@ function App() {
 
   const handleStart = () => {
     setHasStarted(true);
-    localStorage.setItem('hasStarted', 'true');
   };
 
   return (
