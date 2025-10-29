@@ -1544,7 +1544,7 @@ const styles = StyleSheet.create({
                                 <div className="flex flex-col">
                                   {/* ヘッダー部分 */}
                                   <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                       <input
                                         type="radio"
                                         name={`mobile-accommodation-${item.id}`}
@@ -1554,16 +1554,12 @@ const styles = StyleSheet.create({
                                          className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
                                          onClick={(e) => e.stopPropagation()}
                                        />
-                                       <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
-                                         配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
-                                       </span>
+                                       {/* 配慮タイトル */}
+                                       <h5 className="text-gray-800 font-medium text-base leading-tight">
+                                         {acc['配慮案タイトル'] || acc.description}
+                                       </h5>
                                      </div>
                                    </div>
-                                   
-                                   {/* 配慮タイトル */}
-                                   <h5 className="text-gray-800 font-medium text-base leading-tight mb-3">
-                                     {acc['配慮案タイトル'] || acc.description}
-                                   </h5>
                                  
                                  {/* 配慮内容 */}
                                  <div className="mb-3">
@@ -1899,7 +1895,7 @@ const styles = StyleSheet.create({
                                 <div className="flex flex-col h-full">
                                   {/* ヘッダー部分 */}
                                   <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                       <input
                                         type="radio"
                                         name={`accommodation-${item.id}`}
@@ -1909,16 +1905,12 @@ const styles = StyleSheet.create({
                                          className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
                                          onClick={(e) => e.stopPropagation()}
                                        />
-                                       <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
-                                         配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
-                                       </span>
+                                       {/* 配慮タイトル */}
+                                       <h5 className="text-gray-800 font-medium text-base leading-tight">
+                                         {acc['配慮案タイトル'] || acc.description}
+                                       </h5>
                                      </div>
                                    </div>
-                                   
-                                   {/* 配慮タイトル */}
-                                   <h5 className="text-gray-800 font-medium text-base leading-tight mb-3">
-                                     {acc['配慮案タイトル'] || acc.description}
-                                   </h5>
                                  
                                  {/* 配慮内容 */}
                                  <div className="mb-3">
