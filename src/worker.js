@@ -66,6 +66,23 @@ export default {
         respHeaders.set('Cache-Control', 'public, max-age=86400, immutable');
       }
 
+      // Reactアプリの場合、レスポンス内の相対パスを修正
+      if (isApp) {
+        const contentType = respHeaders.get('content-type') || '';
+        if (contentType.includes('text/html') || contentType.includes('text/css') || contentType.includes('application/javascript')) {
+          let body = await upstreamResp.text();
+          
+          // /assets/ で始まるパスを app.inclusibridge.com に書き換え
+          body = body.replace(/\/assets\//g, `${env.ORIGIN_APP}/assets/`);
+          
+          return new Response(body, {
+            status: upstreamResp.status,
+            statusText: upstreamResp.statusText,
+            headers: respHeaders,
+          });
+        }
+      }
+
       return new Response(upstreamResp.body, {
         status: upstreamResp.status,
         statusText: upstreamResp.statusText,
