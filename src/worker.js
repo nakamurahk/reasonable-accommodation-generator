@@ -1,6 +1,8 @@
 /**
  * InclusiBridge Router - Cloudflare Worker (hardened)
  * - /app/* → React (ORIGIN_APP)
+ * - /step* → React (ORIGIN_APP) - アプリ内のステップページ
+ * - /deckbuilding → React (ORIGIN_APP) - アプリ内のデッキビルディングページ
  * - others → Next LP (ORIGIN_NEXT)
  *
  * Env:
@@ -12,7 +14,12 @@ export default {
   async fetch(request, env, ctx) {
     try {
       const url = new URL(request.url);
-      const isApp = url.pathname.startsWith('/app');
+      
+      // Reactアプリに送るパスの判定
+      const isApp = url.pathname.startsWith('/app') || 
+                   url.pathname.startsWith('/step') || 
+                   url.pathname.startsWith('/deckbuilding') ||
+                   url.pathname === '/app';
 
       const targetOrigin = new URL(isApp ? env.ORIGIN_APP : env.ORIGIN_NEXT);
       const targetUrl = new URL(url.pathname + url.search, targetOrigin);
