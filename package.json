@@ -30,7 +30,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start:react": "PORT=3001 POSTCSS_CONFIG=postcss.config.react.js react-scripts start",
-    "build": "react-scripts build",
+    "build": "POSTCSS_CONFIG=postcss.config.react.js react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "next dev",
