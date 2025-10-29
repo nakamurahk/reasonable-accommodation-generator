@@ -9,16 +9,16 @@ export interface SearchIndex {
   situations: Map<string, Set<string>>; // situation -> concern_ids
 }
 
-// 4分割JSON用のローダー関数（src/dataから直接import）
+// 4分割JSON用のローダー関数（src/data/userから直接import）
 export async function loadStore(): Promise<Store> {
   // console.log('=== データロード開始 ===');
   
-  // src/dataから直接import
+  // src/data/userから直接import
   const [concerns, cares, variants, bundles] = await Promise.all([
-    import('./concerns.json').then(m => m.default),
-    import('./cares.json').then(m => m.default),
-    import('./care_variants.json').then(m => m.default),
-    import('./bundles.json').then(m => m.default),
+    import('./user/concerns.json').then(m => m.default),
+    import('./user/cares.json').then(m => m.default),
+    import('./user/care_variants.json').then(m => m.default),
+    import('./user/bundles.json').then(m => m.default),
   ]);
 
   // console.log('生データ件数:', {
