@@ -21,6 +21,13 @@ export default {
                    url.pathname.startsWith('/deckbuilding') ||
                    url.pathname === '/app';
 
+      console.log('Request details:', { 
+        pathname: url.pathname, 
+        isApp, 
+        ORIGIN_APP: env.ORIGIN_APP, 
+        ORIGIN_NEXT: env.ORIGIN_NEXT 
+      });
+
       const targetOrigin = new URL(isApp ? env.ORIGIN_APP : env.ORIGIN_NEXT);
       
       // Reactアプリの場合、/appプレフィックスを削除
