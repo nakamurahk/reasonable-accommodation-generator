@@ -305,8 +305,8 @@ const AboutPage: React.FC = () => {
             <p className="text-xl text-white mb-8">
               InclusiBridgeは、当事者と支援者が対等に配慮を作り上げるツールです。
             </p>
-            <a 
-              href="http://localhost:3001/app" 
+            <a
+              href="/app"
               className="inline-block bg-white text-gray-800 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               ベータアプリを試す

@@ -37,7 +37,7 @@ const CommonHeaderNext: React.FC = () => {
             <Link href="/concept" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
               理念と目指すもの
             </Link>
-            <a href="http://localhost:3001/app" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
+            <a href="/app" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
               アプリを試す
             </a>
             <Link href="/contact" className="text-gray-700 hover:text-teal-600 transition-colors font-semibold">
@@ -110,7 +110,7 @@ const CommonHeaderNext: React.FC = () => {
                     理念と目指すもの
                   </Link>
                   <a 
-                    href="http://localhost:3001/app" 
+                    href="/app" 
                     onClick={closeMobileMenu}
                     className="flex items-center px-4 py-4 text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all duration-200 group"
                   >

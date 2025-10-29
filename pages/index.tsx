@@ -86,8 +86,8 @@ const HomePage: React.FC = () => {
                   animation: 'fadeInUp 1s ease-out 0.6s both'
                 }}
               >
-                <a 
-                  href="http://localhost:3001/app" 
+                <a
+                  href="/app"
                   className="bg-white text-teal-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   無料で使ってみる
@@ -186,8 +186,8 @@ const HomePage: React.FC = () => {
             <p className="text-xl text-teal-100 mb-8">
               無料で利用できるベータ版で、あなたの困りごとを整理してみませんか？
             </p>
-            <a 
-              href="http://localhost:3001/app" 
+            <a
+              href="/app"
               className="bg-white text-teal-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 hover:-translate-y-1 transition-all duration-200 shadow-md hover:shadow-2xl inline-block"
             >
               ベータアプリを試す
