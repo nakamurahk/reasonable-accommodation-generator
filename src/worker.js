@@ -1,0 +1,67 @@
+/**
+ * InclusiBridge Router - Cloudflare Worker (hardened)
+ * - /app/* → React (ORIGIN_APP)
+ * - others → Next LP (ORIGIN_NEXT)
+ *
+ * Env:
+ *   ORIGIN_APP  e.g. https://app.inclusibridge.com
+ *   ORIGIN_NEXT e.g. https://next.inclusibridge.com
+ */
+
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      const url = new URL(request.url);
+      const isApp = url.pathname.startsWith('/app');
+
+      const targetOrigin = new URL(isApp ? env.ORIGIN_APP : env.ORIGIN_NEXT);
+      const targetUrl = new URL(url.pathname + url.search, targetOrigin);
+
+      // 元リクエストからヘッダを複製。ただし hop-by-hop 系は落とす
+      const headers = new Headers(request.headers);
+      headers.delete('host');
+      headers.delete('connection');
+      headers.delete('keep-alive');
+      headers.delete('proxy-authenticate');
+      headers.delete('proxy-authorization');
+      headers.delete('te');
+      headers.delete('trailers');
+      headers.delete('transfer-encoding');
+      headers.delete('upgrade');
+
+      // GET/HEAD 以外のみ body を転送（ReadableStream は 1 回きり）
+      const method = request.method || 'GET';
+      const body = (method === 'GET' || method === 'HEAD') ? undefined : request.body;
+
+      // 軽いキャッシュ方針（静的アセットのみ）
+      const isStatic = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|mjs|txt|woff2?)$/i.test(url.pathname);
+
+      const upstreamResp = await fetch(new Request(targetUrl.toString(), {
+        method,
+        headers,
+        body,
+        redirect: 'manual', // 307/308 等はクライアント側に委ねる
+      }), {
+        cf: isStatic ? { cacheEverything: true, cacheTtl: 86400 } : undefined,
+      });
+
+      // レスポンスヘッダ調整（任意）
+      const respHeaders = new Headers(upstreamResp.headers);
+      if (isStatic && !respHeaders.has('Cache-Control')) {
+        respHeaders.set('Cache-Control', 'public, max-age=86400, immutable');
+      }
+
+      return new Response(upstreamResp.body, {
+        status: upstreamResp.status,
+        statusText: upstreamResp.statusText,
+        headers: respHeaders,
+      });
+    } catch (err) {
+      // 失敗時は 502 で可視化
+      return new Response(
+        JSON.stringify({ error: 'Upstream fetch failed', detail: String(err?.message || err) }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  },
+};

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SideNav from './components/layout/SideNav';
 import AccommodationGenerator from './components/AccommodationGenerator';
 import Header from './components/layout/Header';
@@ -34,36 +34,20 @@ function App() {
 }
 
 function AppContent({ isMobile, hasStarted, onStart }: { isMobile: boolean; hasStarted: boolean; onStart: () => void }) {
+  const navigate = useNavigate();
+
+  const handleStart = () => {
+    onStart();
+    navigate('/step1-1');
+  };
+
   return (
     <Routes>
       {/* ランディングページ */}
       <Route path="/" element={<LandingPage />} />
       
       {/* アプリページ */}
-      <Route path="/app" element={
-        hasStarted ? (
-          isMobile ? (
-            <div className="min-h-screen bg-sand">
-              <MobileHeaderWrapper />
-              <main>
-                <AccommodationGenerator />
-              </main>
-            </div>
-          ) : (
-            <div className="h-screen flex flex-col bg-sand">
-              <HeaderWrapper />
-              <div className="flex-1 flex overflow-hidden">
-                <SideNavWrapper />
-                <main className="flex-1 overflow-auto">
-                  <AccommodationGenerator />
-                </main>
-              </div>
-            </div>
-          )
-        ) : (
-          <StartPage onStart={onStart} />
-        )
-      } />
+      <Route path="/app" element={<StartPage onStart={handleStart} />} />
       
       {/* アプリのステップページ */}
       <Route path="/step1-1" element={

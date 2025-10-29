@@ -1,0 +1,17 @@
+name = "inclusibridge-router"
+main = "src/worker.js"
+compatibility_date = "2024-11-21"
+
+# 本番ルーティング（あなたのドメインに合わせて）
+routes = [
+  { pattern = "inclusibridge.com/*", zone_name = "inclusibridge.com" },
+  { pattern = "www.inclusibridge.com/*", zone_name = "inclusibridge.com" }
+]
+
+[vars]
+# 本番オリジン（推奨：サブドメインで分離）
+ORIGIN_NEXT = "https://next.inclusibridge.com"
+ORIGIN_APP  = "https://app.inclusibridge.com"
+
+# ローカル検証時は、以下を --var で上書き
+#   wrangler dev --var ORIGIN_NEXT=http://127.0.0.1:3000 --var ORIGIN_APP=http://127.0.0.1:3001
