@@ -312,6 +312,7 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
 
   const [base64Images, setBase64Images] = useState<{ [key: string]: string }>({});
   const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
+  const [showRecommendationReason, setShowRecommendationReason] = useState<{ difficultyId: string; accommodationId: string } | null>(null);
   
   // 困りごとの選択状態を切り替える関数
   const toggleDifficultySelection = (difficultyId: string) => {
@@ -1502,23 +1503,51 @@ const styles = StyleSheet.create({
                                  }`}
                                  onClick={() => setAccommodationSelection(item.id, accommodationId)}
                                >
-                                 {/* オススメバッジ - 右上に配置 */}
-                                 {isRecommended && (
-                                   <div 
-                                     className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-help"
-                                     title={topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                   >
-                                     ⭐オススメ
-                                   </div>
-                                 )}
-                                 
-                                 <div className="flex flex-col">
-                                   {/* ヘッダー部分 */}
-                                   <div className="flex items-start justify-between mb-3">
-                                     <div className="flex items-center gap-2">
-                                       <input
-                                         type="radio"
-                                         name={`mobile-accommodation-${item.id}`}
+                                {/* オススメバッジ - 右上に配置 */}
+                                {isRecommended && (
+                                  <div 
+                                    className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors z-10"
+                                    title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowRecommendationReason({ difficultyId: item.id, accommodationId });
+                                    }}
+                                  >
+                                    ⭐オススメ
+                                  </div>
+                                )}
+                                
+                                {/* オススメ理由ポップアップ - モバイル版 */}
+                                {showRecommendationReason?.difficultyId === item.id && 
+                                 showRecommendationReason?.accommodationId === accommodationId && (
+                                  <div 
+                                    className="absolute top-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-[80%] sm:hidden"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className="text-xs text-gray-700 leading-relaxed">
+                                        {topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                      </p>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowRecommendationReason(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="flex flex-col">
+                                  {/* ヘッダー部分 */}
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="radio"
+                                        name={`mobile-accommodation-${item.id}`}
                                          id={`mobile-accommodation-${item.id}-${accIdx}`}
                                          checked={isAccommodationSelected}
                                          onChange={() => setAccommodationSelection(item.id, accommodationId)}
@@ -1532,7 +1561,7 @@ const styles = StyleSheet.create({
                                    </div>
                                    
                                    {/* 配慮タイトル */}
-                                   <h5 className="text-gray-800 font-medium text-sm leading-tight mb-3">
+                                   <h5 className="text-gray-800 font-medium text-base leading-tight mb-3">
                                      {acc['配慮案タイトル'] || acc.description}
                                    </h5>
                                  
@@ -1829,23 +1858,51 @@ const styles = StyleSheet.create({
                                  }`}
                                  onClick={() => setAccommodationSelection(item.id, accommodationId)}
                                >
-                                 {/* オススメバッジ - 右上に配置 */}
-                                 {isRecommended && (
-                                   <div 
-                                     className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-help"
-                                     title={topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                   >
-                                     ⭐オススメ
-                                   </div>
-                                 )}
-                                 
-                                 <div className="flex flex-col h-full">
-                                   {/* ヘッダー部分 */}
-                                   <div className="flex items-start justify-between mb-3">
-                                     <div className="flex items-center gap-2">
-                                       <input
-                                         type="radio"
-                                         name={`accommodation-${item.id}`}
+                                {/* オススメバッジ - 右上に配置 */}
+                                {isRecommended && (
+                                  <div 
+                                    className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors z-10"
+                                    title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowRecommendationReason({ difficultyId: item.id, accommodationId });
+                                    }}
+                                  >
+                                    ⭐オススメ
+                                  </div>
+                                )}
+                                
+                                {/* オススメ理由ポップアップ - PC版 */}
+                                {showRecommendationReason?.difficultyId === item.id && 
+                                 showRecommendationReason?.accommodationId === accommodationId && (
+                                  <div 
+                                    className="absolute top-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-xs hidden sm:block"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className="text-xs text-gray-700 leading-relaxed">
+                                        {topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                      </p>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowRecommendationReason(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="flex flex-col h-full">
+                                  {/* ヘッダー部分 */}
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="radio"
+                                        name={`accommodation-${item.id}`}
                                          id={`accommodation-${item.id}-${accIdx}`}
                                          checked={isAccommodationSelected}
                                          onChange={() => setAccommodationSelection(item.id, accommodationId)}
@@ -1859,7 +1916,7 @@ const styles = StyleSheet.create({
                                    </div>
                                    
                                    {/* 配慮タイトル */}
-                                   <h5 className="text-gray-800 font-medium text-sm leading-tight mb-3">
+                                   <h5 className="text-gray-800 font-medium text-base leading-tight mb-3">
                                      {acc['配慮案タイトル'] || acc.description}
                                    </h5>
                                  

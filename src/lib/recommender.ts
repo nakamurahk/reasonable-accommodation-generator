@@ -184,11 +184,11 @@ export function recommend(
     // クリッピング
     score = clamp01(score);
 
-    // バッジ（タグとして使用）- 表示順：コスト、難易度、効果、法的根拠、頼みやすさ
+    // バッジ（タグとして使用）- 表示順：コスト、難易度、法的根拠、頼みやすさ（効果は非表示）
     const badges: string[] = [];
     if (t.cost) badges.push(`💰コスト：${t.cost}`);
     if (t.difficulty) badges.push(`⚡難易度：${t.difficulty}`);
-    if (t.effect) badges.push(`🌱効果：${t.effect}`);
+    // if (t.effect) badges.push(`🌱効果：${t.effect}`); // 効果バッジは非表示
     if (t.legal) badges.push(`⚖️法的根拠：${t.legal}`);
     if (t.psychological) badges.push(`💬頼みやすさ：${t.psychological}`);
    
