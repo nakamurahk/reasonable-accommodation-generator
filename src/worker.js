@@ -22,7 +22,15 @@ export default {
                    url.pathname === '/app';
 
       const targetOrigin = new URL(isApp ? env.ORIGIN_APP : env.ORIGIN_NEXT);
-      const targetUrl = new URL(url.pathname + url.search, targetOrigin);
+      
+      // Reactアプリの場合、/appプレフィックスを削除
+      let targetPath = url.pathname;
+      if (isApp && targetPath.startsWith('/app')) {
+        targetPath = targetPath.substring(4); // '/app'を削除
+        if (targetPath === '') targetPath = '/'; // 空の場合はルートに
+      }
+      
+      const targetUrl = new URL(targetPath + url.search, targetOrigin);
 
       // 元リクエストからヘッダを複製。ただし hop-by-hop 系は落とす
       const headers = new Headers(request.headers);
