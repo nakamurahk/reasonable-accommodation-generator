@@ -39,7 +39,7 @@
     "export": "next export",
     "start:next": "next start",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "build:static": "npm run generate-sitemap && next build && next export",
+    "build:static": "npm run generate-sitemap && next build",
     "worker:dev": "wrangler dev --var ORIGIN_NEXT=http://127.0.0.1:3000 --var ORIGIN_APP=http://127.0.0.1:3001",
     "worker:deploy": "wrangler deploy",
     "dev:full": "concurrently \"npm run dev\" \"npm run start:react\" \"npm run worker:dev\""
