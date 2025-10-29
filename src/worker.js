@@ -69,12 +69,17 @@ export default {
       // Reactアプリの場合、レスポンス内の相対パスを修正
       if (isApp) {
         const contentType = respHeaders.get('content-type') || '';
+        console.log('Processing React app response:', { contentType, isApp, targetUrl: targetUrl.toString() });
+        
         if (contentType.includes('text/html') || contentType.includes('text/css') || contentType.includes('application/javascript')) {
           let body = await upstreamResp.text();
+          console.log('Original body contains /static/:', body.includes('/static/'));
           
           // 相対パスを app.inclusibridge.com に書き換え
           body = body.replace(/\/static\//g, `${env.ORIGIN_APP}/static/`);
           body = body.replace(/\/assets\//g, `${env.ORIGIN_APP}/assets/`);
+          
+          console.log('Modified body contains app.inclusibridge.com:', body.includes('app.inclusibridge.com'));
           
           return new Response(body, {
             status: upstreamResp.status,
