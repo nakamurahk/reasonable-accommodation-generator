@@ -10,6 +10,8 @@ import { ViewModel } from '../../types/newDataStructure';
 import { Domain as NewDomain } from '../../types/newDataStructure';
 import StepFooter from '../layout/StepFooter';
 import { logPromptGeneration, logSelection } from '../../lib/analytics';
+import supportTags from '../../data/supporter/support_tags.json';
+import { recommend, Accommodation, ScoredResult } from '../../lib/recommender';
 
 // PDF関連の動的インポート
 let PDFComponents: any = null;
@@ -93,6 +95,96 @@ const points = [
   'その場で即決しない：「持ち帰って検討します」と伝える',
 ];
 
+// support_tags.jsonから属性タグを取得する関数
+  const getSupportTags = (careId: string) => {
+    const supportTag = supportTags.items.find((item: any) => item.care_id === careId);
+    if (supportTag) {
+      // コストレベルを短縮形に変換
+      const costLevelMap: { [key: string]: string } = {
+        '低コスト': '低',
+        '中コスト': '中',
+        '高コスト': '高'
+      };
+      return {
+        ...supportTag,
+        cost_level: costLevelMap[supportTag.cost_level] || supportTag.cost_level
+      };
+    }
+    return null;
+  };
+
+  // 推薦ロジック用のヘルパー関数
+  const convertToAccommodation = (acc: any, accIdx: number): Accommodation => {
+    const supportTag = getSupportTags(acc.id);
+    return {
+      id: acc.id,
+      label: `配慮案${ACC_LABELS[accIdx % ACC_LABELS.length]}`,
+      title: acc['配慮案タイトル'] || acc.description || '',
+      tags: {
+        cost: supportTag?.cost_level as any,
+        difficulty: supportTag?.difficulty_level as any,
+        legal: supportTag?.legal_basis === '努力義務' ? '努力義務' : 
+               supportTag?.legal_basis === '任意配慮' ? '任意' : '任意',
+        psychological: supportTag?.psychological_cost_level === '低' ? '高' :
+                      supportTag?.psychological_cost_level === '中' ? '中' : '低',
+        effect: supportTag?.effects?.immediacy === '即効' ? '即効性' : '持続性',
+        leadTimeDays: supportTag?.lead_time === '即時' ? 0 : 
+                     supportTag?.lead_time === '短期' ? 7 : 30,
+        upkeepHoursPerMonth: supportTag?.ongoing_effort === '運用工数低' ? 1 :
+                            supportTag?.ongoing_effort === '運用工数中' ? 4 : 8,
+        stakeholders: supportTag?.people_involved === '少数' ? 2 :
+                     supportTag?.people_involved === '中程度' ? 5 : 10,
+        expertise: supportTag?.expertise_level === 'なし' ? '低' :
+                   supportTag?.expertise_level === '基本研修' ? '中' :
+                   supportTag?.expertise_level === 'IT基本' ? '中' :
+                   supportTag?.expertise_level === 'マネジメント' ? '高' : '低'
+      }
+    };
+  };
+
+  // 推薦結果を取得
+  const getRecommendations = (accommodations: any[]): ScoredResult[] => {
+    const accommodationItems = accommodations.map((acc, idx) => convertToAccommodation(acc, idx));
+    const results = recommend(accommodationItems);
+    
+    // デバッグ用：各配慮案の重みづけ詳細をコンソールに出力
+    console.log('=== 配慮案の重みづけデバッグ情報 ===');
+    results.forEach((rec, index) => {
+      console.log(`\n【配慮案${index + 1}】${rec.title} (${rec.label})`);
+      console.log('最終スコア:', rec.score.toFixed(4));
+      console.log('バッジ:', rec.badges);
+      console.log('理由:', rec.reason);
+      
+      // 各項目のスコア詳細
+      if (rec.debug) {
+        console.log('各項目スコア:');
+        console.log(`  💰コスト: ${rec.debug.s_cost?.toFixed(4) || 'N/A'}`);
+        console.log(`  ⚡難易度: ${rec.debug.s_diff?.toFixed(4) || 'N/A'}`);
+        console.log(`  💬心理的負担: ${rec.debug.s_psy?.toFixed(4) || 'N/A'}`);
+        console.log(`  🌱効果: ${rec.debug.s_eff?.toFixed(4) || 'N/A'}`);
+        console.log(`  ⚖️法的根拠: ${rec.debug.s_legal?.toFixed(4) || 'N/A'}`);
+        console.log(`  ⏰リードタイム: ${rec.debug.s_lead?.toFixed(4) || 'N/A'}`);
+        console.log(`  🔧維持管理: ${rec.debug.s_keep?.toFixed(4) || 'N/A'}`);
+        console.log(`  👥関係者数: ${rec.debug.s_people?.toFixed(4) || 'N/A'}`);
+        console.log(`  🎓専門性: ${rec.debug.s_expt?.toFixed(4) || 'N/A'}`);
+        
+        if (rec.debug.weights) {
+          console.log('重み係数:');
+          Object.entries(rec.debug.weights).forEach(([key, value]) => {
+            console.log(`  ${key}: ${(value as number).toFixed(4)}`);
+          });
+        }
+        
+        if (rec.debug.raw_tags) {
+          console.log('元のタグデータ:', rec.debug.raw_tags);
+        }
+      }
+    });
+    console.log('=====================================\n');
+    
+    return results;
+  };
+
 // 配慮案抽出関数（新データ構造のみ）
 const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null | undefined, selectedDomain: Domain | null, reconstructedViewModel?: ViewModel | null) => {
   // console.log('getAccommodations called with:', { difficultyTitle, viewModel, selectedDomain });
@@ -107,8 +199,16 @@ const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null 
   
   const domain = getDomainFromName(selectedDomain.name);
   const accommodations = getAccommodationsFromViewModel(effectiveViewModel, difficultyTitle, domain);
-  // console.log('getAccommodations - found accommodations:', accommodations);
-  return accommodations;
+  
+  // care_idの若い順（A、B、C）にソート
+  const sortedAccommodations = accommodations.sort((a: any, b: any) => {
+    const aId = parseInt(a.id?.replace('care_', '') || '0');
+    const bId = parseInt(b.id?.replace('care_', '') || '0');
+    return aId - bId;
+  });
+  
+  // console.log('getAccommodations - found accommodations:', sortedAccommodations);
+  return sortedAccommodations;
 };
 
 
@@ -765,11 +865,11 @@ const styles = StyleSheet.create({
           fontSize: 11,
     fontWeight: 'bold',
           color: '#6b7280',
-          marginBottom: 4,
-          fontFamily: 'NotoSansJP',
-        },
+    marginBottom: 4,
+    fontFamily: 'NotoSansJP',
+  },
         accommodationText: {
-          fontSize: 12,
+    fontSize: 12,
     color: '#374151',
           lineHeight: 1.4,
           fontFamily: 'NotoSansJP',
@@ -782,8 +882,8 @@ const styles = StyleSheet.create({
           borderColor: '#e5e7eb',
         },
         exampleLabel: {
-          fontSize: 10,
-          color: '#6b7280',
+    fontSize: 10,
+    color: '#6b7280',
           fontWeight: 'bold',
           marginBottom: 4,
           fontFamily: 'NotoSansJP',
@@ -811,7 +911,7 @@ const styles = StyleSheet.create({
           paddingLeft: 12,
           borderLeftWidth: 3,
           borderLeftColor: '#d1d5db',
-          backgroundColor: '#f9fafb',
+    backgroundColor: '#f9fafb',
           padding: 8,
           borderRadius: 4,
         },
@@ -823,8 +923,8 @@ const styles = StyleSheet.create({
         },
         pointsSection: {
           marginTop: 20,
-          marginBottom: 20,
-        },
+    marginBottom: 20,
+  },
         pointsHeader: {
           backgroundColor: '#14b8a6',
           padding: 12,
@@ -833,7 +933,7 @@ const styles = StyleSheet.create({
         },
         pointsTitle: {
           fontSize: 16,
-          fontWeight: 'bold',
+    fontWeight: 'bold',
           color: '#ffffff',
           textAlign: 'center',
           fontFamily: 'NotoSansJP',
@@ -844,8 +944,8 @@ const styles = StyleSheet.create({
           borderColor: '#14b8a6',
           borderRadius: 8,
           padding: 16,
-        },
-        pointItem: {
+  },
+  pointItem: {
           marginBottom: 8,
         },
         pointText: {
@@ -870,7 +970,7 @@ const styles = StyleSheet.create({
           fontFamily: 'NotoSansJP',
         },
         headerRight: {
-          fontSize: 12,
+    fontSize: 12,
           color: '#6b7280',
           fontFamily: 'NotoSansJP',
         },
@@ -915,8 +1015,8 @@ const styles = StyleSheet.create({
           padding: 8,
           textAlign: 'center',
           marginBottom: 12,
-          fontFamily: 'NotoSansJP',
-        },
+    fontFamily: 'NotoSansJP',
+  },
 });
 
       const today = new Date();
@@ -987,7 +1087,7 @@ const styles = StyleSheet.create({
                 </View>
           </View>
         ))}
-            </View>
+      </View>
             <View style={styles.pointsSection}>
               <View style={styles.pointsHeader}>
                 <Text style={styles.pointsTitle}>合意形成・調整のポイント</Text>
@@ -1007,7 +1107,7 @@ const styles = StyleSheet.create({
               <Text style={styles.footerRight}>
                 InclusiBridge © 2025
               </Text>
-            </View>
+      </View>
     </Page>
   </Document>
 );
@@ -1325,6 +1425,18 @@ const styles = StyleSheet.create({
                 transform: scale(1.02);
               }
             }
+            .line-clamp-2 {
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            .line-clamp-3 {
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
           `
         }} />
         {renderModal()}
@@ -1364,63 +1476,106 @@ const styles = StyleSheet.create({
                   </div>
                 </div>
                 
-                {/* 配慮案の選択 */}
+                {/* 配慮案の選択 - モバイル版は縦並びカード形式 */}
                 {(
                   <div className="p-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
-                    <div className="space-y-3">
-                      {accommodations.map((acc: any, accIdx: number) => {
-                        const accommodationId = String(accIdx);
-                        const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
-                        
-                        return (
-                          <div key={accIdx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                            <div className="flex items-start gap-3">
-                              <input
-                                type="radio"
-                                name={`mobile-accommodation-${item.id}`}
-                                id={`mobile-accommodation-${item.id}-${accIdx}`}
-                                checked={isAccommodationSelected}
-                                onChange={() => setAccommodationSelection(item.id, accommodationId)}
-                                className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
-                              />
-                              <label htmlFor={`mobile-accommodation-${item.id}-${accIdx}`} className="flex-1 cursor-pointer">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
-                                        配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
-                                      </span>
-                                      <span className="text-gray-800 font-medium">
-                                        {acc['配慮案タイトル'] || acc.description}
-                                      </span>
-                                    </div>
-                                    {acc.bullets && acc.bullets.length > 0 && (
-                                      <ul className="ml-4 space-y-1">
-                                        {acc.bullets.map((bullet: string, bulletIdx: number) => (
-                                          <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
-                                            {bullet}
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-                                  </div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
-                                    }}
-                                    className="ml-3 text-teal hover:text-teal-800 text-lg transition-colors flex-shrink-0"
-                                    title="具体的な配慮案を表示"
-                                  >
-                                    ▶
-                                  </button>
-                                </div>
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="space-y-4">
+                         {(() => {
+                           // 推薦結果を取得
+                           const recommendations = getRecommendations(accommodations);
+                           const topRecommendation = recommendations[0];
+                           
+                           return accommodations.map((acc: any, accIdx: number) => {
+                             const accommodationId = String(accIdx);
+                             const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
+                             const supportTag = getSupportTags(acc.id);
+                             const isRecommended = topRecommendation && topRecommendation.id === acc.id;
+                             
+                             return (
+                               <div 
+                                 key={accIdx} 
+                                 className={`relative border-2 rounded-lg p-4 transition-all duration-200 cursor-pointer ${
+                                   isAccommodationSelected 
+                                     ? 'border-teal-500 bg-teal-50 shadow-md' 
+                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                                 }`}
+                                 onClick={() => setAccommodationSelection(item.id, accommodationId)}
+                               >
+                                 {/* オススメバッジ - 右上に配置 */}
+                                 {isRecommended && (
+                                   <div 
+                                     className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-help"
+                                     title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                   >
+                                     ⭐オススメ
+                                   </div>
+                                 )}
+                                 
+                                 <div className="flex flex-col">
+                                   {/* ヘッダー部分 */}
+                                   <div className="flex items-start justify-between mb-3">
+                                     <div className="flex items-center gap-2">
+                                       <input
+                                         type="radio"
+                                         name={`mobile-accommodation-${item.id}`}
+                                         id={`mobile-accommodation-${item.id}-${accIdx}`}
+                                         checked={isAccommodationSelected}
+                                         onChange={() => setAccommodationSelection(item.id, accommodationId)}
+                                         className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
+                                         onClick={(e) => e.stopPropagation()}
+                                       />
+                                       <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
+                                         配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
+                                       </span>
+                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
+                                         {acc['配慮案タイトル'] || acc.description}
+                                       </h5>
+                                     </div>
+                                   </div>
+                                 
+                                 {/* 配慮内容 */}
+                                 <div className="mb-3">
+                                   {/* 配慮内容（短縮版） */}
+                                   {acc.bullets && acc.bullets.length > 0 && (
+                                     <p className="text-xs text-gray-600 line-clamp-2">
+                                       {acc.bullets[0]}
+                                     </p>
+                                   )}
+                                 </div>
+                                 
+                                 {/* バッジ（推薦結果から取得） */}
+                                 {(() => {
+                                   const recommendations = getRecommendations(accommodations);
+                                   const currentRec = recommendations.find(rec => rec.id === acc.id);
+                                   return currentRec && currentRec.badges && currentRec.badges.length > 0 ? (
+                                     <div className="flex flex-wrap gap-1 mb-3">
+                                       {currentRec.badges.map((badge, badgeIdx) => (
+                                         <span key={badgeIdx} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                           {badge}
+                                         </span>
+                                       ))}
+                                     </div>
+                                   ) : null;
+                                 })()}
+                                 
+                                 {/* 詳細を見るボタン */}
+                                 <button
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                   }}
+                                   className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1 self-start"
+                                   title="具体的な配慮案を表示"
+                                 >
+                                   詳細を見る　＞
+                                 </button>
+                               </div>
+                             </div>
+                           );
+                         });
+                       })()}
                     </div>
                   </div>
                 )}
@@ -1588,6 +1743,18 @@ const styles = StyleSheet.create({
               transform: scale(1.02);
             }
           }
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
         `
       }} />
       {renderModal()}
@@ -1634,62 +1801,110 @@ const styles = StyleSheet.create({
                     )}
                   </div>
                   
-                  {/* 配慮案の選択 */}
+                  {/* 配慮案の選択 - PC版は横並びカード形式 */}
                   {(
                     <div className="ml-8 border-l-2 border-gray-200 pl-4">
                       <h4 className="text-sm font-medium text-gray-700 mb-3">配慮案から1つを選択してください</h4>
-                      <ul className="space-y-3">
-                        {accommodations.map((acc: any, accIdx: number) => {
-                          const accommodationId = String(accIdx);
-                          const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
-                          
-                          return (
-                            <li key={accIdx} className="relative">
-                              <div className="flex items-start gap-3">
-                                <input
-                                  type="radio"
-                                  name={`accommodation-${item.id}`}
-                                  id={`accommodation-${item.id}-${accIdx}`}
-                                  checked={isAccommodationSelected}
-                                  onChange={() => setAccommodationSelection(item.id, accommodationId)}
-                                  className="w-4 h-4 text-teal border-gray-300 focus:ring-teal mt-1"
-                                />
-                                <label htmlFor={`accommodation-${item.id}-${accIdx}`} className="flex-1 cursor-pointer">
-                                  <div className="flex items-center">
-                                    <span className="text-gray-700 font-medium flex-shrink-0 whitespace-nowrap mr-2">
-                                      配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}:
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         {(() => {
+                           // 推薦結果を取得
+                           const recommendations = getRecommendations(accommodations);
+                           const topRecommendation = recommendations[0];
+                           
+                           return accommodations.map((acc: any, accIdx: number) => {
+                             const accommodationId = String(accIdx);
+                             const isAccommodationSelected = selectedItems.accommodations[item.id]?.includes(accommodationId) || false;
+                             const supportTag = getSupportTags(acc.id);
+                             const isRecommended = topRecommendation && topRecommendation.id === acc.id;
+                             
+                             return (
+                               <div 
+                                 key={accIdx} 
+                                 className={`relative border-2 rounded-lg p-4 transition-all duration-200 cursor-pointer ${
+                                   isAccommodationSelected 
+                                     ? 'border-teal-500 bg-teal-50 shadow-md' 
+                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                                 }`}
+                                 onClick={() => setAccommodationSelection(item.id, accommodationId)}
+                               >
+                                 {/* オススメバッジ - 右上に配置 */}
+                                 {isRecommended && (
+                                   <div 
+                                     className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-help"
+                                     title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                   >
+                                     ⭐オススメ
+                                   </div>
+                                 )}
+                                 
+                                 <div className="flex flex-col h-full">
+                                   {/* ヘッダー部分 */}
+                                   <div className="flex items-start justify-between mb-3">
+                                     <div className="flex items-center gap-2">
+                                       <input
+                                         type="radio"
+                                         name={`accommodation-${item.id}`}
+                                         id={`accommodation-${item.id}-${accIdx}`}
+                                         checked={isAccommodationSelected}
+                                         onChange={() => setAccommodationSelection(item.id, accommodationId)}
+                                         className="w-4 h-4 text-teal border-gray-300 focus:ring-teal"
+                                         onClick={(e) => e.stopPropagation()}
+                                       />
+                                       <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
+                                         配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
+                  </span>
+                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
+                                         {acc['配慮案タイトル'] || acc.description}
+                                       </h5>
+                </div>
+                                   </div>
+                                 
+                                 {/* 配慮内容 */}
+                                 <div className="mb-3">
+                                   {/* 配慮内容（短縮版） */}
+                                   {acc.bullets && acc.bullets.length > 0 && (
+                                     <p className="text-xs text-gray-600 line-clamp-2">
+                                       {acc.bullets[0]}
+                                     </p>
+                                   )}
+                                 </div>
+                                 
+                                 {/* バッジ（推薦結果から取得） */}
+                                 {(() => {
+                                   const recommendations = getRecommendations(accommodations);
+                                   const currentRec = recommendations.find(rec => rec.id === acc.id);
+                                   return currentRec && currentRec.badges && currentRec.badges.length > 0 ? (
+                                     <div className="flex flex-wrap gap-1 mb-3">
+                                       {currentRec.badges.map((badge, badgeIdx) => (
+                                         <span key={badgeIdx} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                           {badge}
                       </span>
-                                    <span className="text-gray-700">{acc['配慮案タイトル'] || acc.description}</span>
-                                    <button
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
-                                      }}
-                                      className="ml-3 text-teal hover:text-teal-800 text-lg transition-colors flex-shrink-0"
-                                      title="具体的な配慮案を表示"
-                                    >
-                                      ▶
-                                    </button>
-                                  </div>
-                                  {/* 新しいデータ構造のbulletsを箇条書きで表示 */}
-                                  {acc.bullets && acc.bullets.length > 0 && (
-                                    <ul className="mt-2 ml-4 space-y-1">
-                                      {acc.bullets.map((bullet: string, bulletIdx: number) => (
-                                        <li key={bulletIdx} className="text-sm text-gray-600 list-disc">
-                                          {bullet}
-                    </li>
-                  ))}
-                </ul>
-                                  )}
-                                </label>
-                              </div>
-              </li>
-                          );
-                        })}
-          </ul>
-        </div>
+                                       ))}
+                                     </div>
+                                   ) : null;
+                                 })()}
+                                 
+                                 {/* 詳細を見るボタン */}
+                                 <button
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                   }}
+                                   className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1 self-start"
+                                   title="具体的な配慮案を表示"
+                                 >
+                                   詳細を見る　＞
+                                 </button>
+                               </div>
+                             </div>
+                           );
+                         });
+                       })()}
+                      </div>
+                    </div>
                   )}
-                </li>
+              </li>
               );
             })}
           </ul>
@@ -1782,9 +1997,9 @@ const styles = StyleSheet.create({
                   </span>
                 </div>
               </li>
-            </ul>
-          </div>
+          </ul>
         </div>
+      </div>
         
       </div>
       <div className="mt-10 flex flex-wrap gap-4 mb-8 justify-center">
