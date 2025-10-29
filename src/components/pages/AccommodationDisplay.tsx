@@ -1503,43 +1503,6 @@ const styles = StyleSheet.create({
                                  }`}
                                  onClick={() => setAccommodationSelection(item.id, accommodationId)}
                                >
-                                {/* オススメバッジ - 右上に配置 */}
-                                {isRecommended && (
-                                  <div 
-                                    className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors z-10"
-                                    title={topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setShowRecommendationReason({ difficultyId: item.id, accommodationId });
-                                    }}
-                                  >
-                                    ⭐オススメ
-                                  </div>
-                                )}
-                                
-                                {/* オススメ理由ポップアップ - モバイル版 */}
-                                {showRecommendationReason?.difficultyId === item.id && 
-                                 showRecommendationReason?.accommodationId === accommodationId && (
-                                  <div 
-                                    className="absolute top-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-[80%] sm:hidden"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <p className="text-xs text-gray-700 leading-relaxed">
-                                        {topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                      </p>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setShowRecommendationReason(null);
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600 text-sm font-bold"
-                                      >
-                                        ×
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
                                 
                                 <div className="flex flex-col">
                                   {/* ヘッダー部分 */}
@@ -1586,18 +1549,58 @@ const styles = StyleSheet.create({
                                    ) : null;
                                  })()}
                                  
-                                 {/* 詳細を見るボタン */}
-                                 <button
-                                   onClick={(e) => {
-                                     e.preventDefault();
-                                     e.stopPropagation();
-                                     openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
-                                   }}
-                                   className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1 self-start"
-                                   title="具体的な配慮案を表示"
-                                 >
-                                   詳細を見る　＞
-                                 </button>
+                                 {/* 詳細を見るボタンとオススメバッジ */}
+                                 <div className="flex items-center justify-between">
+                                   <button
+                                     onClick={(e) => {
+                                       e.preventDefault();
+                                       e.stopPropagation();
+                                       openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                     }}
+                                     className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1"
+                                     title="具体的な配慮案を表示"
+                                   >
+                                     詳細を見る　＞
+                                   </button>
+                                   
+                                   {/* オススメバッジ - 右下に配置 */}
+                                   {isRecommended && (
+                                     <div 
+                                       className="text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors"
+                                       title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         setShowRecommendationReason({ difficultyId: item.id, accommodationId });
+                                       }}
+                                     >
+                                       ⭐オススメ
+                                     </div>
+                                   )}
+                                 </div>
+                                 
+                                 {/* オススメ理由ポップアップ - モバイル版 */}
+                                 {showRecommendationReason?.difficultyId === item.id && 
+                                  showRecommendationReason?.accommodationId === accommodationId && (
+                                   <div 
+                                     className="absolute bottom-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-[80%] sm:hidden"
+                                     onClick={(e) => e.stopPropagation()}
+                                   >
+                                     <div className="flex items-start justify-between gap-2">
+                                       <p className="text-xs text-gray-700 leading-relaxed">
+                                         {topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                       </p>
+                                       <button
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           setShowRecommendationReason(null);
+                                         }}
+                                         className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+                                       >
+                                         ×
+                                       </button>
+                                     </div>
+                                   </div>
+                                 )}
                                </div>
                              </div>
                            );
@@ -1854,43 +1857,6 @@ const styles = StyleSheet.create({
                                  }`}
                                  onClick={() => setAccommodationSelection(item.id, accommodationId)}
                                >
-                                {/* オススメバッジ - 右上に配置 */}
-                                {isRecommended && (
-                                  <div 
-                                    className="absolute top-2 right-2 text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors z-10"
-                                    title={topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setShowRecommendationReason({ difficultyId: item.id, accommodationId });
-                                    }}
-                                  >
-                                    ⭐オススメ
-                                  </div>
-                                )}
-                                
-                                {/* オススメ理由ポップアップ - PC版 */}
-                                {showRecommendationReason?.difficultyId === item.id && 
-                                 showRecommendationReason?.accommodationId === accommodationId && (
-                                  <div 
-                                    className="absolute top-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-xs hidden sm:block"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <p className="text-xs text-gray-700 leading-relaxed">
-                                        {topRecommendation?.reason || 'この配慮案がおすすめです'}
-                                      </p>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setShowRecommendationReason(null);
-                                        }}
-                                        className="text-gray-400 hover:text-gray-600 text-sm font-bold"
-                                      >
-                                        ×
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
                                 
                                 <div className="flex flex-col h-full">
                                   {/* ヘッダー部分 */}
@@ -1937,18 +1903,58 @@ const styles = StyleSheet.create({
                                    ) : null;
                                  })()}
                                  
-                                 {/* 詳細を見るボタン */}
-                                 <button
-                                   onClick={(e) => {
-                                     e.preventDefault();
-                                     e.stopPropagation();
-                                     openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
-                                   }}
-                                   className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1 self-start"
-                                   title="具体的な配慮案を表示"
-                                 >
-                                   詳細を見る　＞
-                                 </button>
+                                 {/* 詳細を見るボタンとオススメバッジ */}
+                                 <div className="flex items-center justify-between">
+                                   <button
+                                     onClick={(e) => {
+                                       e.preventDefault();
+                                       e.stopPropagation();
+                                       openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                     }}
+                                     className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1"
+                                     title="具体的な配慮案を表示"
+                                   >
+                                     詳細を見る　＞
+                                   </button>
+                                   
+                                   {/* オススメバッジ - 右下に配置 */}
+                                   {isRecommended && (
+                                     <div 
+                                       className="text-yellow-600 text-sm font-bold cursor-pointer hover:text-yellow-700 transition-colors"
+                                       title={topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         setShowRecommendationReason({ difficultyId: item.id, accommodationId });
+                                       }}
+                                     >
+                                       ⭐オススメ
+                                     </div>
+                                   )}
+                                 </div>
+                                 
+                                 {/* オススメ理由ポップアップ - PC版 */}
+                                 {showRecommendationReason?.difficultyId === item.id && 
+                                  showRecommendationReason?.accommodationId === accommodationId && (
+                                   <div 
+                                     className="absolute bottom-12 right-2 bg-white border-2 border-yellow-300 rounded-lg shadow-lg p-3 z-20 max-w-xs hidden sm:block"
+                                     onClick={(e) => e.stopPropagation()}
+                                   >
+                                     <div className="flex items-start justify-between gap-2">
+                                       <p className="text-xs text-gray-700 leading-relaxed">
+                                         {topRecommendation?.reason || 'この配慮案がおすすめです'}
+                                       </p>
+                                       <button
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           setShowRecommendationReason(null);
+                                         }}
+                                         className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+                                       >
+                                         ×
+                                       </button>
+                                     </div>
+                                   </div>
+                                 )}
                                </div>
                              </div>
                            );
