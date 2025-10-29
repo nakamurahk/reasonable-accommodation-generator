@@ -25,7 +25,8 @@ export default {
         pathname: url.pathname, 
         isApp, 
         ORIGIN_APP: env.ORIGIN_APP, 
-        ORIGIN_NEXT: env.ORIGIN_NEXT 
+        ORIGIN_NEXT: env.ORIGIN_NEXT,
+        fullUrl: request.url
       });
 
       const targetOrigin = new URL(isApp ? env.ORIGIN_APP : env.ORIGIN_NEXT);
@@ -58,6 +59,8 @@ export default {
       // 軽いキャッシュ方針（静的アセットのみ）
       const isStatic = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|mjs|txt|woff2?)$/i.test(url.pathname);
 
+      console.log('Fetching from:', targetUrl.toString());
+      
       const upstreamResp = await fetch(new Request(targetUrl.toString(), {
         method,
         headers,
@@ -66,6 +69,8 @@ export default {
       }), {
         cf: isStatic ? { cacheEverything: true, cacheTtl: 86400 } : undefined,
       });
+      
+      console.log('Response status:', upstreamResp.status, 'Content-Type:', upstreamResp.headers.get('content-type'));
 
       // レスポンスヘッダ調整（任意）
       const respHeaders = new Headers(upstreamResp.headers);
