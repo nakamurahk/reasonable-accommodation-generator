@@ -1528,11 +1528,13 @@ const styles = StyleSheet.create({
                                        <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
                                          配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
                                        </span>
-                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
-                                         {acc['配慮案タイトル'] || acc.description}
-                                       </h5>
                                      </div>
                                    </div>
+                                   
+                                   {/* 配慮タイトル */}
+                                   <h5 className="text-gray-800 font-medium text-sm leading-tight mb-3">
+                                     {acc['配慮案タイトル'] || acc.description}
+                                   </h5>
                                  
                                  {/* 配慮内容 */}
                                  <div className="mb-3">
@@ -1852,12 +1854,14 @@ const styles = StyleSheet.create({
                                        />
                                        <span className="bg-sand text-teal-700 px-2 py-1 rounded text-xs font-medium">
                                          配慮案{ACC_LABELS[accIdx % ACC_LABELS.length]}
-                  </span>
-                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
-                                         {acc['配慮案タイトル'] || acc.description}
-                                       </h5>
-                </div>
+                                       </span>
+                                     </div>
                                    </div>
+                                   
+                                   {/* 配慮タイトル */}
+                                   <h5 className="text-gray-800 font-medium text-sm leading-tight mb-3">
+                                     {acc['配慮案タイトル'] || acc.description}
+                                   </h5>
                                  
                                  {/* 配慮内容 */}
                                  <div className="mb-3">
