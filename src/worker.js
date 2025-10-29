@@ -72,7 +72,8 @@ export default {
         if (contentType.includes('text/html') || contentType.includes('text/css') || contentType.includes('application/javascript')) {
           let body = await upstreamResp.text();
           
-          // /assets/ で始まるパスを app.inclusibridge.com に書き換え
+          // 相対パスを app.inclusibridge.com に書き換え
+          body = body.replace(/\/static\//g, `${env.ORIGIN_APP}/static/`);
           body = body.replace(/\/assets\//g, `${env.ORIGIN_APP}/assets/`);
           
           return new Response(body, {
