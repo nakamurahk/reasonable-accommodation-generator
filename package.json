@@ -30,7 +30,9 @@
   "scripts": {
     "start": "react-scripts start",
     "start:react": "PORT=3001 POSTCSS_CONFIG=postcss.config.react.js react-scripts start",
-    "build": "POSTCSS_CONFIG=postcss.config.react.js react-scripts build",
+    "build": "POSTCSS_CONFIG=postcss.config.react.js DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "build:no-lint": "POSTCSS_CONFIG=postcss.config.react.js GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "next dev",
