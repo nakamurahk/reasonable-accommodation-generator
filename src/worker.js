@@ -19,6 +19,7 @@ export default {
       const isApp = url.pathname.startsWith('/app') || 
                    url.pathname.startsWith('/step') || 
                    url.pathname.startsWith('/deckbuilding') ||
+                   url.pathname.startsWith('/static/') ||
                    url.pathname === '/app';
 
       console.log('Request details:', { 
