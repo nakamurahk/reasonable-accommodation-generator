@@ -2,20 +2,14 @@
 User-agent: *
 Allow: /
 
-# AI学習用クローラにはスキーマやAPIディレクトリを拒否
+# AI関連クローラも全面許可（Gemini/ChatGPT/Claude など）
 User-agent: GPTBot
-Disallow: /api/
-Disallow: /schema/
-Disallow: /data/
+Allow: /
 
 User-agent: ClaudeBot
-Disallow: /api/
-Disallow: /schema/
-Disallow: /data/
+Allow: /
 
 User-agent: Google-Extended
-Disallow: /api/
-Disallow: /schema/
-Disallow: /data/
+Allow: /
 
 Sitemap: https://inclusibridge.com/sitemap.xml
