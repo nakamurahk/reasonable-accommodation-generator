@@ -206,14 +206,15 @@ export function buildViewModelFromConcerns(
         .map(id => store.variants[id])
         .filter(v => v && v.domain === domain);
 
+
       // フォールバック：bulletsが空ならdetailから抽出（先頭3〜5）
       const bullets = (careData.bullets?.length ? careData.bullets : 
-        (domainVariants[0]?.detail_paragraphs ?? []).slice(0, 5));
+        (domainVariants[0]?.detail_paragraphs_user ?? []).slice(0, 5));
 
       return {
         care: careData,
         bullets,
-        detail: domainVariants.length ? domainVariants[0].detail_paragraphs : [],
+        detail: domainVariants.length ? domainVariants[0].detail_paragraphs_user : [],
         difficulty: domainVariants.length ? domainVariants[0].request_difficulty : 0,
       };
     });
@@ -234,12 +235,12 @@ export function buildViewModel(store: Store, domain: Domain): ViewModel {
       
       // フォールバック：bulletsが空ならdetailから抽出（先頭3〜5）
       const bullets = (c.bullets?.length ? c.bullets : 
-        (vForDomain[0]?.detail_paragraphs ?? []).slice(0, 5));
+        (vForDomain[0]?.detail_paragraphs_user ?? []).slice(0, 5));
       
       return {
         care: c,
         bullets,
-        detail: vForDomain.length ? vForDomain[0].detail_paragraphs : [],
+        detail: vForDomain.length ? vForDomain[0].detail_paragraphs_user : [],
         difficulty: vForDomain.length ? vForDomain[0].request_difficulty : 0,
       };
     });
@@ -262,14 +263,16 @@ export function getAccommodationsFromViewModel(
     'カテゴリ': item.concern.category,
     '配慮案タイトル': card.care.title, // cares.jsonのtitle
     '具体的な配慮': card.bullets.join('\n'), // cares.jsonのbullets
-    '詳細説明': card.detail.join('\n'), // detail_paragraphs
+    '詳細説明': card.detail.join('\n'), // detail_paragraphs_user
     '難易度': card.difficulty,
     'タグ': card.care.tags.join(','),
     'examples': {
       'workplace': item.concern.examples['企業']?.join(',') || '',
       'education': item.concern.examples['教育機関']?.join(',') || '',
       'support': item.concern.examples['支援機関']?.join(',') || ''
-    }
+    },
+    // concern情報を追加
+    'concern': item.concern
   }));
 }
 
@@ -300,6 +303,6 @@ export async function buildFilteredViewModel(
   const domain = getDomainFromName(query.domain);
   const viewModel = buildViewModelFromConcerns(store, filteredConcerns, domain);
   
-  // 5. UIに渡すViewModel（title＋bullets＋detail_paragraphs）
+  // 5. UIに渡すViewModel（title＋bullets＋detail_paragraphs_user）
   return viewModel;
 }

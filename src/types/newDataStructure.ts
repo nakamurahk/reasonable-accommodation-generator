@@ -25,7 +25,8 @@ export interface CareVariant {
   id: string;
   care_id: string;
   domain: Domain;
-  detail_paragraphs: string[]; // 段落/短文
+  detail_paragraphs_supporter: string[]; // サポーター用詳細説明
+  detail_paragraphs_user: string[]; // ユーザー用詳細説明
   request_difficulty: number; // 必須フィールド
 }
 

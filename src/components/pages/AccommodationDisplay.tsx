@@ -147,43 +147,10 @@ const points = [
     const accommodationItems = accommodations.map((acc, idx) => convertToAccommodation(acc, idx));
     const results = recommend(accommodationItems);
     
-    // デバッグ用：各配慮案の重みづけ詳細をコンソールに出力
-    console.log('=== 配慮案の重みづけデバッグ情報 ===');
-    results.forEach((rec, index) => {
-      console.log(`\n【配慮案${index + 1}】${rec.title} (${rec.label})`);
-      console.log('最終スコア:', rec.score.toFixed(4));
-      console.log('バッジ:', rec.badges);
-      console.log('理由:', rec.reason);
-      
-      // 各項目のスコア詳細
-      if (rec.debug) {
-        console.log('各項目スコア:');
-        console.log(`  💰コスト: ${rec.debug.s_cost?.toFixed(4) || 'N/A'}`);
-        console.log(`  ⚡難易度: ${rec.debug.s_diff?.toFixed(4) || 'N/A'}`);
-        console.log(`  💬心理的負担: ${rec.debug.s_psy?.toFixed(4) || 'N/A'}`);
-        console.log(`  🌱効果: ${rec.debug.s_eff?.toFixed(4) || 'N/A'}`);
-        console.log(`  ⚖️法的根拠: ${rec.debug.s_legal?.toFixed(4) || 'N/A'}`);
-        console.log(`  ⏰リードタイム: ${rec.debug.s_lead?.toFixed(4) || 'N/A'}`);
-        console.log(`  🔧維持管理: ${rec.debug.s_keep?.toFixed(4) || 'N/A'}`);
-        console.log(`  👥関係者数: ${rec.debug.s_people?.toFixed(4) || 'N/A'}`);
-        console.log(`  🎓専門性: ${rec.debug.s_expt?.toFixed(4) || 'N/A'}`);
-        
-        if (rec.debug.weights) {
-          console.log('重み係数:');
-          Object.entries(rec.debug.weights).forEach(([key, value]) => {
-            console.log(`  ${key}: ${(value as number).toFixed(4)}`);
-          });
-        }
-        
-        if (rec.debug.raw_tags) {
-          console.log('元のタグデータ:', rec.debug.raw_tags);
-        }
-      }
-    });
-    console.log('=====================================\n');
     
     return results;
   };
+
 
 // 配慮案抽出関数（新データ構造のみ）
 const getAccommodations = (difficultyTitle: string, viewModel: ViewModel | null | undefined, selectedDomain: Domain | null, reconstructedViewModel?: ViewModel | null) => {
@@ -311,7 +278,13 @@ export const AccommodationDisplay: React.FC<AccommodationDisplayProps> = ({
     String(today.getDate()).padStart(2, '0');
 
   const [base64Images, setBase64Images] = useState<{ [key: string]: string }>({});
-  const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
+  const [modalContent, setModalContent] = useState<{ 
+    title: string; 
+    content: string; 
+    accommodationData?: any; 
+    concernData?: any; 
+    domain?: Domain;
+  } | null>(null);
   const [showRecommendationReason, setShowRecommendationReason] = useState<{ difficultyId: string; accommodationId: string } | null>(null);
   
   // 困りごとの選択状態を切り替える関数
@@ -744,8 +717,8 @@ ${userInput.trim() || '（記述なし）'}
   };
 
   // モーダルを開く関数
-  const openModal = (title: string, content: string) => {
-    setModalContent({ title, content });
+  const openModal = (title: string, content: string, accommodationData?: any, concernData?: any, domain?: Domain) => {
+    setModalContent({ title, content, accommodationData, concernData, domain });
   };
 
   // モーダルを閉じる関数
@@ -1158,6 +1131,9 @@ const styles = StyleSheet.create({
       onClose={closeModal}
       title={modalContent?.title || ''}
       content={modalContent?.content || ''}
+      accommodationData={modalContent?.accommodationData}
+      concernData={modalContent?.concernData}
+      domain={modalContent?.domain}
     />
   );
 
@@ -1518,7 +1494,7 @@ const styles = StyleSheet.create({
                                          onClick={(e) => e.stopPropagation()}
                                        />
                                        {/* 配慮タイトル */}
-                                       <h5 className="text-gray-800 font-medium text-base leading-tight">
+                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
                                          {acc['配慮案タイトル'] || acc.description}
                                        </h5>
                                      </div>
@@ -1555,7 +1531,23 @@ const styles = StyleSheet.create({
                                      onClick={(e) => {
                                        e.preventDefault();
                                        e.stopPropagation();
-                                       openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                       // 困りごとデータを取得（配慮案データから直接取得）
+                                       console.log('=== 困りごとデータ取得デバッグ ===');
+                                       console.log('acc:', acc);
+                                       console.log('acc.concern:', acc.concern);
+                                       
+                                       const concernData = acc.concern ? { concern: acc.concern } : null;
+                                       console.log('found concernData:', concernData);
+                                       console.log('================================');
+                                       
+                                       console.log('selectedDomain for modal:', selectedDomain);
+                                       openModal(
+                                         acc['配慮案タイトル'] || acc.description, 
+                                         acc['詳細説明'] || '', 
+                                         acc, 
+                                         concernData,
+                                         selectedDomain
+                                       );
                                      }}
                                      className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1"
                                      title="具体的な配慮案を表示"
@@ -1872,7 +1864,7 @@ const styles = StyleSheet.create({
                                          onClick={(e) => e.stopPropagation()}
                                        />
                                        {/* 配慮タイトル */}
-                                       <h5 className="text-gray-800 font-medium text-base leading-tight">
+                                       <h5 className="text-gray-800 font-medium text-sm leading-tight">
                                          {acc['配慮案タイトル'] || acc.description}
                                        </h5>
                                      </div>
@@ -1909,7 +1901,23 @@ const styles = StyleSheet.create({
                                      onClick={(e) => {
                                        e.preventDefault();
                                        e.stopPropagation();
-                                       openModal(`${acc['配慮案タイトル'] || acc.description}の具体的な配慮案`, acc['詳細説明'] || '');
+                                       // 困りごとデータを取得（配慮案データから直接取得）
+                                       console.log('=== 困りごとデータ取得デバッグ ===');
+                                       console.log('acc:', acc);
+                                       console.log('acc.concern:', acc.concern);
+                                       
+                                       const concernData = acc.concern ? { concern: acc.concern } : null;
+                                       console.log('found concernData:', concernData);
+                                       console.log('================================');
+                                       
+                                       console.log('selectedDomain for modal:', selectedDomain);
+                                       openModal(
+                                         acc['配慮案タイトル'] || acc.description, 
+                                         acc['詳細説明'] || '', 
+                                         acc, 
+                                         concernData,
+                                         selectedDomain
+                                       );
                                      }}
                                      className="text-teal-600 hover:text-teal-800 text-xs font-medium transition-colors flex items-center gap-1"
                                      title="具体的な配慮案を表示"
@@ -2099,13 +2107,61 @@ const styles = StyleSheet.create({
 };
 
 // モーダルコンポーネント
-const Modal = ({ isOpen, onClose, title, content }: { 
+const Modal = ({ isOpen, onClose, title, content, accommodationData, concernData, domain }: { 
   isOpen: boolean; 
   onClose: () => void; 
   title: string; 
   content: string; 
+  accommodationData?: any;
+  concernData?: any;
+  domain?: Domain;
 }) => {
   if (!isOpen) return null;
+
+  // 使いどころの例を取得
+  const getUsageExamples = () => {
+    console.log('=== 使いどころデバッグ ===');
+    console.log('concernData:', concernData);
+    console.log('concernData?.concern:', concernData?.concern);
+    console.log('concernData?.concern?.examples:', concernData?.concern?.examples);
+    console.log('domain:', domain);
+    
+    if (!concernData?.concern?.examples) {
+      console.log('examples not found');
+      return [];
+    }
+    
+    const examples = concernData.concern.examples;
+    console.log('examples:', examples);
+    
+    // 選択されたドメイン名に応じて例を取得
+    const domainName = (domain && (domain as any).name) ? (domain as any).name : '企業';
+    console.log('domainName:', domainName);
+    
+    const domainExamples = (examples as any)[domainName] || [];
+    console.log('domainExamples:', domainExamples);
+    
+    const result = domainExamples.slice(0, 3); // 最大3つまで
+    console.log('final result:', result);
+    console.log('========================');
+    
+    return result;
+  };
+
+  // 法的根拠を取得
+  const getLegalBasis = () => {
+    if (!accommodationData?.id) return '';
+    // support_tagsから法的根拠を取得
+    const supportTag = getSupportTags(accommodationData.id);
+    return supportTag?.legal_basis || '';
+  };
+
+  // 頼みやすさを取得
+  const getRequestDifficulty = () => {
+    if (!accommodationData?.id) return '';
+    const supportTag = getSupportTags(accommodationData.id);
+    return supportTag?.difficulty_level || '';
+  };
 
   return (
     <div 
@@ -2113,31 +2169,84 @@ const Modal = ({ isOpen, onClose, title, content }: {
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden"
+        className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-        <button
+        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+            {concernData?.concern?.category && (
+              <span className="inline-flex items-center mt-1 px-3 py-1 bg-teal-100 text-teal-800 text-sm rounded-full">
+                <span className="mr-1">
+                  {CATEGORY_STYLES[concernData.concern.category as keyof typeof CATEGORY_STYLES]?.icon || '📋'}
+                </span>
+                {concernData.concern.category}
+              </span>
+            )}
+          </div>
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-        >
+          >
             ✕
-        </button>
+          </button>
         </div>
-        <div className="p-4 overflow-y-auto max-h-[60vh]">
-          {content.includes('\n') ? (
-            <ul className="text-gray-700 leading-relaxed space-y-2">
-              {content.split('\n').filter(line => line.trim()).map((line, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-teal mr-2 mt-1">•</span>
-                  <span>{line.trim()}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+        
+        <div className="p-6 overflow-y-auto max-h-[70vh] space-y-6">
+          {/* 使いどころ */}
+          {(() => {
+            const examples = getUsageExamples();
+            console.log('使いどころ表示チェック:', examples);
+            return examples.length > 0 && (
+              <div>
+                <h4 className="text-lg font-medium text-gray-800 mb-3">こういうときに役立つ</h4>
+                <ul className="space-y-2">
+                  {examples.map((example, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-teal mr-2 mt-1">•</span>
+                      <span className="text-gray-700 text-sm">{example}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
+
+          
+
+          {/* お願いテンプレート */}
+          {content && (
+            <div>
+              <h4 className="text-lg font-medium text-gray-800 mb-3">お願いテンプレート</h4>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-700 leading-relaxed text-sm">
+                  {content.split('\n').map((line: string, index: number) => (
+                    <span key={index}>
+                      {line}
+                      {index < content.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+              </div>
+            </div>
           )}
+
+          {/* 安心ポイント */}
+          <div>
+            <h4 className="text-lg font-medium text-gray-800 mb-3">安心ポイント</h4>
+            <div className="flex flex-wrap gap-2">
+              {getRequestDifficulty() && (
+                <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                  頼みやすさ: {getRequestDifficulty()}
+                </span>
+              )}
+              {getLegalBasis() && (
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                  法的根拠: {getLegalBasis()}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
