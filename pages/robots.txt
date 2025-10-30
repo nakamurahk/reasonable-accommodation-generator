@@ -1,15 +1,21 @@
-# 検索・参照は許可
+# 検索はOK
 User-agent: *
 Allow: /
 
-# AI関連クローラも全面許可（Gemini/ChatGPT/Claude など）
+# AI学習の制御
 User-agent: GPTBot
+Disallow: /src/data/
+Disallow: /api/
 Allow: /
 
 User-agent: ClaudeBot
+Disallow: /src/data/
+Disallow: /api/
 Allow: /
 
 User-agent: Google-Extended
+Disallow: /src/data/
+Disallow: /api/
 Allow: /
 
 Sitemap: https://inclusibridge.com/sitemap.xml
