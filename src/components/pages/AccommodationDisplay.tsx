@@ -849,23 +849,38 @@ const styles = StyleSheet.create({
           fontFamily: 'NotoSansJP',
           marginBottom: 8,
         },
+        tagContainer: {
+          backgroundColor: '#f3f4f6',
+          borderWidth: 1,
+          borderColor: '#d1d5db',
+          padding: 8,
+          borderRadius: 6,
+          marginBottom: 8,
+        },
+        tagText: {
+          fontSize: 10,
+          color: '#374151',
+          fontFamily: 'NotoSansJP',
+        },
         exampleContainer: {
           marginTop: 8,
-          paddingLeft: 16,
-          borderLeft: 2,
+          backgroundColor: '#f9fafb',
+          borderWidth: 1,
           borderColor: '#e5e7eb',
+          padding: 8,
+          borderRadius: 6,
         },
         exampleLabel: {
-    fontSize: 10,
-    color: '#6b7280',
+          fontSize: 11,
+          color: '#111827',
           fontWeight: 'bold',
-          marginBottom: 4,
+          marginBottom: 6,
           fontFamily: 'NotoSansJP',
         },
         exampleText: {
-          fontSize: 11,
+          fontSize: 10,
           color: '#4b5563',
-          lineHeight: 1.3,
+          lineHeight: 1.4,
           fontFamily: 'NotoSansJP',
         },
         accommodationContent: {
@@ -881,18 +896,31 @@ const styles = StyleSheet.create({
         },
         accommodationDetailContainer: {
           marginTop: 8,
-          marginLeft: 16,
-          paddingLeft: 12,
-          borderLeftWidth: 3,
-          borderLeftColor: '#d1d5db',
-    backgroundColor: '#f9fafb',
+          backgroundColor: '#f9fafb',
+          borderWidth: 1,
+          borderColor: '#e5e7eb',
           padding: 8,
-          borderRadius: 4,
+          borderRadius: 6,
         },
         accommodationDetailText: {
           fontSize: 10,
           color: '#4b5563',
           lineHeight: 1.6,
+          fontFamily: 'NotoSansJP',
+        },
+        templateContainer: {
+          marginTop: 8,
+          backgroundColor: '#ffffff',
+          borderWidth: 1,
+          borderColor: '#e5e7eb',
+          padding: 10,
+          borderRadius: 6,
+        },
+        templateLabel: {
+          fontSize: 11,
+          color: '#111827',
+          fontWeight: 'bold',
+          marginBottom: 6,
           fontFamily: 'NotoSansJP',
         },
         pointsSection: {
@@ -1045,12 +1073,41 @@ const styles = StyleSheet.create({
                         <Text style={styles.accommodationTitleText}>
                           配慮案：{acc['配慮案タイトル'] || acc.description}
                         </Text>
-                        {acc['具体的な配慮'] && (
-                          <View style={styles.accommodationDetailContainer}>
-                            {acc['具体的な配慮'].split('\n').map((bullet: string, bulletIdx: number) => (
-                              <Text key={bulletIdx} style={styles.accommodationDetailText}>
-                                ・{bullet}
-                              </Text>
+                        {(() => {
+                          const tag = getSupportTags(acc.id);
+                          const cost = tag?.cost_level || '';
+                          const difficulty = tag?.difficulty_level || '';
+                          const legal = tag?.legal_basis || '';
+                          const psych = tag?.psychological_cost_level || '';
+                          const requestEase = psych === '低' ? '高' : psych === '高' ? '低' : psych || '';
+                          const tagLine = `コスト：${cost}｜難易度：${difficulty}｜法的根拠：${legal}｜頼みやすさ：${requestEase}`;
+                          return (
+                            <View style={styles.tagContainer}>
+                              <Text style={styles.tagText}>{tagLine}</Text>
+                            </View>
+                          );
+                        })()}
+
+                        {(() => {
+                          const examplesObj = acc.concern?.examples;
+                          const domainName = (selectedDomain && (selectedDomain as any).name) ? (selectedDomain as any).name : '企業';
+                          const domainExamples = examplesObj ? (examplesObj as any)[domainName] || [] : [];
+                          const top3 = domainExamples.slice(0, 3);
+                          return top3.length > 0 ? (
+                            <View style={styles.exampleContainer}>
+                              <Text style={styles.exampleLabel}>こういうときに役立つ</Text>
+                              {top3.map((ex: string, i: number) => (
+                                <Text key={i} style={styles.exampleText}>・{ex}</Text>
+                              ))}
+                            </View>
+                          ) : null;
+                        })()}
+
+                        {acc['詳細説明'] && (
+                          <View style={styles.templateContainer}>
+                            <Text style={styles.templateLabel}>お願いテンプレート</Text>
+                            {acc['詳細説明'].split('\n').map((line: string, idx2: number) => (
+                              <Text key={idx2} style={styles.accommodationDetailText}>・{line}</Text>
                             ))}
                           </View>
                         )}
