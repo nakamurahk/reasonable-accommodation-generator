@@ -46,7 +46,7 @@ const ContactPage: React.FC = () => {
         '7W4Y1oE1pX-_j-SE-' // EmailJSの公開キー
       );
 
-      console.log('メール送信成功:', result);
+      
       setSubmitStatus('success');
       setFormData({
         name: '',

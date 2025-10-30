@@ -2120,30 +2120,18 @@ const Modal = ({ isOpen, onClose, title, content, accommodationData, concernData
 
   // 使いどころの例を取得
   const getUsageExamples = () => {
-    console.log('=== 使いどころデバッグ ===');
-    console.log('concernData:', concernData);
-    console.log('concernData?.concern:', concernData?.concern);
-    console.log('concernData?.concern?.examples:', concernData?.concern?.examples);
-    console.log('domain:', domain);
-    
     if (!concernData?.concern?.examples) {
-      console.log('examples not found');
       return [];
     }
     
     const examples = concernData.concern.examples;
-    console.log('examples:', examples);
     
     // 選択されたドメイン名に応じて例を取得
     const domainName = (domain && (domain as any).name) ? (domain as any).name : '企業';
-    console.log('domainName:', domainName);
     
     const domainExamples = (examples as any)[domainName] || [];
-    console.log('domainExamples:', domainExamples);
     
     const result = domainExamples.slice(0, 3); // 最大3つまで
-    console.log('final result:', result);
-    console.log('========================');
     
     return result;
   };
@@ -2196,7 +2184,6 @@ const Modal = ({ isOpen, onClose, title, content, accommodationData, concernData
           {/* 使いどころ */}
           {(() => {
             const examples = getUsageExamples();
-            console.log('使いどころ表示チェック:', examples);
             return examples.length > 0 && (
               <div>
                 <h4 className="text-lg font-medium text-gray-800 mb-3">こういうときに役立つ</h4>

@@ -12,7 +12,7 @@ function App() {
   const [hasStarted, setHasStarted] = useState(false);
 
   const handleAccommodationComplete = (accommodations: string[]) => {
-    console.log('Accommodations:', accommodations);
+    
   };
 
   const handleStart = () => {
