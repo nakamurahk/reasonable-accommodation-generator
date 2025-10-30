@@ -151,7 +151,7 @@ const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
                   <div className="flex items-start space-x-3">
                     <span className="text-yellow-500 text-xl">🔽</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 text-sm">【選抜】必要なサポートを見つける</p>
+                      <p className="font-semibold text-gray-800 text-sm">【選抜】サポートを見つける</p>
                       <p className="text-xs text-gray-600 mt-1">配慮案を見つけ出します。</p>
                     </div>
                   </div>
