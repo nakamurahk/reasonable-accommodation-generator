@@ -1531,16 +1531,8 @@ const styles = StyleSheet.create({
                                      onClick={(e) => {
                                        e.preventDefault();
                                        e.stopPropagation();
-                                       // 困りごとデータを取得（配慮案データから直接取得）
-                                       console.log('=== 困りごとデータ取得デバッグ ===');
-                                       console.log('acc:', acc);
-                                       console.log('acc.concern:', acc.concern);
-                                       
-                                       const concernData = acc.concern ? { concern: acc.concern } : null;
-                                       console.log('found concernData:', concernData);
-                                       console.log('================================');
-                                       
-                                       console.log('selectedDomain for modal:', selectedDomain);
+                                      // 困りごとデータを取得（配慮案データから直接取得）
+                                      const concernData = acc.concern ? { concern: acc.concern } : null;
                                        openModal(
                                          acc['配慮案タイトル'] || acc.description, 
                                          acc['詳細説明'] || '', 
@@ -1901,16 +1893,8 @@ const styles = StyleSheet.create({
                                      onClick={(e) => {
                                        e.preventDefault();
                                        e.stopPropagation();
-                                       // 困りごとデータを取得（配慮案データから直接取得）
-                                       console.log('=== 困りごとデータ取得デバッグ ===');
-                                       console.log('acc:', acc);
-                                       console.log('acc.concern:', acc.concern);
-                                       
-                                       const concernData = acc.concern ? { concern: acc.concern } : null;
-                                       console.log('found concernData:', concernData);
-                                       console.log('================================');
-                                       
-                                       console.log('selectedDomain for modal:', selectedDomain);
+                                      // 困りごとデータを取得（配慮案データから直接取得）
+                                      const concernData = acc.concern ? { concern: acc.concern } : null;
                                        openModal(
                                          acc['配慮案タイトル'] || acc.description, 
                                          acc['詳細説明'] || '', 
@@ -2144,11 +2128,14 @@ const Modal = ({ isOpen, onClose, title, content, accommodationData, concernData
     return supportTag?.legal_basis || '';
   };
 
-  // 頼みやすさを取得
+  // 頼みやすさを取得（psychological_cost_level を反転して表示）
   const getRequestDifficulty = () => {
     if (!accommodationData?.id) return '';
     const supportTag = getSupportTags(accommodationData.id);
-    return supportTag?.difficulty_level || '';
+    const level = supportTag?.psychological_cost_level;
+    if (level === '低') return '高';
+    if (level === '高') return '低';
+    return level || '';
   };
 
   return (
