@@ -84,6 +84,13 @@ export default {
         const contentType = respHeaders.get('content-type') || '';
         console.log('Processing React app response:', { contentType, isApp, targetUrl: targetUrl.toString() });
         
+        // Reactアプリ側のHTMLレスポンスに対してキャッシュ制御ヘッダーを追加
+        if (contentType.includes('text/html')) {
+          respHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+          respHeaders.set('Pragma', 'no-cache');
+          respHeaders.set('Expires', '0');
+        }
+        
         if (contentType.includes('text/html') || contentType.includes('text/css') || contentType.includes('application/javascript')) {
           let body = await upstreamResp.text();
           console.log('Original body contains /static/:', body.includes('/static/'));

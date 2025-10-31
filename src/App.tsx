@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SideNav from './components/layout/SideNav';
 import AccommodationGenerator from './components/AccommodationGenerator';
@@ -10,6 +10,15 @@ import { useIsMobile } from './hooks/useIsMobile';
 function App() {
   const isMobile = useIsMobile();
   const [hasStarted, setHasStarted] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // 初回アクセス時の処理：sessionStorageから状態を復元し、適切に初期化
+  useEffect(() => {
+    // sessionStorageから状態を復元
+    const sessionStarted = sessionStorage.getItem('app_session_started') === 'true';
+    setHasStarted(sessionStarted);
+    setIsInitialized(true);
+  }, []);
 
   const handleAccommodationComplete = (accommodations: string[]) => {
     
@@ -17,7 +26,13 @@ function App() {
 
   const handleStart = () => {
     setHasStarted(true);
+    sessionStorage.setItem('app_session_started', 'true');
   };
+
+  // 初期化が完了するまで何も表示しない
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <Router basename="/app">
@@ -28,6 +43,20 @@ function App() {
 
 function AppContent({ isMobile, hasStarted, onStart }: { isMobile: boolean; hasStarted: boolean; onStart: () => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // 初回アクセス時やステップページへの直接アクセス時に、hasStartedがfalseの場合は必ずStartPageにリダイレクト
+  useEffect(() => {
+    // ルート（/）以外のパスにアクセスしていて、かつhasStartedがfalseの場合
+    if (location.pathname !== '/' && !hasStarted) {
+      // StartPageにリダイレクト（キャッシュを無視して確実にStartPageを表示）
+      navigate('/', { replace: true });
+      // sessionStorageもリセット（念のため）
+      sessionStorage.removeItem('app_session_started');
+      // localStorageもクリア（アプリ側のキャッシュをクリア）
+      localStorage.removeItem('accommodation_selections');
+    }
+  }, [location.pathname, hasStarted, navigate]);
 
   const handleStart = () => {
     onStart();
